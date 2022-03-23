@@ -6,7 +6,7 @@
 #include "Vector2D.hpp"
 
 
-namespace util
+namespace ut
 {
     template <typename N> class VecND<N, 3>
     {

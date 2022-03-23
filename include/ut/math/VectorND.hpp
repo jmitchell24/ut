@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <cmath>
 
-namespace util
+namespace ut
 {
     template <typename N, size_t D> struct VecND
     {

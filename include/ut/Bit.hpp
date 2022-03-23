@@ -8,52 +8,6 @@
 #include <cstdint>
 #include <cstring>
 
-#include "Exception.hpp"
-
-#define static_assert_packed_XX(__type__, __member0__, __member1__) \
-    static_assert ( ( offsetof(__type__, __member0__) < offsetof(__type__, __member1__) ), \
-        #__type__ "::" #__member0__ " does not come before " #__type__ "::" #__member1__); \
-    static_assert ( ( offsetof(__type__, __member0__) >= offsetof(__type__, __member1__) ) || ( offsetof(__type__, __member1__) - sizeof(__type__::__member0__) == offsetof(__type__, __member0__) ),\
-        "There is space between " #__type__ "::" #__member0__ " and " #__type__ "::" #__member1__);
-
-
-#define static_assert_packed_get(_1,_2,_3,_4,_5,_5_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,NAME,...) NAME
-#define static_assert_packed(...) static_assert_packed_get(__VA_ARGS__, \
-    static_assert_packed_14, \
-    static_assert_packed_13, \
-    static_assert_packed_12, \
-    static_assert_packed_11, \
-    static_assert_packed_10, \
-    static_assert_packed_09, \
-    static_assert_packed_08, \
-    static_assert_packed_07, \
-    static_assert_packed_06, \
-    static_assert_packed_05, \
-    static_assert_packed_04, \
-    static_assert_packed_03, \
-    static_assert_packed_02, \
-    static_assert_packed_01, \
-    static_assert_packed_00, \
-    UNUSED, UNUSED)(__VA_ARGS__)
-
-
-#define static_assert_packed_00(t, a, b)                                              static_assert_packed_XX(t, a, b)
-#define static_assert_packed_01(t, a, b, c)                                           static_assert_packed_00(t, a, b) static_assert_packed_XX(t, b, c)
-#define static_assert_packed_02(t, a, b, c, d)                                        static_assert_packed_01(t, a, b, c) static_assert_packed_XX(t, c, d)
-#define static_assert_packed_03(t, a, b, c, d, e)                                     static_assert_packed_02(t, a, b, c, d) static_assert_packed_XX(t, d, e)
-#define static_assert_packed_04(t, a, b, c, d, e, f)                                  static_assert_packed_03(t, a, b, c, d, e) static_assert_packed_XX(t, e, f)
-#define static_assert_packed_05(t, a, b, c, d, e, f, g)                               static_assert_packed_04(t, a, b, c, d, e, f) static_assert_packed_XX(t, f, g)
-#define static_assert_packed_06(t, a, b, c, d, e, f, g, h)                            static_assert_packed_05(t, a, b, c, d, e, f, g) static_assert_packed_XX(t, g, h)
-#define static_assert_packed_07(t, a, b, c, d, e, f, g, h, i)                         static_assert_packed_06(t, a, b, c, d, e, f, g, h) static_assert_packed_XX(t, h, i)
-#define static_assert_packed_08(t, a, b, c, d, e, f, g, h, i, j)                      static_assert_packed_07(t, a, b, c, d, e, f, g, h, i) static_assert_packed_XX(t, i, j)
-#define static_assert_packed_09(t, a, b, c, d, e, f, g, h, i, j, k)                   static_assert_packed_08(t, a, b, c, d, e, f, g, h, i, j) static_assert_packed_XX(t, j, k)
-#define static_assert_packed_10(t, a, b, c, d, e, f, g, h, i, j, k, l)                static_assert_packed_09(t, a, b, c, d, e, f, g, h, i, j, k) static_assert_packed_XX(t, k, l)
-#define static_assert_packed_11(t, a, b, c, d, e, f, g, h, i, j, k, l, m)             static_assert_packed_10(t, a, b, c, d, e, f, g, h, i, j, k, l) static_assert_packed_XX(t, l, m)
-#define static_assert_packed_12(t, a, b, c, d, e, f, g, h, i, j, k, l, m, n)          static_assert_packed_11(t, a, b, c, d, e, f, g, h, i, j, k, l, m) static_assert_packed_XX(t, m, n)
-#define static_assert_packed_13(t, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)       static_assert_packed_12(t, a, b, c, d, e, f, g, h, i, j, k, l, m, n) static_assert_packed_XX(t, n, o)
-#define static_assert_packed_14(t, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)    static_assert_packed_13(t, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) static_assert_packed_XX(t, o, p)
-
-
 namespace ut
 {
     typedef std::uint8_t    b8;
@@ -113,8 +67,6 @@ namespace bit
     inline bool get5(b8 x) { return (x & 0b00100000) > 0; }
     inline bool get6(b8 x) { return (x & 0b01000000) > 0; }
     inline bool get7(b8 x) { return (x & 0b10000000) > 0; }
-
-
 
     inline b8 flipX(b8 x, b8 bit) { return x ^ (0xff << bit); }
     inline b8 flip0(b8 x) { return x ^ 0b00000001; }
@@ -194,7 +146,7 @@ namespace bit
 
         buf[8] = '\0';
 
-        return std::string(buf);
+        return {buf};
     }
 
     inline std::string strNyb(b8 x)
@@ -209,7 +161,7 @@ namespace bit
         buf[4] = ' ';
         buf[9] = '\0';
 
-        return std::string(buf);
+        return {buf};
     }
 }
 }

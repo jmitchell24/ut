@@ -6,9 +6,10 @@ using namespace fmt;
 
 int main()
 {
-    auto output = gulp::exec_to_string("zfs list -Hp");
+    auto r = Rect { 0,0,100,100 };
 
-    print("output: {}\n", output);
+    r = r.fit(23,32);
 
+    print("{} {} {} {}", r.x, r.y, r.w, r.h);
     return 0;
 }

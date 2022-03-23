@@ -5,7 +5,7 @@
 #include "VectorND.hpp"
 #include "Vector3D.hpp"
 
-namespace util
+namespace ut
 {
     template <typename N> class VecND<N, 4>
     {

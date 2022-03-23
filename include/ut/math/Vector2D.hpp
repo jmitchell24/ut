@@ -4,7 +4,7 @@
 
 #include "VectorND.hpp"
 
-namespace util
+namespace ut
 {
     using real_t = float;
 
