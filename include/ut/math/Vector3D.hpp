@@ -6,18 +6,18 @@
 #include "Vector2D.hpp"
 
 
-namespace ut
+namespace util
 {
     template <typename N> class VecND<N, 3>
     {
     public:
-        typedef N                       scalar_type;
+        typedef N               scalar_type;
         typedef VecND<scalar_type,3>    vector_type;
         typedef vector_type&            vector_ref;
         typedef scalar_type&            scalar_ref;
         typedef vector_type const&      vector_param;
         typedef scalar_type             scalar_param;
-        typedef N                       components_type[3];
+        typedef N               components_type[3];
 
         size_t static constexpr SIZE = 3;
 

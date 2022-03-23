@@ -7,6 +7,7 @@
 
 namespace ut
 {
+
     template <typename N>
     struct RectN
     {

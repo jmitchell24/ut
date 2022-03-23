@@ -5,18 +5,18 @@
 #include "VectorND.hpp"
 #include "Vector3D.hpp"
 
-namespace ut
+namespace util
 {
     template <typename N> class VecND<N, 4>
     {
     public:
-        typedef N                       scalar_type;
+        typedef N               scalar_type;
         typedef VecND<scalar_type,4>    vector_type;
         typedef vector_type&            vector_ref;
         typedef scalar_type&            scalar_ref;
         typedef vector_type const&      vector_param;
         typedef scalar_type             scalar_param;
-        typedef N                       components_type[4];
+        typedef N               components_type[4];
 
         size_t static constexpr SIZE = 4;
 
