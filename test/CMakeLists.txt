@@ -15,6 +15,12 @@ FetchContent_Declare(
     GIT_TAG 8.0.1)
 FetchContent_MakeAvailable(fmt)
 
+#FetchContent_GetProperties(ftxui)
+#if(NOT ftxui_POPULATED)
+#  FetchContent_Populate(ftxui)
+#  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+#endif()
+
 # Tests need to be added as executables first
 add_executable(ut_test ut_test.cpp)
 

@@ -1,7 +1,7 @@
 #ifndef STRINGVIEW_HPP
 #define STRINGVIEW_HPP
 
-#include <tuple>
+#include <memory>
 #include <string>
 #include <vector>
 #include <streambuf>
@@ -9,7 +9,8 @@
 #include <stdexcept>
 #include <utility>
 #include <type_traits>
-
+#include <string_view>
+#include <cwctype>
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
@@ -24,43 +25,76 @@ namespace ut
     template <typename Char, typename Traits = std::char_traits<Char>>
     struct basic_svstream;
 
-    template <typename Char, typename Traits = std::char_traits<Char>>
+    template <bool SkipEmpty, typename Char, typename Traits = std::char_traits<Char>>
+    struct basic_svsplit;
+
+#define ENABLE_IF_NULL_TERMINATED  template <bool N_ = NullTerminated, typename = std::enable_if_t<N_ == true>>
+#define ENABLE_IF_NOT_NULL_TERMINATED template <bool N_ = NullTerminated, typename = std::enable_if_t<N_ == false>>
+
+    template <typename Char, typename Traits = std::char_traits<Char>, bool NullTerminated = false>
     class basic_stringview
     {
     public:
         using char_type             = Char;
         using traits_type           = Traits;
         using pointer_type          = char_type const*;
+        using unique_pointer_type   = std::unique_ptr<char_type>;
+        using shared_pointer_type   = std::shared_ptr<char_type>;
         using size_type             = size_t;
         using string_type           = std::basic_string     <char_type,traits_type>;
         using ostream_type          = std::basic_ostream    <char_type,traits_type>;
-        using stringview_type       = basic_stringview      <char_type,traits_type>;
+        using string_view_type      = std::basic_string_view<char_type,traits_type>;
+        using stringview_nstr_type  = basic_stringview      <char_type,traits_type, false>;
+        using stringview_cstr_type  = basic_stringview      <char_type,traits_type, true>;
+        using stringview_type       = basic_stringview      <char_type,traits_type, NullTerminated>;
         using svstreambuf_type      = basic_stringviewbuf   <char_type,traits_type>;
         using svstream_type         = basic_svstream        <char_type,traits_type>;
 
-        basic_stringview()
-            : m_begin{getDefaultString()}, m_end{getDefaultString()}
-        {}
+        template <bool SkipEmpty>
+        using svsplit_type = basic_svsplit<SkipEmpty, char_type,traits_type>;
+
+        inline constexpr static bool NULL_TERMINATED = NullTerminated;
 
         basic_stringview(stringview_type&&)=default;
         basic_stringview(stringview_type const&)=default;
         basic_stringview& operator=(stringview_type&&)=default;
         basic_stringview& operator=(stringview_type const&)=default;
 
-        basic_stringview(pointer_type begin, pointer_type end)
-            : m_begin{begin}, m_end{end}
+        /// Construct with default string ("")
+        inline basic_stringview()
+                : m_begin{getDefaultString()}, m_end{getDefaultString()}
+        {}
+
+        /// Construct with an STL basic_string
+        inline basic_stringview(string_type const& s)
+                : m_begin{s.data()}, m_end{s.data()+s.size()}
+        {}
+
+        /// Construct with an STL basic_string_view
+        inline basic_stringview(string_view_type const& s)
+                : m_begin{s.data()}, m_end{s.data()+s.size()}
+        {}
+
+        /// Construct with a begin and end pointer
+        ENABLE_IF_NOT_NULL_TERMINATED
+        inline basic_stringview(pointer_type begin, pointer_type end)
+                : m_begin{begin}, m_end{end}
         {
             assert(begin != nullptr);
             assert(end   != nullptr);
             assert(begin <= end);
         }
 
-        basic_stringview(string_type const& s)
-            : basic_stringview{s.data(), s.data()+s.size()}
+        /// Construct with a null-terminated stringview
+        ENABLE_IF_NOT_NULL_TERMINATED
+        inline basic_stringview(stringview_cstr_type const& s)
+                : m_begin{s.begin()}, m_end{s.end()}
         {}
 
-        basic_stringview(pointer_type p)
-            : basic_stringview{p, p+strlen(p)}
+        /// Construct with a null-terminated string
+        ENABLE_IF_NULL_TERMINATED
+        inline basic_stringview(pointer_type p)
+                : m_begin{p}, m_end{p+strlen(p)}
         {}
 
         inline pointer_type begin() const { return m_begin; }
@@ -76,15 +110,53 @@ namespace ut
         inline char_type at(size_type i) const
         {
             if (i < m_begin || i >= m_end)
-                throw std::out_of_range{"util::stringview::at()"};
+                throw std::out_of_range{"ut::stringview::at()"};
             return m_begin[i];
         }
 
+        inline void strncpy(char_type* dest, size_t n) const
+        {
+            return ::strncpy(dest, m_begin, min(n, m_end-m_begin));
+        }
+
+        inline shared_pointer_type shared_ptr_copy() const
+        {
+            size_type sz = size();
+            shared_pointer_type ptr = shared_pointer_type(new char_type[sz+1]);
+            ::strncpy(ptr.get(), m_begin, sz);
+            *(ptr.get()+sz) = 0;
+            return ptr;
+        }
+
+        inline unique_pointer_type unique_ptr_copy() const
+        {
+            size_type sz = size();
+            unique_pointer_type ptr = unique_pointer_type(new char_type[sz+1]);
+            ::strncpy(ptr.get(), m_begin, sz);
+            *(ptr.get()+sz) = 0;
+            return ptr;
+        }
+
+        /// Return c-string (if NullTerminated == true)
+        inline pointer_type c_str() const
+        {
+            static_assert (NullTerminated, "stringview must be null-terminated to call c_str()");
+            return m_begin;
+        }
+
+        /// Convert to STL basic_string_view
+        inline string_view_type view() const { return string_view_type(m_begin, m_end-m_begin); }
+
+        /// Convert to STL basic_string
         inline string_type str() const { return string_type(m_begin, m_end); }
 
+        /// Convert to STL basic_streambuf
+        inline svstreambuf_type buf() const { return svstreambuf_type(*this); }
+
+        /// Convert to STL basic_istream
         inline svstream_type stream() const { return svstream_type(*this); }
 
-        inline stringview_type sub(pointer_type begin, pointer_type end) const
+        inline stringview_nstr_type sub(pointer_type begin, pointer_type end) const
         {
             assert(begin >= m_begin);
             assert(begin <= m_end);
@@ -94,26 +166,29 @@ namespace ut
             return stringview_type{begin, end};
         }
 
-        inline stringview_type subBegin(pointer_type end) const
+        /// get sub-string from \a m_begin ptr to specified \p end ptr
+        inline stringview_nstr_type subBegin(pointer_type end) const
         { return sub(m_begin, end); }
 
-        inline stringview_type subEnd(pointer_type begin) const
-        { return sub(begin, m_end);}
+        /// get sub-string from specified begin ptr to \a m_end ptr
+        inline stringview_nstr_type subEnd(pointer_type begin) const
+        { return sub(begin, m_end); }
 
-        inline stringview_type take(size_type size) const
+        /// get sub-string from \a m_begin to \a m_begin + \p size
+        inline stringview_nstr_type take(size_type size) const
         { return takeBegin(size); }
 
-        inline stringview_type takeBegin(size_type size) const
+        inline stringview_nstr_type takeBegin(size_type size) const
         { return sub(m_begin, m_begin+size); }
 
-        inline stringview_type takeEnd(size_type size) const
+        inline stringview_nstr_type takeEnd(size_type size) const
         { return sub(m_end-size, m_end); }
 
         inline bool same(stringview_type const& s) const { return same(*this, s); }
-        inline bool same(char_type c)               const { return same(*this, c); }
+        inline bool same(char_type c)              const { return same(*this, c); }
 
         inline int compare(stringview_type const& s) const { return compare(*this, s); }
-        inline int compare(char_type c)               const { return compare(*this, c); }
+        inline int compare(char_type c)              const { return compare(*this, c); }
 
         inline pointer_type find(stringview_type const& s) const
         {
@@ -121,7 +196,7 @@ namespace ut
             if (sz > this->size())
                 return m_end;
 
-            for (pointer_type i = m_begin; i != m_end-s.size()+1; ++i)
+            for (pointer_type i = m_begin; i != m_end-sz+1; ++i)
                 if (sub(i,sz).same(s))
                     return i;
             return m_end;
@@ -173,7 +248,7 @@ namespace ut
             return end;
         }
 
-        inline bool beginsWith(char_type c) const 
+        inline bool beginsWith(char_type c) const
         {
             if (m_begin == m_end)
                 return false;
@@ -187,7 +262,7 @@ namespace ut
             return takeBegin(s.size()).same(s);
         }
 
-        inline bool endsWith(char_type c) const 
+        inline bool endsWith(char_type c) const
         {
             if (m_begin == m_end)
                 return false;
@@ -214,9 +289,9 @@ namespace ut
             return (i==end) ? m_end : i+1;
         }
 
-        inline stringview_type trimLeft()  const { return sub(trimBegin(), m_end); }
-        inline stringview_type trimRight() const { return sub(m_begin, trimEnd()); }
-        inline stringview_type trim()      const { return sub(trimBegin(), trimEnd()); }
+        inline stringview_nstr_type trimLeft()  const { return sub(trimBegin(), m_end); }
+        inline stringview_nstr_type trimRight() const { return sub(m_begin, trimEnd()); }
+        inline stringview_nstr_type trim()      const { return sub(trimBegin(), trimEnd()); }
 
         inline bool trimmed     () const { return empty() || ( !std::isspace(first()) && !std::isspace(last()) ); }
         inline bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
@@ -256,7 +331,12 @@ namespace ut
         inline static int compare(stringview_type const& a, char_type b)
         { return traits_type::compare(a.begin, &b, 1); }
 
-        friend ostream_type& operator<<(ostream_type& os, stringview_type const& s)
+        inline static stringview_cstr_type explicit_construct_cstr(pointer_type begin, size_type sz)
+        {
+            return stringview_cstr_type(begin, sz);
+        }
+
+        friend inline ostream_type& operator<<(ostream_type& os, stringview_type const& s)
         {
             os.write(s.begin(), s.end() - s.begin());
             return os;
@@ -266,12 +346,19 @@ namespace ut
         char_type const* m_begin;
         char_type const* m_end;
 
+        explicit basic_stringview(pointer_type begin, size_type sz)
+                : m_begin{begin}, m_end{m_begin+sz}
+        {}
+
         static char_type const* getDefaultString()
         {
             static char_type buf[1];
             return buf;
         }
     };
+
+#undef ENABLE_IF_NULL_TERMINATED
+#undef ENABLE_IF_NOT_NULL_TERMINATED
 
     template <bool SkipEmpty, typename Char, typename Traits>
     struct basic_svsplit
@@ -287,6 +374,10 @@ namespace ut
         inline constexpr static bool is_unary_delim_v =
                 std::is_invocable_r_v<bool, Unary, char_type>;
 
+        template <typename Callable>
+        inline constexpr static bool is_callback_v =
+                std::is_invocable_r_v<bool, Callable, stringview_type>;
+
         template <typename T>
         inline constexpr static bool is_tieable_v =
                 std::is_same_v<T, stringview_type> ||
@@ -296,6 +387,7 @@ namespace ut
         inline static void split(stringview_type const& sv, Callable&& callback, Unary&& unary_delim)
         {
             static_assert (is_unary_delim_v<Unary>, "Unary must accept 1 parameter of char_type, return value must cast to bool");
+            static_assert (is_callback_v<Callable>, "Callable must accept 1 parameter of stringview_type, return value must cast to bool");
 
             if (sv.empty())
                 return;
@@ -309,11 +401,15 @@ namespace ut
                     {
                         stringview_type tok = sv.sub(token_begin, i);
                         if (!tok.empty())
-                            callback(tok);
+                        {
+                            if (!callback(tok))
+                                return;
+                        }
                     }
                     else
                     {
-                        callback(sv.sub(token_begin, i));
+                        if (!callback(sv.sub(token_begin, i)))
+                            return;
                     }
 
                     token_begin = i+1;
@@ -347,9 +443,9 @@ namespace ut
 
             container_type tokens;
             split(
-                sv,
-                [&tokens](auto&& s){ tokens.emplace_back(s); },
-                unary_delim
+                    sv,
+                    [&tokens](auto&& s){ tokens.emplace_back(s); return true; },
+                    unary_delim
             );
             return tokens;
         }
@@ -384,7 +480,7 @@ namespace ut
         template <size_type I, typename U, typename T>
         inline static size_type tie_impl(stringview_type const& sv, pointer_type token_begin, U unary_delim, T& out)
         {
-            static_assert (is_tieable_v<T>, "out parameter must be ut::stringview or std::ignore");
+            static_assert (is_tieable_v<T>, "out parameter must be stringview or std::ignore");
 
             for (pointer_type i = token_begin; i != sv.end(); ++i)
             {
@@ -429,7 +525,7 @@ namespace ut
         template <size_type I, typename U, typename T, typename... TT>
         inline static size_type tie_impl(stringview_type const& sv, pointer_type token_begin, U unary_delim, T& out, TT&... tt)
         {
-            static_assert (is_tieable_v<T>, "out parameter must be ut::stringview or std::ignore");
+            static_assert (is_tieable_v<T>, "out parameter must be stringview or std::ignore");
 
             for (pointer_type i = token_begin; i != sv.end(); ++i)
             {
@@ -484,9 +580,9 @@ namespace ut
         using string_view_type  = basic_stringview<char_type, traits_type>;
 
         basic_stringviewbuf(string_view_type const& s) :
-            m_begin(s.begin()),
-            m_cur  (m_begin),
-            m_end  (s.end())
+                m_begin(s.begin()),
+                m_cur  (m_begin),
+                m_end  (s.end())
         { }
 
         inline string_view_type all() const
@@ -620,7 +716,7 @@ namespace ut
         using streambuf_type    = basic_stringviewbuf<char_type, traits_type>;
 
         basic_svstream(string_view_type const& s)
-            : m_buf(s), std::basic_istream<char_type, traits_type>(&m_buf)
+                : m_buf(s), std::basic_istream<char_type, traits_type>(&m_buf)
         {}
 
         inline string_view_type all() const
@@ -633,10 +729,11 @@ namespace ut
         streambuf_type m_buf;
     };
 
-    template <typename C> inline C const* begin(basic_stringview<C> const& s) { return s.begin(); }
-    template <typename C> inline C const* end  (basic_stringview<C> const& s) { return s.end(); }
+    template <typename Char, typename Traits, bool NullTerminated> inline Char const* begin(basic_stringview<Char,Traits,NullTerminated> const& s) { return s.begin(); }
+    template <typename Char, typename Traits, bool NullTerminated> inline Char const* end  (basic_stringview<Char,Traits,NullTerminated> const& s) { return s.end(); }
 
-    using stringview    = basic_stringview<char, std::char_traits<char>>;
+    using stringview = basic_stringview<char, std::char_traits<char>, false>;
+    using cstrview = basic_stringview<char, std::char_traits<char>, true>;
 
     template <bool SkipEmpty = true>
     using svsplit = basic_svsplit<SkipEmpty, char, std::char_traits<char>>;
@@ -644,23 +741,29 @@ namespace ut
     using stringviewbuf = basic_stringviewbuf<char>;
     using svstream      = basic_svstream<char>;
 
-    inline stringview operator "" _sv(char const* str, size_t sz) noexcept
+    inline cstrview operator "" _sv(char const* str, size_t sz) noexcept
     {
-        return stringview{ str, str+sz };
+        return cstrview::explicit_construct_cstr(str, sz);
     }
-
-//    inline stringview sv(char const* begin, char const* end)
-//    { return stringview{ begin, end }; }
-
-//    inline stringview sv(std::string const& s)
-//    { return stringview{ s }; }
-
-//    inline stringview sv(char const* s)
-//    { return stringview{ s }; }
 
     template <char Delim>
     inline bool delim(char c)
     { return c == Delim; }
+}
+
+namespace std
+{
+    template<class Key> struct hash;
+
+    template <typename Char, typename Traits, bool NullTerminated>
+    struct hash<ut::basic_stringview<Char,Traits,NullTerminated>>
+    {
+        size_t operator()(ut::basic_stringview<Char,Traits,NullTerminated> const& k) const
+        {
+            using string_view_type = typename ut::basic_stringview<Char,Traits,NullTerminated>::string_view_type;
+            return hash<string_view_type>{}(k.view());
+        }
+    };
 }
 
 

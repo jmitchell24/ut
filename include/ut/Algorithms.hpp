@@ -1,7 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+#include <istream>
+#include <stdexcept>
 #include <string_view>
+
+#include <cstdio>
+#include <cassert>
 
 namespace ut
 {
@@ -83,4 +89,8 @@ namespace ut
     };
 
     using string_metric = basic_string_metic<char>;
+
+
+
+
 }
