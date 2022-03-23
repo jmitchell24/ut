@@ -1,3 +1,9 @@
 #include <ut/Fmt.hpp>
+using namespace ut;
 
-::ut::Fmt thread_local ::ut::Fmt::FMT;
+Fmt& Fmt::instance()
+{
+    static thread_local Fmt fmt;
+    return fmt;
+}
+

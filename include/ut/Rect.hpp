@@ -11,6 +11,7 @@ namespace ut
     struct RectN
     {
         using scalar_type   = N;
+        using real_type     = real_t;
         using rect_type     = RectN<N>;
         using point_type    = Vec2N<N>;
         using split_type    = std::pair<rect_type,rect_type>;
@@ -54,7 +55,7 @@ namespace ut
 
 
         inline point_type xy  () const { return point_type(x,y); }
-        inline point_type size() const { return point_type(w, h); }
+        inline point_type size() const { return point_type(w,h); }
 
         inline point_type topLeft    (scalar_type dx, scalar_type dy) const { return point_type(x+dx      , y+dy       ); }
         inline point_type topRight   (scalar_type dx, scalar_type dy) const { return point_type(x + w - dx, y + dy       ); }
@@ -81,9 +82,11 @@ namespace ut
         inline rect_type left  (scalar_type dx, scalar_type dw) const { return rect_type(x + dx         , y                 , dw, h ); }
         inline rect_type right (scalar_type dx, scalar_type dw) const { return rect_type(x + w - dx - dw, y                 , dw, h ); }
 
+
+
         inline rect_type fit(scalar_type dw, scalar_type dh) const
         {
-            real_t scale = std::min(real_t(this->w) / dw, real_t(this->h) / dh);
+            real_type scale = std::min(real_type(this->w) / dw, real_type(this->h) / dh);
             dw *= scale;
             dh *= scale;
 
@@ -96,9 +99,9 @@ namespace ut
             };
         }
 
-        inline rect_type fit(scalar_type dw, scalar_type dh, double& scale) const
+        inline rect_type fit(scalar_type dw, scalar_type dh, real_type& scale) const
         {
-            scale = std::min(real_t(this->w) / dw, real_t(this->h) / dh);
+            scale = std::min(real_type(this->w) / dw, real_type(this->h) / dh);
             dw *= scale;
             dh *= scale;
 

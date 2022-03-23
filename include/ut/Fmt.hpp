@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
-#include <stdarg.h>
+#include <cstdarg>
 
 #define FMT_VARARGS_OBJ(__obj__, __start_arg__) \
 { \
@@ -27,16 +27,16 @@ namespace ut
 
         using buffer_type = std::array<char, BUFFER_SIZE>;
 
-        static thread_local Fmt FMT;
-
         Fmt()
             : m_buffer{}, m_result{0}
         {}
 
-        inline char const* buffer() const { return m_buffer.data(); }
-        inline int result() const { return m_result; }
+        static Fmt& instance();
 
-        inline std::string string() const
+        [[nodiscard]] inline char const* buffer() const { return m_buffer.data(); }
+        [[nodiscard]] inline int result() const { return m_result; }
+
+        [[nodiscard]] inline std::string string() const
         {
             if (m_result > 0)
                 return std::string{m_buffer.data(), m_buffer.data() + m_result};
@@ -94,7 +94,7 @@ namespace ut
         int         m_result;
     };
 
-    static Fmt& FMT = Fmt::FMT;
+    [[maybe_unused]] static Fmt& FMT = Fmt::instance();
 }
 
 
