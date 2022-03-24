@@ -16,8 +16,7 @@ namespace ut
         using point_type    = Vec2N<N>;
         using split_type    = std::pair<rect_type,rect_type>;
 
-        scalar_type x, y;
-        scalar_type w, h;
+        scalar_type x, y, w, h;
 
         RectN()
             : x{0}, y{0}, w{0}, h{0}
@@ -67,9 +66,9 @@ namespace ut
         inline point_type bottomLeft (point_type const& p) const { return bottomLeft (p.x, p.y); }
         inline point_type bottomRight(point_type const& p) const { return bottomRight(p.x, p.y); }
 
-        inline rect_type topLeft    (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx             , y + dy              , dw, dh); }
-        inline rect_type topRight   (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + w - dx - dw, y + dy              , dw, dh); }
-        inline rect_type bottomLeft (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx             , y + h - dy - dh, dw, dh); }
+        inline rect_type topLeft    (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx         , y + dy         , dw, dh); }
+        inline rect_type topRight   (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + w - dx - dw, y + dy         , dw, dh); }
+        inline rect_type bottomLeft (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx         , y + h - dy - dh, dw, dh); }
         inline rect_type bottomRight(scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + w - dx - dw, y + h - dy - dh, dw, dh); }
 
         inline rect_type topLeft    (rect_type const& r) const { return topLeft    (r.x, r.y, r.w, r.h); }
@@ -175,13 +174,13 @@ namespace ut
         }
     };
 
-    using Rect = RectN<int>;
-    using Point = Vec2N<int>;
+    using rect = RectN<int>;
+    using point = Vec2N<int>;
 
-    typedef RectN<float>         Rectf;
-    typedef RectN<double>        Rectd;
-    typedef RectN<int>           Recti;
-    typedef RectN<unsigned>      Rectu;
-    typedef RectN<unsigned char> Rectb;
+    typedef RectN<float>         rectf;
+    typedef RectN<double>        rectd;
+    typedef RectN<int>           recti;
+    typedef RectN<unsigned>      rectu;
+    typedef RectN<unsigned char> rectb;
 }
 #endif // RECT_HPP

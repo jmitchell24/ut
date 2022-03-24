@@ -6,7 +6,7 @@
 
 namespace ut
 {
-    using real_t = float;
+
 
     template <typename N> class VecND<N, 2>
     {
@@ -44,10 +44,10 @@ namespace ut
         {}
 
         VecND(vector_type const&)=default;
-        VecND(vector_type&&)=default;
+        VecND(vector_type&&) noexcept =default;
 
         VecND& operator=(vector_type const&)=default;
-        VecND& operator=(vector_type&&)=default;
+        VecND& operator=(vector_type&&) noexcept =default;
 
         template <typename T>
         inline VecND<T,2> cast() const { return VecND<T,2>{T(x), T(y)}; }

@@ -6,7 +6,7 @@ using namespace fmt;
 
 int main()
 {
-    auto r = Rect { 0,0,100,100 };
+    auto r = rect { 0,0,100,100 };
 
     r = r.fit(23,32);
 

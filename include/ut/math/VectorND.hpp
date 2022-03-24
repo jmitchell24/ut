@@ -15,6 +15,8 @@
 
 namespace ut
 {
+    using real_t = float;
+
     template <typename N, size_t D> struct VecND
     {
         typedef N               Num;

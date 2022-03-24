@@ -6,7 +6,8 @@
 
 namespace ut
 {
-    class Timer
+    /// convenience class for tracking time for profiling and real-time applications (e.g. games)
+    class timer
     {
     public:
         using count_type                = double;
@@ -16,7 +17,7 @@ namespace ut
         using milliseconds_type         = std::chrono::duration<count_type, std::milli>;
         using seconds_type              = std::chrono::duration<count_type>;
 
-        Timer()
+        timer()
             : m_now{getNow()}, m_previous{}
         { }
 
@@ -55,10 +56,10 @@ namespace ut
         /// return elapsed time between 't' timepoint and member timepoint
         ///
 
-        inline count_type seconds       (Timer const& t) const { return seconds_type     {t.m_now - m_now}.count(); }
-        inline count_type milliseconds  (Timer const& t) const { return milliseconds_type{t.m_now - m_now}.count(); }
-        inline count_type microseconds  (Timer const& t) const { return microseconds_type{t.m_now - m_now}.count(); }
-        inline count_type nanoseconds   (Timer const& t) const { return nanoseconds_type {t.m_now - m_now}.count(); }
+        inline count_type seconds       (timer const& t) const { return seconds_type     {t.m_now - m_now}.count(); }
+        inline count_type milliseconds  (timer const& t) const { return milliseconds_type{t.m_now - m_now}.count(); }
+        inline count_type microseconds  (timer const& t) const { return microseconds_type{t.m_now - m_now}.count(); }
+        inline count_type nanoseconds   (timer const& t) const { return nanoseconds_type {t.m_now - m_now}.count(); }
 
         ///
         /// return elapsed time between now and member timepoint, then reset
