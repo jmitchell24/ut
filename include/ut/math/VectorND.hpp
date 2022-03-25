@@ -12,183 +12,183 @@
 #include <algorithm>
 #include <type_traits>
 #include <cmath>
+#include <cstdint>
 
 namespace ut
 {
     using real_t = float;
 
-    template <typename N, size_t D> struct VecND
+    template <typename N, size_t D> struct vec
     {
-        typedef N               Num;
-        typedef Num&            NumRef;
-        typedef Num             NumParam;
+        using scalar_type       = N;
+        using vector_type       = vec<N,D>;
+        using vector_ref        = vector_type&;
+        using scalar_ref        = scalar_type&;
+        using vector_param      = vector_type const&;
+        using scalar_param      = scalar_type;
+        using elements_type     = scalar_type[D];
 
-        typedef VecND<Num,D>    Vec;
-        typedef Vec&            VecRef;    
-        typedef Vec const&      VecParam;
+        size_t static constexpr SIZE = D;
 
-        typedef N               Components[D];
+        elements_type elements;
 
-        typedef std::size_t     size_type;
-        typedef Num*            iterator;
-        typedef Num const*      const_iterator;
-
-        size_type static constexpr Size = D;
-
-        Components components;
-
-        inline VecND()
+        inline vec()
         {
-            std::fill(std::begin(components), std::end(components), (Num)0);
+            std::fill(std::begin(elements), std::end(elements), (scalar_type)0);
         }
 
-        constexpr VecND(Vec&&)=default;
-        constexpr VecND(Vec const&)=default;
+        constexpr vec(vector_type&&) noexcept =default;
+        constexpr vec(vector_type const&)=default;
 
         template <typename P>
-        inline VecND(VecND<P,D> const& v)
+        inline vec(vec<P,D> const& v)
         {
-            for (size_t i = 0; i < Size; ++i)
-                components[i] = (Num)v.components[i];
+            for (size_t i = 0; i < SIZE; ++i)
+                elements[i] = (scalar_type)v.elements[i];
         }
 
-        inline explicit VecND(NumParam n)
+        inline explicit vec(scalar_param n)
         {
             std::fill(begin(), end(), n);
         }
 
-//        inline VecND(std::initializer_list<N>&& il)
-//            : VecND(make_vector<N,D>(il.begin(), il.end()))
+//        inline vec(std::initializer_list<N>&& il)
+//            : vec(make_vector<N,D>(il.begin(), il.end()))
 //        {}
 
-        inline explicit VecND(Components const& components)
+        inline explicit vec(elements_type const& components)
         {
             std::copy(std::begin(components), std::end(components), begin());
         }
 
-        inline Num sum       () const { return std::accumulate(begin(), end(), (Num)0, std::plus<Num>()); }
-        inline Num sumSquared() const { return std::inner_product(begin(), end(), begin(), (Num)0); }
-        inline Num length    () const { return std::sqrt(sumSquared()); }
-        inline Num dot     (VecParam v) const { return std::inner_product(begin(), end(), v.begin(), (Num)0); }
-        inline Num angle   (VecParam v) const { return (*this==v) ? (Num)0 : std::acos(dot(v) / (length()*v.length())); }
-        inline Num distance(VecParam v) const { return ((*this) - v).length(); }
+        inline scalar_type sum       () const { return std::accumulate(begin(), end(), (scalar_type)0, std::plus<scalar_type>()); }
+        inline scalar_type sumSquared() const { return std::inner_product(begin(), end(), begin(), (scalar_type)0); }
+        inline scalar_type length    () const { return std::sqrt(sumSquared()); }
+        inline scalar_type dot     (vector_param v) const { return std::inner_product(begin(), end(), v.begin(), (scalar_type)0); }
+        inline scalar_type angle   (vector_param v) const { return (*this == v) ? (scalar_type)0 : std::acos(dot(v) / (length() * v.length())); }
+        inline scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
 
-        inline Vec round() const
+        inline vector_type round() const
         {
-            Components components;
-            for (size_type i = 0; i < Size; ++i)
-                components[i] = std::round(this->components[i]);
-            return Vec(components);
+            elements_type temp;
+            for (size_t i = 0; i < SIZE; ++i)
+                temp[i] = std::round(this->elements[i]);
+            return {temp};
         }
 
-        inline Vec floor() const
+        inline vector_type floor() const
         {
-            Components components;
-            for (size_type i = 0; i < Size; ++i)
-                components[i] = std::floor(this->components[i]);
-            return Vec(components);
+            elements_type temp;
+            for (size_t i = 0; i < SIZE; ++i)
+                temp[i] = std::floor(this->elements[i]);
+            return {temp};
         }
 
-        inline Vec ceil() const
+        inline vector_type ceil() const
         {
-            Components components;
-            for (size_type i = 0; i < Size; ++i)
-                components[i] = std::ceil(this->components[i]);
-            return Vec(components);
+            elements_type temp;
+            for (size_t i = 0; i < SIZE; ++i)
+                temp[i] = std::ceil(this->elements[i]);
+            return {temp};
         }
 
-        inline Vec reverse() const
+        inline vector_type reverse() const
         {
-            Components copy;
-            std::reverse_copy(begin(), end(), std::begin(copy));
-            return Vec(copy);
+            elements_type temp;
+            std::reverse_copy(begin(), end(), std::begin(temp));
+            return vector_type(temp);
         }
 
-        inline Vec normal() const { return *this / length(); }
-        inline Vec project(VecParam base)   const { return base * ( (*this*base) / base.sumSquared() ); }
-        inline Vec reflect(VecParam normal) const { return *this + (normal * -(normal * *this) * (Num)2); }
+        inline vector_type normal() const { return *this / length(); }
+        inline vector_type project(vector_param base)   const { return base * ((*this * base) / base.sumSquared() ); }
+        inline vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * (scalar_type)2); }
 
-        inline bool isNan() const
+        [[nodiscard]] inline bool isNan() const
         {
             bool nan = false;
-            for (size_type i = 0; i < Size; ++i)
-                nan |= std::isnan(components[i]);
+            for (size_t i = 0; i < SIZE; ++i)
+                nan |= std::isnan(elements[i]);
             return nan;
         }
 
-        inline bool isInf() const
+        [[nodiscard]] inline bool isInf() const
         {
             bool inf = false;
-            for (size_type i = 0; i < Size; ++i)
-                inf |= std::isinf(components[i]);
+            for (size_t i = 0; i < SIZE; ++i)
+                inf |= std::isinf(elements[i]);
             return inf;
         }
 
-        inline Vec operator- () const { return transform(std::negate<Num>()); }
+        inline vector_type operator- () const { return transform(std::negate<scalar_type>()); }
 
-        inline Vec operator+ (VecParam v) const { return transform(v,std::plus<Num>()); }
-        inline Vec operator- (VecParam v) const { return transform(v,std::minus<Num>()); }
-        inline Vec operator* (VecParam v) const { return transform(v,std::multiplies<Num>()); }
-        inline Vec operator/ (VecParam v) const { return transform(v,std::divides<Num>()); }
+        inline vector_type operator+ (vector_param v) const { return transform(v, std::plus<scalar_type>()); }
+        inline vector_type operator- (vector_param v) const { return transform(v, std::minus<scalar_type>()); }
+        inline vector_type operator* (vector_param v) const { return transform(v, std::multiplies<scalar_type>()); }
+        inline vector_type operator/ (vector_param v) const { return transform(v, std::divides<scalar_type>()); }
 
-        inline Vec operator+ (NumParam n) const { return transform([n](NumParam x){ return x + n; }); }
-        inline Vec operator- (NumParam n) const { return transform([n](NumParam x){ return x - n; }); }
-        inline Vec operator* (NumParam n) const { return transform([n](NumParam x){ return x * n; }); }
-        inline Vec operator/ (NumParam n) const { return transform([n](NumParam x){ return x / n; }); }
+        inline vector_type operator+ (scalar_param n) const { return transform([n](scalar_param x){ return x + n; }); }
+        inline vector_type operator- (scalar_param n) const { return transform([n](scalar_param x){ return x - n; }); }
+        inline vector_type operator* (scalar_param n) const { return transform([n](scalar_param x){ return x * n; }); }
+        inline vector_type operator/ (scalar_param n) const { return transform([n](scalar_param x){ return x / n; }); }
 
-        inline VecRef operator=  (Vec&&)=default;
-        inline VecRef operator=  (VecParam v) { std::copy(v.begin(), v.end(), begin()); return *this; }
-        inline VecRef operator+= (VecParam v) { return (*this = *this + v); }
-        inline VecRef operator-= (VecParam v) { return (*this = *this - v); }
-        inline VecRef operator*= (VecParam v) { return (*this = *this * v); }
-        inline VecRef operator/= (VecParam v) { return (*this = *this / v); }
+        inline vector_ref operator=  (vector_type&&) noexcept =default;
+        inline vector_ref operator=  (vector_param v) { std::copy(v.begin(), v.end(), begin()); return *this; }
+        inline vector_ref operator+= (vector_param v) { return (*this = *this + v); }
+        inline vector_ref operator-= (vector_param v) { return (*this = *this - v); }
+        inline vector_ref operator*= (vector_param v) { return (*this = *this * v); }
+        inline vector_ref operator/= (vector_param v) { return (*this = *this / v); }
 
-        inline VecRef operator=  (NumParam n) { std::fill(begin(), end(), n); return *this; }
-        inline VecRef operator+= (NumParam n) { return (*this = *this + n); }
-        inline VecRef operator-= (NumParam n) { return (*this = *this - n); }
-        inline VecRef operator*= (NumParam n) { return (*this = *this * n); }
-        inline VecRef operator/= (NumParam n) { return (*this = *this / n); }
+        inline vector_ref operator=  (scalar_param n) { std::fill(begin(), end(), n); return *this; }
+        inline vector_ref operator+= (scalar_param n) { return (*this = *this + n); }
+        inline vector_ref operator-= (scalar_param n) { return (*this = *this - n); }
+        inline vector_ref operator*= (scalar_param n) { return (*this = *this * n); }
+        inline vector_ref operator/= (scalar_param n) { return (*this = *this / n); }
 
-        inline bool operator== (VecParam v) const { return std::equal(begin(), end(), v.begin()); }
-        inline bool operator!= (VecParam v) const { return !(*this == v); }
-        inline bool operator<  (VecParam v) const { return std::lexicographical_compare(begin(), end(), v.begin(), v.end()); }
-        inline bool operator>  (VecParam v) const { return *this < v; }
-        inline bool operator<= (VecParam v) const { return !(*this < v); }
-        inline bool operator>= (VecParam v) const { return !(v < *this); }
+        inline bool operator== (vector_param v) const { return std::equal(begin(), end(), v.begin()); }
+        inline bool operator!= (vector_param v) const { return !(*this == v); }
+        inline bool operator<  (vector_param v) const { return std::lexicographical_compare(begin(), end(), v.begin(), v.end()); }
+        inline bool operator>  (vector_param v) const { return *this < v; }
+        inline bool operator<= (vector_param v) const { return !(*this < v); }
+        inline bool operator>= (vector_param v) const { return !(v < *this); }
 
-        inline NumParam operator[] (size_type const i) const { assert(i < Size); return components[i]; }
-        inline Num    & operator[] (size_type const i)       { assert(i < Size); return components[i]; }
+        inline scalar_param operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
+        inline scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
 
-        inline iterator       begin()       { return std::begin(components); }
-        inline const_iterator begin() const { return std::begin(components); }
+        inline auto begin()       { return std::begin(elements); }
+        inline auto begin() const { return std::begin(elements); }
 
-        inline iterator       end()       { return std::end(components); }
-        inline const_iterator end() const { return std::end(components); }
+        inline auto end()       { return std::end(elements); }
+        inline auto end() const { return std::end(elements); }
 
-        static_assert(D > 1, "Dim must be greater than one");
+        [[nodiscard]] inline size_t size() const { return SIZE; }
+
+        inline scalar_type const* data() const { return elements; }
+        inline scalar_type*       data()       { return elements; }
+
+        static_assert(D > 1, "D must be greater than one");
 
     private:
-        template <typename P> inline Vec transform(P predicate) const
+        template <typename P> inline vector_type transform(P predicate) const
         {
-            Vec copy = *this;
+            vector_type copy = *this;
             std::transform(copy.begin(), copy.end(), copy.begin(), predicate);
             return copy;
         }
 
-        template <typename P> inline Vec transform(VecParam v, P predicate) const
+        template <typename P> inline vector_type transform(vector_param v, P predicate) const
         {
-            Vec copy = *this;
+            vector_type copy = *this;
             std::transform(v.begin(), v.end(), copy.begin(), copy.end(), predicate);
             return copy;
         }
     };
 
     template <typename N, size_t D, typename It>
-    inline VecND<N,D> make_vector(It first, It last)
+    inline vec<N,D> make_vec(It first, It last)
     {
-        VecND<N,D> v;
-        auto const e = v.end();
-        auto       c = v.begin();
+        vec<N,D> v;
+        auto e = v.end();
+        auto c = v.begin();
         for (auto i = first; i != last && c != e; ++i, ++c)
             *c = (N)*i;
         return v;

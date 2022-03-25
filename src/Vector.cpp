@@ -4,21 +4,21 @@
 
 namespace ut
 {
-    template struct VecND<float        , 4>;
-    template struct VecND<double       , 4>;
-    template struct VecND<int          , 4>;
-    template struct VecND<unsigned     , 4>;
-    template struct VecND<unsigned char, 4>;
+    template struct vec<float       , 2>;
+    template struct vec<double      , 2>;
+    template struct vec<int         , 2>;
+    template struct vec<unsigned    , 2>;
+    template struct vec<std::uint8_t, 2>;
 
-    template struct VecND<float        , 3>;
-    template struct VecND<double       , 3>;
-    template struct VecND<int          , 3>;
-    template struct VecND<unsigned     , 3>;
-    template struct VecND<unsigned char, 3>;
+    template struct vec<float       , 3>;
+    template struct vec<double      , 3>;
+    template struct vec<int         , 3>;
+    template struct vec<unsigned    , 3>;
+    template struct vec<std::uint8_t, 3>;
 
-    template struct VecND<float        , 2>;
-    template struct VecND<double       , 2>;
-    template struct VecND<int          , 2>;
-    template struct VecND<unsigned     , 2>;
-    template struct VecND<unsigned char, 2>;
+    template struct vec<float       , 4>;
+    template struct vec<double      , 4>;
+    template struct vec<int         , 4>;
+    template struct vec<unsigned    , 4>;
+    template struct vec<std::uint8_t, 4>;
 }

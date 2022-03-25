@@ -1,15 +1,13 @@
-#include <ut/ut.hpp>
+#include <ut/math/Vector4D.hpp>
 using namespace ut;
 
-#include <fmt/core.h>
-using namespace fmt;
+#include <cstdio>
+#include <cstdlib>
 
 int main()
 {
-    auto r = rect { 0,0,100,100 };
 
-    r = r.fit(23,32);
-
-    print("{} {} {} {}", r.x, r.y, r.w, r.h);
     return 0;
 }
+
+//inline vector_type cross  (vector_param v)      const { return vector_type((y * v.z) - (v.y * z), (z * v.x) - (v.z * x), (x * v.y) - (v.x * y)); }

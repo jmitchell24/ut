@@ -3,105 +3,125 @@
 #pragma once
 
 #include "VectorND.hpp"
-#include "Vector2D.hpp"
-
 
 namespace ut
 {
-    template <typename N> class VecND<N, 3>
+    template <typename N> class vec<N, 3>
     {
     public:
-        typedef N               scalar_type;
-        typedef VecND<scalar_type,3>    vector_type;
-        typedef vector_type&            vector_ref;
-        typedef scalar_type&            scalar_ref;
-        typedef vector_type const&      vector_param;
-        typedef scalar_type             scalar_param;
-        typedef N               components_type[3];
+        using scalar_type       = N;
+        using vector_type       = vec<N,3>;
+        using vector_ref        = vector_type&;
+        using scalar_ref        = scalar_type&;
+        using vector_param      = vector_type const&;
+        using scalar_param      = scalar_type;
+        using elements_type     = scalar_type[3];
 
         size_t static constexpr SIZE = 3;
 
         union
         {
             struct { scalar_type x,y,z; };
-
-            VecND<N,2> xy;
-
-            components_type components;
+            elements_type elements;
         };
 
-        inline constexpr VecND()
-            : x((scalar_type)0), y((scalar_type)0), z((scalar_type)0)
+        inline constexpr vec()
+                : x{scalar_type(0)}, y{scalar_type(0)}, z{scalar_type(0)}
         {}
 
-        constexpr VecND(vector_type&&)=default;
-        constexpr VecND(vector_type const&)=default;
-
-        template <typename P>
-        inline constexpr VecND(VecND<P,3> const& v)
-            : x((scalar_type)v.x), y((scalar_type)v.y), z((scalar_type)v.z)
+        inline constexpr explicit vec(scalar_param n)
+                : x{n}, y{n}, z{n}
         {}
 
-        inline constexpr explicit VecND(scalar_param n)
-            : x(n), y(n), z(n)
+        inline constexpr vec(scalar_param x, scalar_param y, scalar_param z)
+                : x{x}, y{y}, z{z}
         {}
 
-        inline constexpr VecND(VecND<N,2> const& v, scalar_param z)
-            : x(v.x), y(v.y), z(z)
+        inline constexpr vec(elements_type const& e)
+                : x{e[0]}, y{e[1]}, z{e[2]}
         {}
 
-        inline constexpr VecND(scalar_param x, scalar_param y, scalar_param z)
-            : x(x), y(y), z(z)
-        {}
+        vec(vector_type const&)=default;
+        vec(vector_type&&) noexcept =default;
 
-        inline constexpr explicit VecND(components_type const& components)
-            : x(components[0]), y(components[1]), z(components[2])
-        {}
+        vec& operator=(vector_type const&)=default;
+        vec& operator=(vector_type&&) noexcept =default;
 
-        inline scalar_type sum       () const { return x + y + z; }
-        inline scalar_type sumSquared() const { return x*x + y*y + z*z; }
-        inline scalar_type length    () const { return std::sqrt(sumSquared()); }
-        inline scalar_type dot     (vector_param v) const { return x*v.x + y*v.y + z*v.z; }
-        inline scalar_type angle   (vector_param v) const { return (*this==v) ? (scalar_type)0 : std::acos(dot(v) / (length()*v.length())); }
-        inline scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
+        template <typename T>
+        inline vec<T,SIZE> cast() const { return vec<T,SIZE>{T(x), T(y), T(z)}; }
 
-        inline vector_type round  () const { return vector_type(std::round(x), std::round(y), std::round(z)); }
-        inline vector_type floor  () const { return vector_type(std::floor(x), std::floor(y), std::floor(z)); }
-        inline vector_type ceil   () const { return vector_type(std::ceil (x), std::ceil (y), std::ceil (z)); }
+        inline void add(scalar_type s) { x += s, y += s; z += s; }
+        inline void sub(scalar_type s) { x += s, y += s; z += s; }
+        inline void mul(scalar_type s) { x += s, y += s; z += s; }
+        inline void div(scalar_type s) { x += s, y += s; z += s; }
 
-        inline vector_type reverse() const { return vector_type(z,y,x); }
-        inline vector_type normal () const { return *this / length(); }
-        inline vector_type cross  (vector_param v)      const { return vector_type((y * v.z) - (v.y * z), (z * v.x) - (v.z * x), (x * v.y) - (v.x * y)); }
-        inline vector_type project(vector_param base)   const { return base * ( (*this*base) / base.sumSquared() ); }
-        inline vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * (scalar_type)2); }
+        ENABLE_IF_INTEGRAL
+        inline void mod(scalar_type s) { x %= s; y %= s; z %= s; }
 
-        inline bool isNan() const { return std::isnan(x) || std::isnan(y) || std::isnan(z); }
-        inline bool isInf() const { return std::isinf(x) || std::isinf(y) || std::isinf(z); }
+        inline void add(vector_param p) { x += p.x; y += p.y; z += p.z; }
+        inline void sub(vector_param p) { x -= p.x; y -= p.y; z -= p.z; }
+        inline void mul(vector_param p) { x *= p.x; y *= p.y; z *= p.z; }
+        inline void div(vector_param p) { x /= p.x; y /= p.y; z /= p.z; }
 
-        inline vector_type operator - () const { return vector_type(-x,-y,-z); }
+        ENABLE_IF_INTEGRAL
+        inline void mod(vector_param p) { x %= p.x, y %= p.y; z %= p.z; }
 
-        inline vector_type operator + (vector_param v) const { return vector_type(x + v.x, y + v.y, z + v.z); }
-        inline vector_type operator - (vector_param v) const { return vector_type(x - v.x, y - v.y, z - v.z); }
-        inline vector_type operator * (vector_param v) const { return vector_type(x * v.x, y * v.y, z * v.z); }
-        inline vector_type operator / (vector_param v) const { return vector_type(x / v.x, y / v.y, z / v.z); }
+        [[nodiscard]] inline scalar_type sum       () const { return x + y; }
+        [[nodiscard]] inline scalar_type sumSquared() const { return x*x + y*y; }
+        [[nodiscard]] inline scalar_type length    () const { return std::sqrt(sumSquared()); }
 
-        inline vector_ref operator =  (vector_type&&)=default;
-        inline vector_ref operator =  (vector_param v) { x = v.x; y = v.y; z = v.z; return *this; }
-        inline vector_ref operator += (vector_param v) { return (*this = *this + v); }
-        inline vector_ref operator -= (vector_param v) { return (*this = *this - v); }
-        inline vector_ref operator *= (vector_param v) { return (*this = *this * v); }
-        inline vector_ref operator /= (vector_param v) { return (*this = *this / v); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type dot     (vector_param v) const { return x*v.x + y*v.y + z*v.z; }
+        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type angle   (vector_param v) const { return (*this==v) ? scalar_type{0} : std::acos(dot(v) / (length()*v.length())); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
 
-        inline vector_type operator + (scalar_param n) const { return vector_type(x + n, y + n, z + n); }
-        inline vector_type operator - (scalar_param n) const { return vector_type(x - n, y - n, z - n); }
-        inline vector_type operator * (scalar_param n) const { return vector_type(x * n, y * n, z * n); }
-        inline vector_type operator / (scalar_param n) const { return vector_type(x / n, y / n, z / n); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type round() const { return vector_type(std::round(x), std::round(y)); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type floor() const { return vector_type(std::floor(x), std::floor(y)); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type ceil () const { return vector_type(std::ceil (x), std::ceil (y)); }
 
-        inline vector_ref operator =  (scalar_param n) { x = n; y = n; z = n; return *this; }
-        inline vector_ref operator += (scalar_param n) { return (*this = *this + n); }
-        inline vector_ref operator -= (scalar_param n) { return (*this = *this - n); }
-        inline vector_ref operator *= (scalar_param n) { return (*this = *this * n); }
-        inline vector_ref operator /= (scalar_param n) { return (*this = *this / n); }
+        [[nodiscard]] inline vector_type neg    () const { return vector_type(-x,-y,-z); }
+        [[nodiscard]] inline vector_type reverse() const { return vector_type(z, y, x); }
+
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type normal () const { return *this / length(); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type project(vector_param base)   const { return base * ( (*this*base) / base.sumSquared() ); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * scalar_type{2}); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type cross  (vector_param v)      const { return vector_type((y * v.z) - (v.y * z), (z * v.x) - (v.z * x), (x * v.y) - (v.x * y)); }
+
+        ENABLE_IF_FLOAT [[nodiscard]] inline bool isNan() const { return std::isnan(x) || std::isnan(y); }
+        ENABLE_IF_FLOAT [[nodiscard]] inline bool isInf() const { return std::isinf(x) || std::isinf(y); }
+
+        inline vector_type operator - () const { return neg(); }
+
+        inline vector_type operator+(scalar_type s) const { return vector_type(x + s, y + s, z + s); }
+        inline vector_type operator-(scalar_type s) const { return vector_type(x - s, y - s, z - s); }
+        inline vector_type operator*(scalar_type s) const { return vector_type(x * s, y * s, z * s); }
+        inline vector_type operator/(scalar_type s) const { return vector_type(x / s, y / s, z / s); }
+
+        ENABLE_IF_INTEGRAL
+        inline vector_type operator%(scalar_type s) const { return vector_type(x % s, y % s, z % s); }
+
+        inline vector_type operator+(vector_type const& p) const { return vector_type(x + p.x, y + p.y, z + p.z); }
+        inline vector_type operator-(vector_type const& p) const { return vector_type(x - p.x, y - p.y, z - p.z); }
+        inline vector_type operator*(vector_type const& p) const { return vector_type(x * p.x, y * p.y, z * p.z); }
+        inline vector_type operator/(vector_type const& p) const { return vector_type(x / p.x, y / p.y, z / p.z); }
+
+        ENABLE_IF_INTEGRAL
+        inline vector_type operator%(vector_type const& p) const { return vector_type(x % p.x, y % p.y, z % p.z); }
+
+        inline vector_type& operator += (vector_type const& p) { add(p); return *this; }
+        inline vector_type& operator -= (vector_type const& p) { sub(p); return *this; }
+        inline vector_type& operator *= (vector_type const& p) { mul(p); return *this; }
+        inline vector_type& operator /= (vector_type const& p) { div(p); return *this; }
+
+        ENABLE_IF_INTEGRAL
+        inline vector_type& operator %= (vector_type const& p) { mod(p); return *this; }
+
+        inline vector_type& operator += (scalar_type s) { add(s); return *this; }
+        inline vector_type& operator -= (scalar_type s) { sub(s); return *this; }
+        inline vector_type& operator *= (scalar_type s) { mul(s); return *this; }
+        inline vector_type& operator /= (scalar_type s) { div(s); return *this; }
+
+        ENABLE_IF_INTEGRAL
+        inline vector_type& operator %= (scalar_type s) { mod(s); return *this; }
 
         inline bool operator== (vector_param v) const { return std::equal(begin(), end(), v.begin()); }
         inline bool operator!= (vector_param v) const { return !(*this == v); }
@@ -110,28 +130,33 @@ namespace ut
         inline bool operator<= (vector_param v) const { return !(*this < v); }
         inline bool operator>= (vector_param v) const { return !(v < *this); }
 
-        inline scalar_param operator[] (size_t const i) const { assert(i < SIZE); return components[i]; }
-        inline scalar_type    & operator[] (size_t const i)       { assert(i < SIZE); return components[i]; }
+        [[nodiscard]] inline scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
+        [[nodiscard]] inline scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
 
-        inline scalar_type*       begin()       { return std::begin(components); }
-        inline scalar_type const* begin() const { return std::begin(components); }
+        [[nodiscard]] inline auto begin()       { return std::begin(elements); }
+        [[nodiscard]] inline auto begin() const { return std::begin(elements); }
 
-        inline scalar_type*       end()       { return std::end(components); }
-        inline scalar_type const* end() const { return std::end(components); }
+        [[nodiscard]] inline auto end()       { return std::end(elements); }
+        [[nodiscard]] inline auto end() const { return std::end(elements); }
+
+        [[nodiscard]] inline size_t size() const { return SIZE; }
+
+        [[nodiscard]] inline scalar_type const* data() const { return elements; }
+        [[nodiscard]] inline scalar_type*       data()       { return elements; }
     };
 
-    template <typename N> using Vec3N = VecND<N, 3>;
+    template <typename N> using vec3x = vec<N, 3>;
 
-    typedef Vec3N<real_t>        Vec3;
-    typedef Vec3N<float>         Vec3f;
-    typedef Vec3N<double>        Vec3d;
-    typedef Vec3N<int>           Vec3i;
-    typedef Vec3N<unsigned>      Vec3u;
-    typedef Vec3N<unsigned char> Vec3b;
+    typedef vec3x<real_t>       vec3;
+    typedef vec3x<float>        vec3f;
+    typedef vec3x<double>       vec3d;
+    typedef vec3x<int>          vec3i;
+    typedef vec3x<unsigned>     vec3u;
+    typedef vec3x<std::uint8_t> vec3b;
 
-    extern template struct VecND<float        , 3>;
-    extern template struct VecND<double       , 3>;
-    extern template struct VecND<int          , 3>;
-    extern template struct VecND<unsigned     , 3>;
-    extern template struct VecND<unsigned char, 3>;
+    extern template struct vec<float       , 3>;
+    extern template struct vec<double      , 3>;
+    extern template struct vec<int         , 3>;
+    extern template struct vec<unsigned    , 3>;
+    extern template struct vec<std::uint8_t, 3>;
 }
