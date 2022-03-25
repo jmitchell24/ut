@@ -1,4 +1,4 @@
-#include <ut/math/Vector4D.hpp>
+#include <ut/ut.hpp>
 using namespace ut;
 
 #include <cstdio>
@@ -6,7 +6,9 @@ using namespace ut;
 
 int main()
 {
-
+    for (auto e : rectf{0,0,50,50})
+        printf("%.2f ", e);
+    printf("\n");
     return 0;
 }
 

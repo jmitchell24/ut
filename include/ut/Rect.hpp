@@ -8,36 +8,41 @@
 namespace ut
 {
     template <typename N>
-    struct RectN
+    struct rectx
     {
         using scalar_type   = N;
         using real_type     = real_t;
-        using rect_type     = RectN<N>;
-        using point_type    = Vec2N<N>;
+        using rect_type     = rectx<N>;
+        using point_type    = vec2x<N>;
         using split_type    = std::pair<rect_type,rect_type>;
+        using elements_type = scalar_type[4];
 
-        scalar_type x, y, w, h;
+        union
+        {
+            struct { scalar_type x,y,w,h; };
+            elements_type elements;
+        };
 
-        RectN()
+        rectx()
             : x{0}, y{0}, w{0}, h{0}
         {}
 
-        RectN(scalar_type x, scalar_type y, scalar_type width, scalar_type height)
+        rectx(scalar_type x, scalar_type y, scalar_type width, scalar_type height)
             : x{x}, y{y}, w{width}, h{height}
         {}
 
-        RectN(point_type const& p, point_type const& s)
+        rectx(point_type const& p, point_type const& s)
             : x{p.x}, y{p.y}, w{s.x}, h{s.y}
         {}
 
-        RectN(RectN const&)=default;
-        RectN(RectN&&) noexcept =default;
+        rectx(rectx const&)=default;
+        rectx(rectx&&) noexcept =default;
 
-        RectN& operator=(RectN const&)=default;
-        RectN& operator=(RectN&&) noexcept =default;
+        rectx& operator=(rectx const&)=default;
+        rectx& operator=(rectx&&) noexcept =default;
 
         template <typename T>
-        inline RectN<T> cast() const { return RectN<T>(T(x), T(y), T(w), T(h)); }
+        inline rectx<T> cast() const { return rectx<T>(T(x), T(y), T(w), T(h)); }
 
         inline scalar_type minX() const { return x; }
         inline scalar_type minY() const { return y; }
@@ -172,15 +177,27 @@ namespace ut
             scalar_type h = max_y - min_y;
             return {x, y, w, h};
         }
+
+        [[nodiscard]] inline scalar_type  operator[] (size_t i) const { assert(i < 4); return elements[i]; }
+        [[nodiscard]] inline scalar_type& operator[] (size_t i)       { assert(i < 4); return elements[i]; }
+
+        [[nodiscard]] inline auto begin()       { return std::begin(elements); }
+        [[nodiscard]] inline auto begin() const { return std::begin(elements); }
+
+        [[nodiscard]] inline auto end()       { return std::end(elements); }
+        [[nodiscard]] inline auto end() const { return std::end(elements); }
+
+        [[nodiscard]] inline scalar_type const* data() const { return elements; }
+        [[nodiscard]] inline scalar_type*       data()       { return elements; }
     };
 
-    using rect = RectN<int>;
-    using point = Vec2N<int>;
+    using rect = rectx<int>;
+    using point = rectx<int>;
 
-    typedef RectN<float>         rectf;
-    typedef RectN<double>        rectd;
-    typedef RectN<int>           recti;
-    typedef RectN<unsigned>      rectu;
-    typedef RectN<unsigned char> rectb;
+    typedef rectx<float>        rectf;
+    typedef rectx<double>       rectd;
+    typedef rectx<int>          recti;
+    typedef rectx<unsigned>     rectu;
+    typedef rectx<std::uint8_t> rectb;
 }
 #endif // RECT_HPP
