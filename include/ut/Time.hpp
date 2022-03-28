@@ -33,10 +33,10 @@ namespace ut
             m_now = now;
         }
 
-        inline count_type previousSeconds       () const { return m_previous.count(); }
-        inline count_type previousMilliseconds  () const { return milliseconds_type{m_previous}.count(); }
-        inline count_type previousMicroseconds  () const { return microseconds_type{m_previous}.count(); }
-        inline count_type previousNanoseconds   () const { return nanoseconds_type {m_previous}.count(); }
+        [[nodiscard]] inline count_type previousSeconds       () const { return m_previous.count(); }
+        [[nodiscard]] inline count_type previousMilliseconds  () const { return milliseconds_type{m_previous}.count(); }
+        [[nodiscard]] inline count_type previousMicroseconds  () const { return microseconds_type{m_previous}.count(); }
+        [[nodiscard]] inline count_type previousNanoseconds   () const { return nanoseconds_type {m_previous}.count(); }
 
         inline count_type nextSeconds       () { return (next(), previousSeconds()); }
         inline count_type nextMilliseconds  () { return (next(), previousMilliseconds()); }
@@ -47,10 +47,10 @@ namespace ut
         /// return elapsed time between now and member timepoint
         ///
 
-        inline count_type seconds       () const { return seconds_type     {getNow() - m_now}.count(); }
-        inline count_type milliseconds  () const { return milliseconds_type{getNow() - m_now}.count(); }
-        inline count_type microseconds  () const { return microseconds_type{getNow() - m_now}.count(); }
-        inline count_type nanoseconds   () const { return nanoseconds_type {getNow() - m_now}.count(); }
+        [[nodiscard]] inline count_type seconds       () const { return seconds_type     {getNow() - m_now}.count(); }
+        [[nodiscard]] inline count_type milliseconds  () const { return milliseconds_type{getNow() - m_now}.count(); }
+        [[nodiscard]] inline count_type microseconds  () const { return microseconds_type{getNow() - m_now}.count(); }
+        [[nodiscard]] inline count_type nanoseconds   () const { return nanoseconds_type {getNow() - m_now}.count(); }
 
         ///
         /// return elapsed time between 't' timepoint and member timepoint
