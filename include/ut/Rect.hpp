@@ -199,5 +199,21 @@ namespace ut
     typedef rectx<int>          recti;
     typedef rectx<unsigned>     rectu;
     typedef rectx<std::uint8_t> rectb;
+
+#if defined(UT_STL_INTEROP)
+    template <typename N>
+    inline std::ostream& operator<<(std::ostream& os, rectx<N> const& r)
+    {
+        return os << r.x << "x" << r.y << " [" << r.w << ", " << r.h << "]";
+    }
+
+    template <typename N, size_t D>
+    inline std::string to_string(rectx<N> const& v)
+    {
+        std::ostringstream ss;
+        ss << v;
+        return ss.str();
+    }
+#endif
 }
 #endif // RECT_HPP

@@ -20,6 +20,7 @@ int main()
             NAN
             );
 
+    auto r1 = rect(1,1,500,400);
 
     cout << "v1: " << v1 << endl;
     cout << "v2: " << v2 << endl;
@@ -27,7 +28,7 @@ int main()
     cout << "v4: " << v4 << endl;
     cout << "v4.isinf: " << v4.isInf() << endl;
     cout << "v4.isnan: " << v4.isNan() << endl;
-
+    cout << "r1: " << r1 << endl;
     return 0;
 }
 
