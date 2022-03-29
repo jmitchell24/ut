@@ -6,8 +6,6 @@
 
 namespace ut
 {
-
-
     template <typename N> class vec<N, 2>
     {
     public:
@@ -53,9 +51,9 @@ namespace ut
         inline vec<T,SIZE> cast() const { return vec<T,SIZE>{T(x), T(y)}; }
 
         inline void add(scalar_type s) { x += s; y += s; }
-        inline void sub(scalar_type s) { x += s; y += s; }
-        inline void mul(scalar_type s) { x += s; y += s; }
-        inline void div(scalar_type s) { x += s; y += s; }
+        inline void sub(scalar_type s) { x -= s; y -= s; }
+        inline void mul(scalar_type s) { x *= s; y *= s; }
+        inline void div(scalar_type s) { x /= s; y /= s; }
 
         ENABLE_IF_INTEGRAL
         inline void mod(scalar_type s) { x %= s; y %= s; }
@@ -159,8 +157,6 @@ namespace ut
     typedef vec2x<int>           vec2i;
     typedef vec2x<unsigned>      vec2u;
     typedef vec2x<unsigned char> vec2b;
-
-
 
     extern template struct vec<float        , 2>;
     extern template struct vec<double       , 2>;
