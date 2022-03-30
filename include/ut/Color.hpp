@@ -178,6 +178,12 @@ namespace ut
         struct hsv
         {
             real_t h,s,v,a;
+
+            inline hsv withH(real_t x) { return {x, s, v, a}; }
+            inline hsv withS(real_t x) { return {h, x, v, a}; }
+            inline hsv withV(real_t x) { return {h, s, x, a}; }
+            inline hsv withA(real_t x) { return {h, s, v, x}; }
+
             inline explicit operator vec4() const
             { return { h,s,v,a }; }
         };
