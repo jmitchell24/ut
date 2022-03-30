@@ -10,6 +10,14 @@ using namespace std;
 
 int main()
 {
+    constexpr color::hsv x{0,0,0};
+    constexpr color y{1,1,1,1};
+    constexpr color z{x};
+
+    constexpr rectf r;
+
+
+
     auto v = vector<color>
     {
 #define COLOR(_n, _i) color(_i),
@@ -22,7 +30,7 @@ int main()
     for (auto const& c : v)
         cout << c << endl;
 
-    color::hsv x;
+
 
 
     return EXIT_SUCCESS;

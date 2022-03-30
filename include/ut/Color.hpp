@@ -188,43 +188,43 @@ namespace ut
             { return { h,s,v,a }; }
         };
 
-        b32 i=0;
+        b32 i;
         struct { b8 a,b,g,r; };
 
-        inline color()
+        inline constexpr color()
             : i{0}
         {}
 
-        inline color(b8 r, b8 g, b8 b, b8 a = 255)
+        inline constexpr color(b8 r, b8 g, b8 b, b8 a = 255)
             : r{r}, g{g}, b{b}, a{a}
         {}
 
-        inline explicit color(b32 i)
+        inline explicit constexpr color(b32 i)
             : i{i}
-        { assert(get_native_endianness() == ENDIAN_LITTLE); }
+        {}
 
-        inline explicit color(vec4b const& v)
+        inline explicit constexpr color(vec4b const& v)
             : r{v.x}, g{v.y}, b{v.z}, a{v.w}
         {}
 
-        inline explicit color(normal const& n)
+        inline explicit constexpr color(normal const& n)
             : color{NORMALtoRGB(n)}
         {}
 
-        inline explicit color(hsv const& h)
+        inline explicit constexpr color(hsv const& h)
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
 
-        inline explicit operator vec4b () const { return {r,g,b,a}; }
-        inline explicit operator normal() const { return RGBtoNORMAL(*this); }
-        inline explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        inline explicit constexpr operator vec4b () const { return {r,g,b,a}; }
+        inline explicit constexpr operator normal() const { return RGBtoNORMAL(*this); }
+        inline explicit constexpr operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
 
-        inline bool operator== (color const& c) const { return i == c.i; }
-        inline bool operator!= (color const& c) const { return !(*this == c); }
-        inline bool operator<  (color const& c) const { return i < c.i; }
-        inline bool operator>  (color const& c) const { return *this < c; }
-        inline bool operator<= (color const& c) const { return !(*this < c); }
-        inline bool operator>= (color const& c) const { return !(c < *this); }
+        inline constexpr bool operator== (color const& c) const { return i == c.i; }
+        inline constexpr bool operator!= (color const& c) const { return !(*this == c); }
+        inline constexpr bool operator<  (color const& c) const { return i < c.i; }
+        inline constexpr bool operator>  (color const& c) const { return *this < c; }
+        inline constexpr bool operator<= (color const& c) const { return !(*this < c); }
+        inline constexpr bool operator>= (color const& c) const { return !(c < *this); }
 
         static color parseRGBA(char const* s);
         static bool tryParseRGBA(char const* s, color& c);
@@ -233,11 +233,71 @@ namespace ut
         static bool tryParseARGB(char const* s, color& c);
 
     private:
-        static normal RGBtoNORMAL(color c);
-        static color NORMALtoRGB(normal n);
+        static constexpr color::normal RGBtoNORMAL(color c)
+        {
+            return {real_t(c.r) / 255, real_t(c.g) / 255, real_t(c.b) / 255, real_t(c.a) / 255 };
+        }
 
-        static hsv NORMALtoHSV(normal n);
-        static normal HSVtoNORMAL(hsv c);
+        static constexpr color NORMALtoRGB(normal n)
+        {
+            return { b8(n.r * 255), b8(n.g * 255), b8(n.b * 255), b8(n.a * 255)  };
+        }
+
+        // Convert color3 floats ([0-1],[0-1],[0-1]) to hsv floats ([0-1],[0-1],[0-1]), from Foley & van Dam p592
+        // Optimized http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
+        static constexpr color::hsv NORMALtoHSV(normal c)
+        {
+            auto K = real_t(0);
+
+            if (c.g < c.b)
+            {
+                std::swap(c.g, c.b);
+                K = -real_t(1);
+            }
+
+            if (c.r < c.g)
+            {
+                std::swap(c.r, c.g);
+                K = -real_t(2) / real_t(6) - K;
+            }
+
+            real_t const chroma = c.r - (c.g < c.b ? c.g : c.b);
+
+            return
+            {
+            std::fabs(K + (c.g - c.b) / (real_t(6) * chroma + real_t(1e-20))),
+            chroma / (c.r + real_t(1e-20)),
+            c.r,
+            c.a
+            };
+        }
+
+        // Convert hsv floats ([0-1],[0-1],[0-1]) to color3 floats ([0-1],[0-1],[0-1]), from Foley & van Dam p593
+        // also http://en.wikipedia.org/wiki/HSL_and_HSV
+        static constexpr normal HSVtoNORMAL(hsv c)
+        {
+            if (c.s == real_t(0.0))
+            {
+                return { c.v, c.v, c.v, c.a };
+            }
+
+            c.h = std::fmod(c.h, real_t(1.0)) / (real_t(60.0) / real_t(360.0));
+            int    i = (int)c.h;
+            real_t f = c.h - (float)i;
+            real_t p = c.v * (real_t(1.0) - c.s);
+            real_t q = c.v * (real_t(1.0) - c.s * f);
+            real_t t = c.v * (real_t(1.0) - c.s * (real_t(1.0) - f));
+
+            switch (i)
+            {
+                case 0: return { c.v, t  , p  , c.a };
+                case 1: return { q  , c.v, p  , c.a };
+                case 2: return { p  , c.v, t  , c.a };
+                case 3: return { p  , q  , c.v, c.a };
+                case 4: return { t  , p  , c.v, c.a };
+                case 5: default: return { c.v, p, q, c.a };
+            }
+        }
     };
 
 #if defined(UT_STL_INTEROP)
@@ -253,7 +313,7 @@ namespace ut
 
 namespace colors
 {
-#define COLOR(_name, _i) static const color _name{b32(_i)};
+#define COLOR(_name, _i) static constexpr color _name{_i};
     UT_COLORS
 #undef COLOR
 }
