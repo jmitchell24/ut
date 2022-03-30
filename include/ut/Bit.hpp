@@ -7,12 +7,7 @@
 #include <string>
 #include <cstdio>
 #include <cerrno>
-#include <cstdint>
 #include <cstring>
-
-namespace ut
-{
-
 
 //util::b8 static swap_table[256]
 //{
@@ -40,23 +35,40 @@ namespace ut
 //}
 
 
-namespace ut::bit
+namespace ut
 {
-    using b8 = std::uint8_t;
-    using b16 = std::uint16_t;
-    using b32 = std::uint32_t;
+    using b8  = std::uint_fast8_t;
+    using b16 = std::uint_fast16_t;
+    using b32 = std::uint_fast32_t;
 
-    inline b8 lo4(b8 x) { return x & 0xf;        }
-    inline b8 hi4(b8 x) { return (x >> 4) & 0xf; }
+    inline constexpr b8 u32_byte0(b32 x) { return (x >> (0 * 8)) & 0xFF; }
+    inline constexpr b8 u32_byte1(b32 x) { return (x >> (1 * 8)) & 0xFF; }
+    inline constexpr b8 u32_byte2(b32 x) { return (x >> (2 * 8)) & 0xFF; }
+    inline constexpr b8 u32_byte3(b32 x) { return (x >> (3 * 8)) & 0xFF; }
 
-    inline b8 lo8(b16 x) { return x & 0xff;        }
-    inline b8 hi8(b16 x) { return (x >> 8) & 0xff; }
+    enum Endianness  { ENDIAN_BIG, ENDIAN_LITTLE };
 
-    inline b16 lo16(b32 x) { return x & 0xffff;         }
-    inline b16 hi16(b32 x) { return (x >> 16) & 0xffff; }
+    inline Endianness get_native_endianness()
+    {
+        union { b32 i; b8 c[sizeof(int)]; } u{0x1};
+        return u.c[0] == 1 ? ENDIAN_LITTLE : ENDIAN_BIG;
+    }
 
-    inline b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
-    inline b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
+    inline constexpr b8 lo4(b8 x) { return x & 0xf;        }
+    inline constexpr b8 hi4(b8 x) { return (x >> 4) & 0xf; }
+
+    inline constexpr b8 lo8(b16 x) { return x & 0xff;        }
+    inline constexpr b8 hi8(b16 x) { return (x >> 8) & 0xff; }
+
+    inline constexpr b16 lo16(b32 x) { return x & 0xffff;         }
+    inline constexpr b16 hi16(b32 x) { return (x >> 16) & 0xffff; }
+
+    inline constexpr b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
+    inline constexpr b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
+
+
+namespace bit
+{
 
     inline bool getX(b8 x, size_t n) { return ((x >> n) & 0x01); }
     inline bool get0(b8 x) { return (x & 0b00000001) > 0; }
@@ -165,6 +177,5 @@ namespace ut::bit
     }
 }
 }
-
 
 #endif // UTIL_HPP

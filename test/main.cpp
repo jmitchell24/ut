@@ -10,11 +10,17 @@ using namespace std;
 
 int main()
 {
-    auto c = color4::parseARGB("#11ffeaff");
+    auto v = vector<color>
+    {
+#define COLOR(_n, _i) color(_i),
+        UT_COLORS
+#undef COLOR
+    };
 
-    cout << color3::fromHSV(colors::aliceblue.hsv()) << endl;
-    cout << colors::aliceblue << endl;
-    cout << c.normal() << endl;
+    sort(v.begin(), v.end());
+
+    for (auto const& c : v)
+        cout << c << endl;
 
 
     return EXIT_SUCCESS;
