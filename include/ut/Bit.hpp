@@ -1,6 +1,8 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
+#include "Int.hpp"
+
 #include <vector>
 #include <string>
 #include <cstdio>
@@ -10,13 +12,7 @@
 
 namespace ut
 {
-    typedef std::uint8_t    b8;
-    typedef std::uint16_t   b16;
-    typedef std::uint32_t   b32;
 
-    typedef std::int8_t     i8;
-    typedef std::int16_t    i16;
-    typedef std::int32_t    i32;
 
 //util::b8 static swap_table[256]
 //{
@@ -44,8 +40,12 @@ namespace ut
 //}
 
 
-namespace bit
+namespace ut::bit
 {
+    using b8 = std::uint8_t;
+    using b16 = std::uint16_t;
+    using b32 = std::uint32_t;
+
     inline b8 lo4(b8 x) { return x & 0xf;        }
     inline b8 hi4(b8 x) { return (x >> 4) & 0xf; }
 

@@ -4,6 +4,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${UT_SOURCE_DIR}/include/ut/*.hpp")
 add_library(ut
     "Fmt.cpp"
     "Vector.cpp"
+    "Color.cpp"
     ${HEADER_LIST}
 )
 

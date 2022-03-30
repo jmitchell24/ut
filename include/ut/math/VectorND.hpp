@@ -218,6 +218,13 @@ namespace ut
         }
     };
 
+    template <size_t D> using vecn   = vec<real_t, D>;
+    template <size_t D> using vecnf  = vec<float, D>;
+    template <size_t D> using vecnd  = vec<double, D>;
+    template <size_t D> using vecni  = vec<int, D>;
+    template <size_t D> using vecnu  = vec<unsigned, D>;
+    template <size_t D> using vecnb  = vec<std::uint8_t, D>;
+
     template <typename N, typename... T>
     inline vec<N,sizeof...(T)> make_vec(T&&... t)
     {
@@ -235,6 +242,20 @@ namespace ut
             os << ", " << v[i];
         os << ')';
         return os;
+    }
+
+    template <size_t D>
+    inline std::ostream& operator<<(std::ostream& os, vec<char,D> const& v)
+    {
+        static_assert(D > 0, "seriously?");
+        return os << v.template cast<int>();
+    }
+
+    template <size_t D>
+    inline std::ostream& operator<<(std::ostream& os, vec<unsigned char,D> const& v)
+    {
+        static_assert(D > 0, "seriously?");
+        return os << v.template cast<unsigned>();
     }
 
     template <typename N, size_t D>
