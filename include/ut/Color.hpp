@@ -199,7 +199,7 @@ namespace ut
             : r{r}, g{g}, b{b}, a{a}
         {}
 
-        inline color(b32 i)
+        inline explicit color(b32 i)
             : i{i}
         { assert(get_native_endianness() == ENDIAN_LITTLE); }
 

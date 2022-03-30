@@ -22,6 +22,8 @@ int main()
     for (auto const& c : v)
         cout << c << endl;
 
+    color::hsv x;
+
 
     return EXIT_SUCCESS;
 }
