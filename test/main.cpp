@@ -10,29 +10,11 @@ using namespace std;
 
 int main()
 {
-    constexpr color::hsv x{0,0,0};
-    constexpr color y{1,1,1,1};
-    constexpr color z{x};
+    rectf r{0,0,800,600};
+    cout << r << endl;
 
-    constexpr rectf r;
-
-
-
-    auto v = vector<color>
-    {
-#define COLOR(_n, _i) color(_i),
-        UT_COLORS
-#undef COLOR
-    };
-
-    sort(v.begin(), v.end());
-
-    for (auto const& c : v)
-        cout << c << endl;
-
-
-
-
+    r = r.topLeft(0,0, fraction(.5), fraction(.5));
+    cout << r << endl;
     return EXIT_SUCCESS;
 }
 
