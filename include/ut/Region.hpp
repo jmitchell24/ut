@@ -137,6 +137,9 @@ namespace ut
 
         DECO_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { PADY return { { min.x  , min.y+h }, { min.x+w, max.y-h } }; }
         DECO_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { PADY return { { min.x-w, min.y+h }, { min.x  , max.y-h } }; }
+        DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return { { max.x  , min.y+h }, { max.x+w, max.y-h } }; }
+        DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return { { max.x-w, min.y+h }, { max.x  , max.y-h } }; }
+
         //DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
         //DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
 
