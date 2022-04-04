@@ -96,6 +96,7 @@ namespace ut
         ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type floor() const { return rect_type(std::floor(x), std::floor(y), std::floor(w), std::floor(h)); }
         ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type ceil () const { return rect_type(std::ceil (x), std::ceil (y), std::ceil (w), std::ceil (h)); }
 
+
         //
         // layout helpers
         //

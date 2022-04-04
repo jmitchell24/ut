@@ -6,6 +6,7 @@
 #include "Gulp.hpp"
 #include "StringView.hpp"
 #include "Rect.hpp"
+#include "Region.hpp"
 #include "Color.hpp"
 #include "math/Vector2D.hpp"
 #include "math/Vector3D.hpp"
