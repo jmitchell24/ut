@@ -125,11 +125,29 @@ namespace ut
         DECO_PURE region_type alignBRtoBL(scalar_type w, scalar_type h) { return { { max.x  , max.y-h }, { max.x+w, max.y   } }; }
         DECO_PURE region_type alignBRtoBR(scalar_type w, scalar_type h) { return { { max.x-w, max.y-h }, { max.x  , max.y   } }; }
 
-//        DECO_PURE region_type alignTCtoTC(scalar_type w, scalar_type h)
-//        {
-//            scalar_type _w=width()-w, _h=height()-h;
-//            return { { min.x + _w, min.y }, { max.x-_w, min.y+h } };
-//        };
+#define PADX w=(width()-w)/2;
+#define PADY h=(height()-h)/2;
+#define HALFX w=w/2;
+#define HALFY h=h/2;
+
+        DECO_PURE region_type alignTCtoTC(scalar_type w, scalar_type h) { PADX return { { min.x+w, min.y   }, { max.x-w, min.y+h } }; }
+        DECO_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { PADX return { { min.x+w, min.y-h }, { max.x-w, min.y   } }; }
+        DECO_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { PADX return { { min.x+w, max.y   }, { max.x-w, max.y+h } }; }
+        DECO_PURE region_type alignBCtoBC(scalar_type w, scalar_type h) { PADX return { { min.x+w, max.y-h }, { max.x-w, max.y   } }; }
+
+        DECO_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { PADY return { { min.x  , min.y+h }, { min.x+w, max.y-h } }; }
+        DECO_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { PADY return { { min.x-w, min.y+h }, { min.x  , max.y-h } }; }
+        //DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
+        //DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
+
+
+        //DECO_PURE region_type alignTCtoCC(scalar_type w, scalar_type h) { PADX HALFY return { { min.x+w,
+
+#undef PADX
+#undef PADY
+#undef HALFX
+#undef HALFY
+
 //
 //        DECO_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
 //        DECO_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
