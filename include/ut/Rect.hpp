@@ -96,70 +96,9 @@ namespace ut
         ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type floor() const { return rect_type(std::floor(x), std::floor(y), std::floor(w), std::floor(h)); }
         ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type ceil () const { return rect_type(std::ceil (x), std::ceil (y), std::ceil (w), std::ceil (h)); }
 
-
         //
         // layout helpers
         //
-
-        [[nodiscard]] inline constexpr point_type topLeft    (scalar_type dx, scalar_type dy) const { return point_type(x + dx    , y + dy    ); }
-        [[nodiscard]] inline constexpr point_type topRight   (scalar_type dx, scalar_type dy) const { return point_type(x + w - dx, y + dy    ); }
-        [[nodiscard]] inline constexpr point_type bottomLeft (scalar_type dx, scalar_type dy) const { return point_type(x+dx      , y + h - dy); }
-        [[nodiscard]] inline constexpr point_type bottomRight(scalar_type dx, scalar_type dy) const { return point_type(x + w - dx, y + h - dy); }
-
-        [[nodiscard]] inline constexpr point_type topLeft    (point_type const& p) const { return topLeft    (p.x, p.y); }
-        [[nodiscard]] inline constexpr point_type topRight   (point_type const& p) const { return topRight   (p.x, p.y); }
-        [[nodiscard]] inline constexpr point_type bottomLeft (point_type const& p) const { return bottomLeft (p.x, p.y); }
-        [[nodiscard]] inline constexpr point_type bottomRight(point_type const& p) const { return bottomRight(p.x, p.y); }
-
-        [[nodiscard]] inline constexpr point_type topLeft    (fraction dx, fraction dy) const { return topLeft    (dx(w), dy(h)); }
-        [[nodiscard]] inline constexpr point_type topRight   (fraction dx, fraction dy) const { return topRight   (dx(w), dy(h)); }
-        [[nodiscard]] inline constexpr point_type bottomLeft (fraction dx, fraction dy) const { return bottomLeft (dx(w), dy(h)); }
-        [[nodiscard]] inline constexpr point_type bottomRight(fraction dx, fraction dy) const { return bottomRight(dx(w), dy(h)); }
-
-        [[nodiscard]] inline constexpr rect_type topLeft    (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx         , y + dy         , dw, dh); }
-        [[nodiscard]] inline constexpr rect_type topRight   (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + w - dx - dw, y + dy         , dw, dh); }
-        [[nodiscard]] inline constexpr rect_type bottomLeft (scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + dx         , y + h - dy - dh, dw, dh); }
-        [[nodiscard]] inline constexpr rect_type bottomRight(scalar_type dx, scalar_type dy, scalar_type dw, scalar_type dh) const { return rect_type(x + w - dx - dw, y + h - dy - dh, dw, dh); }
-
-        [[nodiscard]] inline constexpr rect_type topLeft    (rect_type const& r) const { return topLeft    (r.x, r.y, r.w, r.h); }
-        [[nodiscard]] inline constexpr rect_type topRight   (rect_type const& r) const { return topRight   (r.x, r.y, r.w, r.h); }
-        [[nodiscard]] inline constexpr rect_type bottomLeft (rect_type const& r) const { return bottomLeft (r.x, r.y, r.w, r.h); }
-        [[nodiscard]] inline constexpr rect_type bottomRight(rect_type const& r) const { return bottomRight(r.x, r.y, r.w, r.h); }
-
-        [[nodiscard]] inline constexpr rect_type topLeft    (fraction dx, fraction dy, scalar_type dw, scalar_type dh) const { return topLeft    (dx(w), dy(h), dw, dh); }
-        [[nodiscard]] inline constexpr rect_type topRight   (fraction dx, fraction dy, scalar_type dw, scalar_type dh) const { return topRight   (dx(w), dy(h), dw, dh); }
-        [[nodiscard]] inline constexpr rect_type bottomLeft (fraction dx, fraction dy, scalar_type dw, scalar_type dh) const { return bottomLeft (dx(w), dy(h), dw, dh); }
-        [[nodiscard]] inline constexpr rect_type bottomRight(fraction dx, fraction dy, scalar_type dw, scalar_type dh) const { return bottomRight(dx(w), dy(h), dw, dh); }
-
-        [[nodiscard]] inline constexpr rect_type topLeft    (scalar_type dx, scalar_type dy, fraction dw, fraction dh) const { return topLeft    (dx, dy, dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type topRight   (scalar_type dx, scalar_type dy, fraction dw, fraction dh) const { return topRight   (dx, dy, dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottomLeft (scalar_type dx, scalar_type dy, fraction dw, fraction dh) const { return bottomLeft (dx, dy, dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottomRight(scalar_type dx, scalar_type dy, fraction dw, fraction dh) const { return bottomRight(dx, dy, dw(w), dh(h)); }
-
-        [[nodiscard]] inline constexpr rect_type topLeft    (fraction dx, fraction dy, fraction dw, fraction dh) const { return topLeft    (dx(w), dy(h), dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type topRight   (fraction dx, fraction dy, fraction dw, fraction dh) const { return topRight   (dx(w), dy(h), dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottomLeft (fraction dx, fraction dy, fraction dw, fraction dh) const { return bottomLeft (dx(w), dy(h), dw(w), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottomRight(fraction dx, fraction dy, fraction dw, fraction dh) const { return bottomRight(dx(w), dy(h), dw(w), dh(h)); }
-
-        [[nodiscard]] inline constexpr rect_type top   (scalar_type dy, scalar_type dh) const { return rect_type(x              , y + dy            , w , dh); }
-        [[nodiscard]] inline constexpr rect_type bottom(scalar_type dy, scalar_type dh) const { return rect_type(x              , y + h - dy - dh   , w , dh); }
-        [[nodiscard]] inline constexpr rect_type left  (scalar_type dx, scalar_type dw) const { return rect_type(x + dx         , y                 , dw, h ); }
-        [[nodiscard]] inline constexpr rect_type right (scalar_type dx, scalar_type dw) const { return rect_type(x + w - dx - dw, y                 , dw, h ); }
-
-        [[nodiscard]] inline constexpr rect_type top   (fraction dy, scalar_type dh) const { return top   (dy(h), h); }
-        [[nodiscard]] inline constexpr rect_type bottom(fraction dy, scalar_type dh) const { return bottom(dy(h), h); }
-        [[nodiscard]] inline constexpr rect_type left  (fraction dx, scalar_type dw) const { return left  (dx(w), w); }
-        [[nodiscard]] inline constexpr rect_type right (fraction dx, scalar_type dw) const { return right (dx(w), w); }
-
-        [[nodiscard]] inline constexpr rect_type top   (scalar_type dy, fraction dh) const { return top   (h, dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottom(scalar_type dy, fraction dh) const { return bottom(h, dh(h)); }
-        [[nodiscard]] inline constexpr rect_type left  (scalar_type dx, fraction dw) const { return left  (w, dw(w)); }
-        [[nodiscard]] inline constexpr rect_type right (scalar_type dx, fraction dw) const { return right (w, dw(w)); }
-
-        [[nodiscard]] inline constexpr rect_type top   (fraction dy, fraction dh) const { return top   (dy(h), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type bottom(fraction dy, fraction dh) const { return bottom(dy(h), dh(h)); }
-        [[nodiscard]] inline constexpr rect_type left  (fraction dx, fraction dw) const { return left  (dx(w), dw(w)); }
-        [[nodiscard]] inline constexpr rect_type right (fraction dx, fraction dw) const { return right (dx(w), dw(w)); }
 
         [[nodiscard]] inline constexpr rect_type fit(scalar_type dw, scalar_type dh) const
         {

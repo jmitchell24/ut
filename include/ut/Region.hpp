@@ -81,6 +81,11 @@ namespace ut
         DECO_PURE point_type bl() const { return { min.x, max.y }; }  /// Bottom Left
         DECO_PURE point_type br() const { return max; }               /// Bottom Right
 
+        DECO_PURE point_type tc() const { return { min.x + (max.x - min.x)/2, min.y }; } /// Top Center
+        DECO_PURE point_type bc() const { return { min.x + (max.x - min.x)/2, max.y }; } /// Bottom Center
+        DECO_PURE point_type lc() const { return { min.x, min.y + (max.y - min.y)/2 }; } /// Left Center
+        DECO_PURE point_type rc() const { return { max.x, min.y + (max.y - min.y)/2 }; } /// Right Center
+
         template <typename T>
         DECO_PURE regionx<T> cast() const { return regionx<T>(min.template cast<T>(), max.template cast<T>()); }
 
@@ -99,7 +104,6 @@ namespace ut
         DECO_PURE bool contains(point_type  const& p) const { return p.x     >= min.x && p.y     >= min.y && p.x     <  max.x && p.y     <  max.y; }
         DECO_PURE bool contains(region_type const& r) const { return r.min.x >= min.x && r.min.y >= min.y && r.max.x <= max.x && r.max.y <= max.y; }
         DECO_PURE bool overlaps(region_type const& r) const { return r.min.y <  max.y && r.max.y >  min.y && r.Min.x <  max.x && r.max.x >  min.x; }
-
 
         //
         // alignment helpers
@@ -125,8 +129,8 @@ namespace ut
         DECO_PURE region_type alignBRtoBL(scalar_type w, scalar_type h) { return { { max.x  , max.y-h }, { max.x+w, max.y   } }; }
         DECO_PURE region_type alignBRtoBR(scalar_type w, scalar_type h) { return { { max.x-w, max.y-h }, { max.x  , max.y   } }; }
 
-#define PADX w=(width()-w)/2;
-#define PADY h=(height()-h)/2;
+#define PADX  w=(width()-w)/2;
+#define PADY  h=(height()-h)/2;
 #define HALFX w=w/2;
 #define HALFY h=h/2;
 
@@ -140,42 +144,12 @@ namespace ut
         DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return { { max.x  , min.y+h }, { max.x+w, max.y-h } }; }
         DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return { { max.x-w, min.y+h }, { max.x  , max.y-h } }; }
 
-        //DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
-        //DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return { { min.x, min.y }, { max.x, min.y } }; }
-
-
-        //DECO_PURE region_type alignTCtoCC(scalar_type w, scalar_type h) { PADX HALFY return { { min.x+w,
+        DECO_PURE region_type alignCCtoCC(scalar_type w, scalar_type h) { PADY PADX return { { min.x+w, min.y+h }, { max.x-w, max.y-h } }; }
 
 #undef PADX
 #undef PADY
 #undef HALFX
 #undef HALFY
-
-//
-//        DECO_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//        DECO_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//        DECO_PURE region_type alignBCtoBC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//
-//        DECO_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//        DECO_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//        DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-//        DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
-
-
-        //DECO_PURE region_type alignTLtoTR(scalar_type w, scalar_type h) { return { {min.x-w, min.y  }, {min.x  ,min.y+h} }; } /// Align Top Right to parent Top Left
-
-
-
-
-        //DECO_PURE region_type alignOLB(scalar_type w, scalar_type h) { return { {min.x-w, max.y-h}, {min.x  ,max.y-h} }; } /// Align Outside, Left, Bottom
-
-        //DECO_PURE region_type alignORT(scalar_type w, scalar_type h) { return { {max.x  , min.y  }, {max.x+w,min.y+h} }; } /// Align Outside, Right, Top
-        //DECO_PURE region_type alignORB(scalar_type w, scalar_type h) { return { {max.x  , max.y  }, {max.x+w,max.y-h} }; } /// Align Outside, Right, Bottom
-
-        //DECO_PURE region_type alignORT(scalar_type w, scalar_type h) { return { {max.x  , min.y  }, {max.x+w,min.y+h} }; } /// Align Outside, Right, Top
-        //DECO_PURE region_type alignORB(scalar_type w, scalar_type h) { return { {max.x  , max.y  }, {max.x+w,max.y-h} }; } /// Align Outside, Right, Bottom
-
-
 
         DECO_PURE region_type pad(point_type const& tl, point_type const& br) const
         {
@@ -214,6 +188,36 @@ namespace ut
         DECO_PURE region_type pad(fraction f) const
         {
             return pad(f, f);
+        }
+
+        DECO_PURE region_type fit(scalar_type dw, scalar_type dh) const
+        {
+            auto w = (real_type)width();
+            auto h = (real_type)height();
+            auto scale = std::min(w / dw, h / dh);
+
+            dw *= scale;
+            dh *= scale;
+
+            auto x = min.x + (w - dw) / 2;
+            auto y = min.y + (h - dh) / 2;
+
+            return { x, y, x+dw, y+dh };
+        }
+
+        DECO_PURE region_type fit(scalar_type dw, scalar_type dh, real_type& scale) const
+        {
+            auto w = (real_type)width();
+            auto h = (real_type)height();
+            scale = std::min(w / dw, h / dh);
+
+            dw *= scale;
+            dh *= scale;
+
+            auto x = min.x + (w - dw) / 2;
+            auto y = min.y + (h - dh) / 2;
+
+            return { x, y, x+dw, y+dh };
         }
     };
 

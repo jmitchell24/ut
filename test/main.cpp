@@ -37,6 +37,8 @@ int main()
     PRINT(alignBRtoBL)
     PRINT(alignBRtoBR)
     cout << endl;
+    PRINT(fit)
+    cout << endl;
 //    PRINT(alignTCtoTC)
 //    PRINT(alignTCtoBC)
 //    PRINT(alignBCtoTC)
