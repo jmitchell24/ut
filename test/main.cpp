@@ -6,15 +6,47 @@
 using namespace ut;
 
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 int main()
 {
-    rectf r{0,0,800,600};
+    regionf r(rectf{0,0,800,600});
     cout << r << endl;
 
-    r = r.topLeft(0,0, fraction(.5), fraction(.5));
-    cout << r << endl;
+
+#define PRINT(__x__) cout << #__x__ << " --> " << r.__x__(100,100) << setw(25) << r.__x__(100,100).rect() << endl;
+
+    PRINT(alignTLtoTL)
+    PRINT(alignTLtoTR)
+    PRINT(alignTLtoBL)
+    PRINT(alignTLtoBR)
+    cout << endl;
+    PRINT(alignTRtoTL)
+    PRINT(alignTRtoTR)
+    PRINT(alignTRtoBL)
+    PRINT(alignTRtoBR)
+    cout << endl;
+    PRINT(alignBLtoTL)
+    PRINT(alignBLtoTR)
+    PRINT(alignBLtoBL)
+    PRINT(alignBLtoBR)
+    cout << endl;
+    PRINT(alignBRtoTL)
+    PRINT(alignBRtoTR)
+    PRINT(alignBRtoBL)
+    PRINT(alignBRtoBR)
+    cout << endl;
+//    PRINT(alignTCtoTC)
+//    PRINT(alignTCtoBC)
+//    PRINT(alignBCtoTC)
+//    PRINT(alignBCtoBC)
+//    PRINT(alignLCtoLC)
+//    PRINT(alignLCtoRC)
+//    PRINT(alignRCtoLC)
+//    PRINT(alignRCtoRC)
+
+#undef PRINT
     return EXIT_SUCCESS;
 }
 

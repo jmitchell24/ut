@@ -23,7 +23,7 @@ namespace ut
     {
         using scalar_type       = N;
         using real_type         = real_t;
-        using region_type       = rectx<N>;
+        using region_type       = regionx<N>;
         using rect_type         = rectx<N>;
         using point_type        = vec2x<N>;
         using split_type        = std::pair<region_type,region_type>;
@@ -48,7 +48,7 @@ namespace ut
         { }
 
         constexpr explicit regionx(rect_type const& rect)
-                : min{rect.x, rect.y}, max{rect.x+rect.w, rect.y+rect.y}
+                : min{rect.x, rect.y}, max{rect.x+rect.w, rect.y+rect.h}
         { }
 
         constexpr regionx(regionx const&)=default;
@@ -71,9 +71,10 @@ namespace ut
 
         DECO_PURE point_type pos   () const { return min; }
         DECO_PURE point_type size  () const { return max - min; }
-        DECO_PURE point_type width () const { return max.x - min.x; }
-        DECO_PURE point_type height() const { return max.y - min.y; }
         DECO_PURE point_type center() const { return min + (size() / 2); }
+
+        DECO_PURE scalar_type width () const { return max.x - min.x; }
+        DECO_PURE scalar_type height() const { return max.y - min.y; }
 
         DECO_PURE point_type tl() const { return min; }               /// Top Left
         DECO_PURE point_type tr() const { return { max.x, min.y }; }  /// Top Right
@@ -104,9 +105,54 @@ namespace ut
         // alignment helpers
         //
 
+        DECO_PURE region_type alignTLtoTL(scalar_type w, scalar_type h) { return { { min.x  , min.y   }, { min.x+w, min.y+h } }; }
+        DECO_PURE region_type alignTLtoTR(scalar_type w, scalar_type h) { return { { min.x-w, min.y   }, { min.x  , min.y+h } }; }
+        DECO_PURE region_type alignTLtoBL(scalar_type w, scalar_type h) { return { { min.x  , min.y-h }, { min.x+w, min.y   } }; }
+        DECO_PURE region_type alignTLtoBR(scalar_type w, scalar_type h) { return { { min.x-w, min.y-h }, { min.x  , min.y   } }; }
 
-        DECO_PURE region_type alignOLT(scalar_type w, scalar_type h) { return { {min.x-w, min.y  }, {min.x,min.y+h} }; } /// Align Outside, Left, Top
-        DECO_PURE region_type alignOLB(scalar_type w, scalar_type h) { return { {min.x-w, max.y-h}, {min.x,max.y-h} }; } /// Align Outside, Left, Bottom
+        DECO_PURE region_type alignTRtoTL(scalar_type w, scalar_type h) { return { { max.x  , min.y   }, { max.x+w, min.y+h } }; }
+        DECO_PURE region_type alignTRtoTR(scalar_type w, scalar_type h) { return { { max.x-w, min.y   }, { max.x  , min.y+h } }; }
+        DECO_PURE region_type alignTRtoBL(scalar_type w, scalar_type h) { return { { max.x  , min.y-h }, { max.x+w, min.y   } }; }
+        DECO_PURE region_type alignTRtoBR(scalar_type w, scalar_type h) { return { { max.x-w, min.y-h }, { max.x  , min.y   } }; }
+
+        DECO_PURE region_type alignBLtoTL(scalar_type w, scalar_type h) { return { { min.x  , max.y   }, { min.x+w, max.y+h } }; }
+        DECO_PURE region_type alignBLtoTR(scalar_type w, scalar_type h) { return { { min.x-w, max.y   }, { min.x  , max.y+h } }; }
+        DECO_PURE region_type alignBLtoBL(scalar_type w, scalar_type h) { return { { min.x  , max.y-h }, { min.x+w, max.y   } }; }
+        DECO_PURE region_type alignBLtoBR(scalar_type w, scalar_type h) { return { { min.x-w, max.y-h }, { min.x  , max.y   } }; }
+
+        DECO_PURE region_type alignBRtoTL(scalar_type w, scalar_type h) { return { { max.x  , max.y   }, { max.x+w, max.y+h } }; }
+        DECO_PURE region_type alignBRtoTR(scalar_type w, scalar_type h) { return { { max.x-w, max.y   }, { max.x  , max.y+h } }; }
+        DECO_PURE region_type alignBRtoBL(scalar_type w, scalar_type h) { return { { max.x  , max.y-h }, { max.x+w, max.y   } }; }
+        DECO_PURE region_type alignBRtoBR(scalar_type w, scalar_type h) { return { { max.x-w, max.y-h }, { max.x  , max.y   } }; }
+
+//        DECO_PURE region_type alignTCtoTC(scalar_type w, scalar_type h)
+//        {
+//            scalar_type _w=width()-w, _h=height()-h;
+//            return { { min.x + _w, min.y }, { max.x-_w, min.y+h } };
+//        };
+//
+//        DECO_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//        DECO_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//        DECO_PURE region_type alignBCtoBC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//
+//        DECO_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//        DECO_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//        DECO_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+//        DECO_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { /*return { { }, { } };*/ assert(!"not implemented");return {};  };
+
+
+        //DECO_PURE region_type alignTLtoTR(scalar_type w, scalar_type h) { return { {min.x-w, min.y  }, {min.x  ,min.y+h} }; } /// Align Top Right to parent Top Left
+
+
+
+
+        //DECO_PURE region_type alignOLB(scalar_type w, scalar_type h) { return { {min.x-w, max.y-h}, {min.x  ,max.y-h} }; } /// Align Outside, Left, Bottom
+
+        //DECO_PURE region_type alignORT(scalar_type w, scalar_type h) { return { {max.x  , min.y  }, {max.x+w,min.y+h} }; } /// Align Outside, Right, Top
+        //DECO_PURE region_type alignORB(scalar_type w, scalar_type h) { return { {max.x  , max.y  }, {max.x+w,max.y-h} }; } /// Align Outside, Right, Bottom
+
+        //DECO_PURE region_type alignORT(scalar_type w, scalar_type h) { return { {max.x  , min.y  }, {max.x+w,min.y+h} }; } /// Align Outside, Right, Top
+        //DECO_PURE region_type alignORB(scalar_type w, scalar_type h) { return { {max.x  , max.y  }, {max.x+w,max.y-h} }; } /// Align Outside, Right, Bottom
 
 
 
@@ -149,6 +195,30 @@ namespace ut
             return pad(f, f);
         }
     };
+
+    using region = regionx<int>;
+
+    typedef regionx<float>        regionf;
+    typedef regionx<double>       regiond;
+    typedef regionx<int>          regioni;
+    typedef regionx<unsigned>     regionu;
+    typedef regionx<std::uint8_t> regionb;
+
+#if defined(UT_STL_INTEROP)
+    template <typename N>
+    inline std::ostream& operator<<(std::ostream& os, regionx<N> const& r)
+    {
+        return os << r.min << ", " << r.max;
+    }
+
+    template <typename N, size_t D>
+    inline std::string to_string(regionx<N> const& v)
+    {
+        std::ostringstream ss;
+        ss << v;
+        return ss.str();
+    }
+#endif
 }
 
 #undef DECO_PURE
