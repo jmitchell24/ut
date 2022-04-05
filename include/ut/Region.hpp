@@ -8,16 +8,6 @@
 
 namespace ut
 {
-    enum gravity
-    {
-        GRAVITY_NONE,
-        GRAVITY_LEFT,
-        GRAVITY_RIGHT,
-        GRAVITY_TOP,
-        GRAVITY_BOTTOM,
-        GRAVITY_CENTER
-    };
-
     /// Similar to Rect. Represented by min and max coordinates instead of position and size.
     /// Makes some calculations more efficient.
     template <typename N>
@@ -74,6 +64,9 @@ namespace ut
         M_DECL_PURE point_type pos   () const { return min; }
         M_DECL_PURE point_type size  () const { return max - min; }
         M_DECL_PURE point_type center() const { return min + (size() / 2); }
+
+        M_DECL_PURE scalar_type x() const { return min.x; }
+        M_DECL_PURE scalar_type y() const { return min.y; }
 
         M_DECL_PURE scalar_type width () const { return max.x - min.x; }
         M_DECL_PURE scalar_type height() const { return max.y - min.y; }
