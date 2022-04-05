@@ -316,3 +316,4 @@ namespace ut
 }
 
 #undef M_DECL_PURE
+#undef M_DECL

@@ -162,6 +162,9 @@
     COLOR(yellowgreen,          0x9acd32ff) \
     COLOR(rebeccapurple,        0x663399ff)
 
+#define M_DECL_PURE             [[nodiscard]] inline constexpr
+#define M_DECL                  inline constexpr
+
 namespace ut
 {
     /// color (RGBA) class with standard functionality.
@@ -171,7 +174,13 @@ namespace ut
         struct normal
         {
             real_t r,g,b,a;
-            inline explicit operator vec4() const
+
+            M_DECL_PURE normal withR(real_t x) const { return {x, g, b, a}; }
+            M_DECL_PURE normal withG(real_t x) const { return {r, x, b, a}; }
+            M_DECL_PURE normal withB(real_t x) const { return {r, g, x, a}; }
+            M_DECL_PURE normal withA(real_t x) const { return {r, g, b, x}; }
+
+            inline constexpr explicit operator vec4() const
             { return { r,g,b,a }; }
         };
 
@@ -179,12 +188,12 @@ namespace ut
         {
             real_t h,s,v,a;
 
-            inline hsv withH(real_t x) { return {x, s, v, a}; }
-            inline hsv withS(real_t x) { return {h, x, v, a}; }
-            inline hsv withV(real_t x) { return {h, s, x, a}; }
-            inline hsv withA(real_t x) { return {h, s, v, x}; }
+            M_DECL_PURE hsv withH(real_t x) const { return {x, s, v, a}; }
+            M_DECL_PURE hsv withS(real_t x) const { return {h, x, v, a}; }
+            M_DECL_PURE hsv withV(real_t x) const { return {h, s, x, a}; }
+            M_DECL_PURE hsv withA(real_t x) const { return {h, s, v, x}; }
 
-            inline explicit operator vec4() const
+            inline constexpr explicit operator vec4() const
             { return { h,s,v,a }; }
         };
 
@@ -199,25 +208,30 @@ namespace ut
             : r{r}, g{g}, b{b}, a{a}
         {}
 
-        inline explicit constexpr color(b32 i)
+        inline constexpr explicit color(b32 i)
             : i{i}
         {}
 
-        inline explicit constexpr color(vec4b const& v)
+        inline constexpr explicit color(vec4b const& v)
             : r{v.x}, g{v.y}, b{v.z}, a{v.w}
         {}
 
-        inline explicit constexpr color(normal const& n)
+        inline constexpr explicit color(normal const& n)
             : color{NORMALtoRGB(n)}
         {}
 
-        inline explicit constexpr color(hsv const& h)
+        inline constexpr explicit color(hsv const& h)
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
 
-        inline explicit constexpr operator vec4b () const { return {r,g,b,a}; }
-        inline explicit constexpr operator normal() const { return RGBtoNORMAL(*this); }
-        inline explicit constexpr operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE color withR(b8 x) const { return {x, g, b, a}; }
+        M_DECL_PURE color withG(b8 x) const { return {r, x, b, a}; }
+        M_DECL_PURE color withB(b8 x) const { return {r, g, x, a}; }
+        M_DECL_PURE color withA(b8 x) const { return {r, g, b, x}; }
+
+        inline constexpr explicit operator vec4b () const { return {r,g,b,a}; }
+        inline constexpr explicit operator normal() const { return RGBtoNORMAL(*this); }
+        inline constexpr explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
 
         inline constexpr bool operator== (color const& c) const { return i == c.i; }
         inline constexpr bool operator!= (color const& c) const { return !(*this == c); }
@@ -319,5 +333,7 @@ namespace colors
 }
 }
 
+#undef M_DECL_PURE
+#undef M_DECL
 
 #endif //UT_COLOR_HPP
