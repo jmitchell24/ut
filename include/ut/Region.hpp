@@ -68,8 +68,8 @@ namespace ut
         M_DECL_PURE scalar_type x() const { return min.x; }
         M_DECL_PURE scalar_type y() const { return min.y; }
 
-        M_DECL_PURE scalar_type width () const { return max.x - min.x; }
-        M_DECL_PURE scalar_type height() const { return max.y - min.y; }
+        M_DECL_PURE scalar_type w() const { return max.x - min.x; }
+        M_DECL_PURE scalar_type h() const { return max.y - min.y; }
 
         M_DECL_PURE point_type tl() const { return min; }              /// Top Left
         M_DECL_PURE point_type tr() const { return {max.x, min.y }; }  /// Top Right
