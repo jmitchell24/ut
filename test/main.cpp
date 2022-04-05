@@ -11,8 +11,10 @@ using namespace std;
 
 int main()
 {
+    cout << FMT("hello, %s", "world") << endl;
+
     regionf r(rectf{0,0,800,600});
-    r.rect<char>();
+
     cout << r << endl;
 
 

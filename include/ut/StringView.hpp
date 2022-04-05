@@ -55,9 +55,9 @@ namespace ut
 
         inline constexpr static bool NULL_TERMINATED = NullTerminated;
 
-        basic_stringview(stringview_type&&)=default;
+        basic_stringview(stringview_type&&) noexcept =default;
         basic_stringview(stringview_type const&)=default;
-        basic_stringview& operator=(stringview_type&&)=default;
+        basic_stringview& operator=(stringview_type&&) noexcept =default;
         basic_stringview& operator=(stringview_type const&)=default;
 
         /// Construct with default string ("")
