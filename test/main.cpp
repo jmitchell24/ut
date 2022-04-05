@@ -12,6 +12,7 @@ using namespace std;
 int main()
 {
     regionf r(rectf{0,0,800,600});
+    r.rect<char>();
     cout << r << endl;
 
 

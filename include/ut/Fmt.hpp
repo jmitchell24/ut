@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <cstdio>
 #include <cstdarg>
 
@@ -23,7 +24,11 @@ namespace ut
     class Fmt
     {
     public:
+#if defined(UT_FMT_BUFFER_SIZE)
+        int static constexpr BUFFER_SIZE = UT_FMT_BUFFER_SIZE;
+#else
         int static constexpr BUFFER_SIZE = 1024;
+#endif
 
         using buffer_type = std::array<char, BUFFER_SIZE>;
 
@@ -35,6 +40,7 @@ namespace ut
 
         [[nodiscard]] inline char const* buffer() const { return m_buffer.data(); }
         [[nodiscard]] inline int result() const { return m_result; }
+        [[nodiscard]] inline std::string_view view() const { return { m_buffer.data(), (size_t)m_result }; }
 
         [[nodiscard]] inline std::string string() const
         {
@@ -43,7 +49,7 @@ namespace ut
             return std::string{};
         }
 
-        inline std::string string(char const* fmt, ...)
+        [[nodiscard]] inline std::string string(char const* fmt, ...)
         {
             va_list args;
             va_start(args, fmt);
@@ -51,6 +57,16 @@ namespace ut
             va_end(args);
 
             return string();
+        }
+
+        [[nodiscard]] inline std::string_view view(char const* fmt, ...)
+        {
+            va_list args;
+            va_start(args, fmt);
+            m_result = vsprintf(fmt, args);
+            va_end(args);
+
+            return view();
         }
 
         inline int vsprintf(char const* fmt, va_list args)

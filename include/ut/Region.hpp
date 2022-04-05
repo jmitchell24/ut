@@ -59,17 +59,12 @@ namespace ut
 
         M_DECL_PURE scalar_type area() const { return width() * height(); }
 
-        M_DECL_PURE rect_type rect() const { return {min.x, min.y, width(), height() }; }
-
         M_DECL_PURE point_type pos   () const { return min; }
         M_DECL_PURE point_type size  () const { return max - min; }
         M_DECL_PURE point_type center() const { return min + (size() / 2); }
 
-        M_DECL_PURE scalar_type x() const { return min.x; }
-        M_DECL_PURE scalar_type y() const { return min.y; }
-
-        M_DECL_PURE scalar_type w() const { return max.x - min.x; }
-        M_DECL_PURE scalar_type h() const { return max.y - min.y; }
+        M_DECL_PURE scalar_type width () const { return max.x - min.x; }
+        M_DECL_PURE scalar_type height() const { return max.y - min.y; }
 
         M_DECL_PURE point_type tl() const { return min; }              /// Top Left
         M_DECL_PURE point_type tr() const { return {max.x, min.y }; }  /// Top Right
@@ -83,6 +78,9 @@ namespace ut
 
         template <typename T>
         M_DECL_PURE regionx<T> cast() const { return regionx<T>(min.template cast<T>(), max.template cast<T>()); }
+
+        template <typename T=N>
+        M_DECL_PURE rectx<T> rect() const { return rectx<T>(T(min.x), T(min.y), T(width()), T(height())); }
 
         //
         // mutators
