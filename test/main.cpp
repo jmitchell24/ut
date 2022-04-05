@@ -2,6 +2,7 @@
 #include "doctest.h"
 
 #define UT_STL_INTEROP
+#define UT_FMT_USE_CSTRVIEW
 #include <ut/ut.hpp>
 using namespace ut;
 
@@ -11,7 +12,15 @@ using namespace std;
 
 int main()
 {
-    cout << FMT("hello, %s", "world") << endl;
+    auto s1 = FMT("hello, %d, %s", 1, "world");
+    auto s2 = FMT("hello, %d, %s", 2, "world");
+    auto s3 = FMT("hello, %d, %s", 3, "world");
+    auto s4 = FMT("hello, %d, %s", 4, "world");
+
+    cout << s1 << endl;
+    cout << s2 << endl;
+    cout << s3 << endl;
+    cout << s4 << endl;
 
     regionf r(rectf{0,0,800,600});
 

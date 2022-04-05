@@ -1,13 +1,30 @@
 #ifndef STRING_HPP
 #define STRING_HPP
 
-#include "StringView.hpp"
+//
+// Preprocessor Options
+//
+
+//---- Use ut::cstrview if enabled, otherwise use std::string_view
+//#define UT_FMT_USE_CSTRVIEW
+
+//---- Specify string buffer size, default is 512
+//#define UT_FMT_BUFFER_SIZE
+
+//---- Specify number of string buffers, default is 8
+//#define UT_FMT_BUFFER_COUNT
 
 #include <array>
 #include <vector>
 #include <string>
 #include <cstdio>
 #include <cstdarg>
+
+#if defined(UT_FMT_USE_CSTRVIEW)
+#include "StringView.hpp"
+#else
+#include <string_view>
+#endif
 
 #define FMT_VARARGS_OBJ(__obj__, __start_arg__) \
 { \
@@ -21,6 +38,7 @@
 
 #define M_DECL_PURE             [[nodiscard]] inline
 #define M_DECL                  inline
+#define M_CURRENT_BUFFER        ( m_buffer[m_counter%BUFFER_COUNT] )
 
 namespace ut
 {
@@ -30,24 +48,42 @@ namespace ut
 #if defined(UT_FMT_BUFFER_SIZE)
         int static constexpr BUFFER_SIZE = UT_FMT_BUFFER_SIZE;
 #else
-        int static constexpr BUFFER_SIZE = 1024;
+        int static constexpr BUFFER_SIZE = 512;
 #endif
 
-        using buffer_type = std::array<char, BUFFER_SIZE>;
+#if defined(UT_FMT_BUFFER_COUNT)
+        int static constexpr BUFFER_COUNT = UT_FMT_BUFFER_COUNT;
+#else
+        int static constexpr BUFFER_COUNT = 8;
+#endif
 
-        Fmt();
-        static Fmt& instance();
+#if defined(UT_FMT_USE_CSTRVIEW)
+        using stringview_type = cstrview;
+#else
+        using stringview_type = std::string_view;
+#endif
 
-        M_DECL_PURE char const* buffer() const { return m_buffer.data(); }
+        using buffer_type           = std::array<char, BUFFER_SIZE>;
+        using buffer_container_type = std::array<buffer_type, BUFFER_COUNT>;
+
+        Fmt() noexcept;
+        static Fmt& instance() noexcept;
+
+        M_DECL_PURE char const* buffer() const { return M_CURRENT_BUFFER.data(); }
         M_DECL_PURE int         result() const { return m_result; }
 
-        M_DECL_PURE cstrview view() const
-        { return cstrview::explicit_construct_cstr(m_buffer.data(), (size_t)m_result); }
+#if defined(UT_FMT_USE_CSTRVIEW)
+        M_DECL_PURE stringview_type view() const
+        { return cstrview::explicit_construct_cstr(M_CURRENT_BUFFER.data(), (size_t)m_result); }
+#else
+        M_DECL_PURE stringview_type view() const
+        { return {M_CURRENT_BUFFER.data(), (size_t)m_result}; }
+#endif
 
         M_DECL_PURE std::string string() const
         {
             if (m_result > 0)
-                return std::string{m_buffer.data(), m_buffer.data() + m_result};
+                return std::string{M_CURRENT_BUFFER.data(), M_CURRENT_BUFFER.data() + m_result};
             return std::string{};
         }
 
@@ -55,61 +91,47 @@ namespace ut
         {
             va_list args;
             va_start(args, fmt);
-            m_result = vsprintf(fmt, args);
+            m_result = printNextBuffer(fmt, args);
             va_end(args);
 
             return string();
         }
 
-        M_DECL cstrview view(char const* fmt, ...)
+        M_DECL stringview_type view(char const* fmt, ...)
         {
             va_list args;
             va_start(args, fmt);
-            m_result = vsprintf(fmt, args);
+            m_result = printNextBuffer(fmt, args);
             va_end(args);
 
             return view();
         }
 
-        M_DECL int vsprintf(char const* fmt, va_list args)
-        {
-            m_result = vsnprintf(m_buffer.data(), m_buffer.size(), fmt, args);
-
-            if (m_result < 0)
-                m_buffer[0] = '\0';
-
-            return m_result;
-        }
-
-        M_DECL int sprintf(char const* fmt, ...)
+        M_DECL stringview_type operator() (char const* fmt, ...)
         {
             va_list args;
             va_start(args, fmt);
-            m_result = vsprintf(fmt, args);
-            va_end(args);
-
-            return m_result;
-        }
-
-        M_DECL int fscanf(FILE* file)
-        {
-            m_result = ::fscanf(file, "%1023s ", m_buffer.data());
-            return m_result;
-        }
-
-        M_DECL cstrview operator() (char const* fmt, ...)
-        {
-            va_list args;
-            va_start(args, fmt);
-            m_result = vsprintf(fmt, args);
+            m_result = printNextBuffer(fmt, args);
             va_end(args);
 
             return view();
         }
 
     private:
-        buffer_type m_buffer;
-        int         m_result;
+        buffer_container_type   m_buffer;
+        size_t                  m_counter;
+        int                     m_result;
+
+        M_DECL int printNextBuffer(char const* fmt, va_list args)
+        {
+            ++m_counter;
+            m_result = vsnprintf(M_CURRENT_BUFFER.data(), M_CURRENT_BUFFER.size(), fmt, args);
+
+            if (m_result < 0)
+                M_CURRENT_BUFFER[0] = '\0';
+
+            return m_result;
+        }
     };
 
     [[maybe_unused]] static Fmt& FMT = Fmt::instance();
@@ -117,5 +139,6 @@ namespace ut
 
 #undef M_DECL_PURE
 #undef M_DECL
+#undef M_CURRENT_BUFFER
 
 #endif // STRING_HPP
