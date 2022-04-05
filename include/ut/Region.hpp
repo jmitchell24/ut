@@ -122,40 +122,40 @@ namespace ut
         // alignment helpers
         //
 
-        M_DECL_PURE region_type alignTLtoTL(scalar_type w, scalar_type h) { return {{min.x  , min.y   }, {min.x + w, min.y + h } }; }
-        M_DECL_PURE region_type alignTLtoTR(scalar_type w, scalar_type h) { return {{min.x - w, min.y   }, {min.x  , min.y + h } }; }
-        M_DECL_PURE region_type alignTLtoBL(scalar_type w, scalar_type h) { return {{min.x  , min.y - h }, {min.x + w, min.y   } }; }
-        M_DECL_PURE region_type alignTLtoBR(scalar_type w, scalar_type h) { return {{min.x - w, min.y - h }, {min.x  , min.y   } }; }
+        M_DECL_PURE region_type alignTLtoTL(scalar_type w, scalar_type h) { return {{min.x    , min.y     }, {min.x + w, min.y + h } }; }
+        M_DECL_PURE region_type alignTLtoTR(scalar_type w, scalar_type h) { return {{min.x - w, min.y     }, {min.x    , min.y + h } }; }
+        M_DECL_PURE region_type alignTLtoBL(scalar_type w, scalar_type h) { return {{min.x    , min.y - h }, {min.x + w, min.y     } }; }
+        M_DECL_PURE region_type alignTLtoBR(scalar_type w, scalar_type h) { return {{min.x - w, min.y - h }, {min.x    , min.y     } }; }
 
-        M_DECL_PURE region_type alignTRtoTL(scalar_type w, scalar_type h) { return {{max.x  , min.y   }, {max.x + w, min.y + h } }; }
-        M_DECL_PURE region_type alignTRtoTR(scalar_type w, scalar_type h) { return {{max.x - w, min.y   }, {max.x  , min.y + h } }; }
-        M_DECL_PURE region_type alignTRtoBL(scalar_type w, scalar_type h) { return {{max.x  , min.y - h }, {max.x + w, min.y   } }; }
-        M_DECL_PURE region_type alignTRtoBR(scalar_type w, scalar_type h) { return {{max.x - w, min.y - h }, {max.x  , min.y   } }; }
+        M_DECL_PURE region_type alignTRtoTL(scalar_type w, scalar_type h) { return {{max.x    , min.y     }, {max.x + w, min.y + h } }; }
+        M_DECL_PURE region_type alignTRtoTR(scalar_type w, scalar_type h) { return {{max.x - w, min.y     }, {max.x    , min.y + h } }; }
+        M_DECL_PURE region_type alignTRtoBL(scalar_type w, scalar_type h) { return {{max.x    , min.y - h }, {max.x + w, min.y     } }; }
+        M_DECL_PURE region_type alignTRtoBR(scalar_type w, scalar_type h) { return {{max.x - w, min.y - h }, {max.x    , min.y     } }; }
 
-        M_DECL_PURE region_type alignBLtoTL(scalar_type w, scalar_type h) { return {{min.x  , max.y   }, {min.x + w, max.y + h } }; }
-        M_DECL_PURE region_type alignBLtoTR(scalar_type w, scalar_type h) { return {{min.x - w, max.y   }, {min.x  , max.y + h } }; }
-        M_DECL_PURE region_type alignBLtoBL(scalar_type w, scalar_type h) { return {{min.x  , max.y - h }, {min.x + w, max.y   } }; }
-        M_DECL_PURE region_type alignBLtoBR(scalar_type w, scalar_type h) { return {{min.x - w, max.y - h }, {min.x  , max.y   } }; }
+        M_DECL_PURE region_type alignBLtoTL(scalar_type w, scalar_type h) { return {{min.x    , max.y     }, {min.x + w, max.y + h } }; }
+        M_DECL_PURE region_type alignBLtoTR(scalar_type w, scalar_type h) { return {{min.x - w, max.y     }, {min.x    , max.y + h } }; }
+        M_DECL_PURE region_type alignBLtoBL(scalar_type w, scalar_type h) { return {{min.x    , max.y - h }, {min.x + w, max.y     } }; }
+        M_DECL_PURE region_type alignBLtoBR(scalar_type w, scalar_type h) { return {{min.x - w, max.y - h }, {min.x    , max.y     } }; }
 
-        M_DECL_PURE region_type alignBRtoTL(scalar_type w, scalar_type h) { return {{max.x  , max.y   }, {max.x + w, max.y + h } }; }
-        M_DECL_PURE region_type alignBRtoTR(scalar_type w, scalar_type h) { return {{max.x - w, max.y   }, {max.x  , max.y + h } }; }
-        M_DECL_PURE region_type alignBRtoBL(scalar_type w, scalar_type h) { return {{max.x  , max.y - h }, {max.x + w, max.y   } }; }
-        M_DECL_PURE region_type alignBRtoBR(scalar_type w, scalar_type h) { return {{max.x - w, max.y - h }, {max.x  , max.y   } }; }
+        M_DECL_PURE region_type alignBRtoTL(scalar_type w, scalar_type h) { return {{max.x    , max.y     }, {max.x + w, max.y + h } }; }
+        M_DECL_PURE region_type alignBRtoTR(scalar_type w, scalar_type h) { return {{max.x - w, max.y     }, {max.x    , max.y + h } }; }
+        M_DECL_PURE region_type alignBRtoBL(scalar_type w, scalar_type h) { return {{max.x    , max.y - h }, {max.x + w, max.y     } }; }
+        M_DECL_PURE region_type alignBRtoBR(scalar_type w, scalar_type h) { return {{max.x - w, max.y - h }, {max.x    , max.y     } }; }
 
 #define PADX  w=(width()-w)/2;
 #define PADY  h=(height()-h)/2;
 #define HALFX w=w/2;
 #define HALFY h=h/2;
 
-        M_DECL_PURE region_type alignTCtoTC(scalar_type w, scalar_type h) { PADX return {{min.x + w, min.y   }, {max.x - w, min.y + h } }; }
-        M_DECL_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { PADX return {{min.x + w, min.y - h }, {max.x - w, min.y   } }; }
-        M_DECL_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { PADX return {{min.x + w, max.y   }, {max.x - w, max.y + h } }; }
-        M_DECL_PURE region_type alignBCtoBC(scalar_type w, scalar_type h) { PADX return {{min.x + w, max.y - h }, {max.x - w, max.y   } }; }
+        M_DECL_PURE region_type alignTCtoTC(scalar_type w, scalar_type h) { PADX return {{min.x + w, min.y     }, {max.x - w, min.y + h } }; }
+        M_DECL_PURE region_type alignTCtoBC(scalar_type w, scalar_type h) { PADX return {{min.x + w, min.y - h }, {max.x - w, min.y     } }; }
+        M_DECL_PURE region_type alignBCtoTC(scalar_type w, scalar_type h) { PADX return {{min.x + w, max.y     }, {max.x - w, max.y + h } }; }
+        M_DECL_PURE region_type alignBCtoBC(scalar_type w, scalar_type h) { PADX return {{min.x + w, max.y - h }, {max.x - w, max.y     } }; }
 
-        M_DECL_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { PADY return {{min.x  , min.y + h }, {min.x + w, max.y - h } }; }
-        M_DECL_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { PADY return {{min.x - w, min.y + h }, {min.x  , max.y - h } }; }
-        M_DECL_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return {{max.x  , min.y + h }, {max.x + w, max.y - h } }; }
-        M_DECL_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return {{max.x - w, min.y + h }, {max.x  , max.y - h } }; }
+        M_DECL_PURE region_type alignLCtoLC(scalar_type w, scalar_type h) { PADY return {{min.x    , min.y + h }, {min.x + w, max.y - h } }; }
+        M_DECL_PURE region_type alignLCtoRC(scalar_type w, scalar_type h) { PADY return {{min.x - w, min.y + h }, {min.x    , max.y - h } }; }
+        M_DECL_PURE region_type alignRCtoLC(scalar_type w, scalar_type h) { PADY return {{max.x    , min.y + h }, {max.x + w, max.y - h } }; }
+        M_DECL_PURE region_type alignRCtoRC(scalar_type w, scalar_type h) { PADY return {{max.x - w, min.y + h }, {max.x    , max.y - h } }; }
 
         M_DECL_PURE region_type alignCCtoCC(scalar_type w, scalar_type h) { PADY PADX return {{min.x + w, min.y + h }, {max.x - w, max.y - h } }; }
 
@@ -164,44 +164,100 @@ namespace ut
 #undef HALFX
 #undef HALFY
 
+        //
+        // pad ( alias for shrink() )
+        //
+
         M_DECL_PURE region_type pad(point_type const& tl, point_type const& br) const
-        {
-            return { min + tl, max - br };
-        }
+        { return shrink(tl, br); }
 
         M_DECL_PURE region_type pad(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
-        {
-            return pad({left,top}, {right,bottom});
-        }
+        { return shrink(left, top, right, bottom); }
 
         M_DECL_PURE region_type pad(scalar_type horz, scalar_type vert) const
-        {
-            return pad({horz,vert}, {horz,vert});
-        }
+        { return shrink(horz, vert); }
 
         M_DECL_PURE region_type pad(scalar_type sz) const
-        {
-            return pad({sz,sz}, {sz,sz});
-        }
+        { return shrink(sz); }
 
         M_DECL_PURE region_type pad(fraction left, fraction top, fraction right, fraction bottom) const
+        { return shrink(left, top, right, bottom); }
+
+        M_DECL_PURE region_type pad(fraction horz, fraction vert) const
+        { return shrink(horz, vert); }
+
+        M_DECL_PURE region_type pad(fraction f) const
+        { return shrink(f); }
+
+        //
+        // shrink
+        //
+
+        M_DECL_PURE region_type shrink(point_type const& tl, point_type const& br) const
+        { return { min + tl, max - br }; }
+
+        M_DECL_PURE region_type shrink(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
+        { return shrink({left,top}, {right,bottom}); }
+
+        M_DECL_PURE region_type shrink(scalar_type horz, scalar_type vert) const
+        { return shrink({horz,vert}, {horz,vert}); }
+
+        M_DECL_PURE region_type shrink(scalar_type sz) const
+        { return shrink({sz,sz}, {sz,sz}); }
+
+        M_DECL_PURE region_type shrink(fraction left, fraction top, fraction right, fraction bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
-            return pad(left(width()), top(height()), right(width()), bottom(height()));
+            return shrink(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE region_type pad(fraction horz, fraction vert) const
+        M_DECL_PURE region_type shrink(fraction horz, fraction vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
-            return pad(horz(width()), vert(height()));
+            return shrink(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE region_type pad(fraction f) const
+        M_DECL_PURE region_type shrink(fraction f) const
+        { return shrink(f, f); }
+
+        //
+        // expand
+        //
+
+        M_DECL_PURE region_type expand(point_type const& tl, point_type const& br) const
+        { return { min - tl, max + br }; }
+
+        M_DECL_PURE region_type expand(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
+        { return expand({left,top}, {right,bottom}); }
+
+        M_DECL_PURE region_type expand(scalar_type horz, scalar_type vert) const
+        { return expand({horz,vert}, {horz,vert}); }
+
+        M_DECL_PURE region_type expand(scalar_type sz) const
+        { return expand({sz,sz}, {sz,sz}); }
+
+        M_DECL_PURE region_type expand(fraction left, fraction top, fraction right, fraction bottom) const
         {
-            return pad(f, f);
+            assert(left.v + right.v <= .5);
+            assert(top.v + bottom.v <= .5);
+            return shrink(left(width()), top(height()), right(width()), bottom(height()));
         }
+
+        M_DECL_PURE region_type expand(fraction horz, fraction vert) const
+        {
+            assert(horz.v <= .5);
+            assert(vert.v <= .5);
+            return expand(horz(width()), vert(height()));
+        }
+
+        M_DECL_PURE region_type expand(fraction f) const
+        { return expand(f, f); }
+
+        //
+        // fit
+        //
 
         M_DECL_PURE region_type fit(scalar_type dw, scalar_type dh) const
         {
