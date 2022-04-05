@@ -15,7 +15,7 @@
     va_end(__args__); \
 }
 
-#define FMT_VARARGS(__start_arg__) FMT_VARARGS_OBJ(::ut::Fmt::FMT, __start_arg__)
+#define FMT_VARARGS(__start_arg__) FMT_VARARGS_OBJ(::ut::FMT, __start_arg__)
 
 
 namespace ut
