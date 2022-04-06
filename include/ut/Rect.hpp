@@ -5,8 +5,14 @@
 
 #include <utility>
 
+#define M_DECL_PURE             [[nodiscard]] inline constexpr
+#define M_DECL                  inline constexpr
+
 namespace ut
 {
+    template <typename N>
+    struct rectx;
+
     /// strongly typed fractional value
     struct fraction
     {
@@ -25,10 +31,9 @@ namespace ut
     struct rectx
     {
         using scalar_type   = N;
-        using real_type     = real_t;
         using rect_type     = rectx<N>;
         using point_type    = vec2x<N>;
-        using split_type    = std::pair<rect_type,rect_type>;
+        using split_type    = std::tuple<rect_type,rect_type>;
         using elements_type = scalar_type[4];
 
         union
@@ -60,31 +65,35 @@ namespace ut
         constexpr rectx& operator=(rectx&&) noexcept =default;
 
         //
+        // mutators
+        //
+
+        M_DECL void pos (scalar_type px, scalar_type py) { x = px; y = py; }
+        M_DECL void size(scalar_type sw, scalar_type sh) { w = sw; h = sh; assert(w>=0); assert(h>=0); }
+
+        M_DECL void pos (point_type const& p) { x = p.x; y = p.y; }
+        M_DECL void size(point_type const& s) { w = s.x; h = s.y; }
+
+        //
         // accessors
         //
 
-        inline constexpr void pos (scalar_type px, scalar_type py) { x = px; y = py; }
-        inline constexpr void size(scalar_type sw, scalar_type sh) { w = sw; h = sh; assert(w>=0); assert(h>=0); }
-
-        inline constexpr void pos (point_type const& p) { x = p.x; y = p.y; }
-        inline constexpr void size(point_type const& s) { w = s.x; h = s.y; }
-
-        [[nodiscard]] inline constexpr point_type pos () const { return point_type(x,y); }
-        [[nodiscard]] inline constexpr point_type size() const { return point_type(w,h); }
+        M_DECL_PURE point_type pos () const { return point_type(x,y); }
+        M_DECL_PURE point_type size() const { return point_type(w,h); }
 
         template <typename T>
-        [[nodiscard]] inline constexpr rectx<T> cast() const { return rectx<T>(T(x), T(y), T(w), T(h)); }
+        M_DECL_PURE rectx<T> cast() const { return rectx<T>(T(x), T(y), T(w), T(h)); }
 
-        [[nodiscard]] inline constexpr scalar_type minX() const { return x; }
-        [[nodiscard]] inline constexpr scalar_type minY() const { return y; }
-        [[nodiscard]] inline constexpr scalar_type maxX() const { return x + w; }
-        [[nodiscard]] inline constexpr scalar_type maxY() const { return y + h; }
+        M_DECL_PURE scalar_type minX() const { return x; }
+        M_DECL_PURE scalar_type minY() const { return y; }
+        M_DECL_PURE scalar_type maxX() const { return x + w; }
+        M_DECL_PURE scalar_type maxY() const { return y + h; }
 
-        ENABLE_IF_INTEGRAL [[nodiscard]] inline constexpr scalar_type maxIncX() const { return x + w - 1; }      // inclusive
-        ENABLE_IF_INTEGRAL [[nodiscard]] inline constexpr scalar_type maxIncY() const { return y + h - 1; }      // inclusive
+        ENABLE_IF_INTEGRAL M_DECL_PURE scalar_type maxIncX() const { return x + w - 1; }      // inclusive
+        ENABLE_IF_INTEGRAL M_DECL_PURE scalar_type maxIncY() const { return y + h - 1; }      // inclusive
 
-        [[nodiscard]] inline constexpr point_type min() const { return point_type(x,y); }
-        [[nodiscard]] inline constexpr point_type max() const { return point_type(x + w, y + h); }
+        M_DECL_PURE point_type min() const { return point_type(x,y); }
+        M_DECL_PURE point_type max() const { return point_type(x + w, y + h); }
 
         ENABLE_IF_INTEGRAL [[nodiscard]] inline constexpr point_type maxInc() const { return point_type{x + w - 1, y + h - 1}; }
 
@@ -92,79 +101,15 @@ namespace ut
         // utility
         //
 
-        ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type round() const { return rect_type(std::round(x), std::round(y), std::round(w), std::round(h)); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type floor() const { return rect_type(std::floor(x), std::floor(y), std::floor(w), std::floor(h)); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline constexpr rect_type ceil () const { return rect_type(std::ceil (x), std::ceil (y), std::ceil (w), std::ceil (h)); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type round() const { return rect_type(std::round(x), std::round(y), std::round(w), std::round(h)); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type floor() const { return rect_type(std::floor(x), std::floor(y), std::floor(w), std::floor(h)); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type ceil () const { return rect_type(std::ceil (x), std::ceil (y), std::ceil (w), std::ceil (h)); }
 
         //
-        // layout helpers
+        // split
         //
 
-        [[nodiscard]] inline constexpr rect_type fit(scalar_type dw, scalar_type dh) const
-        {
-            real_type scale = std::min(real_type(this->w) / dw, real_type(this->h) / dh);
-            dw *= scale;
-            dh *= scale;
-
-            return
-            {
-                this->x + (this->w - dw) / 2,
-                this->y + (this->h - dh) / 2,
-                dw,
-                dh
-            };
-        }
-
-        [[nodiscard]] inline constexpr rect_type fit(scalar_type dw, scalar_type dh, real_type& scale) const
-        {
-            scale = std::min(real_type(this->w) / dw, real_type(this->h) / dh);
-            dw *= scale;
-            dh *= scale;
-
-            return
-            {
-                this->x + (this->w - dw) / 2,
-                this->y + (this->h - dh) / 2,
-                dw,
-                dh
-            };
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
-        {
-            return { x + left, y + top, w - left - right, h - top - bottom };
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(scalar_type horz, scalar_type vert) const
-        {
-            return { x + horz, y + vert, w - horz - horz, h - vert - vert };
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(scalar_type pad) const
-        {
-            return { x + pad, y + pad, w - pad - pad, h - pad - pad };
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(fraction left, fraction top, fraction right, fraction bottom) const
-        {
-            assert(left.v + right.v <= .5);
-            assert(top.v + bottom.v <= .5);
-            return pad(left(w), top(h), right(w), bottom(h));
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(fraction horz, fraction vert) const
-        {
-            assert(horz.v <= .5);
-            assert(vert.v <= .5);
-            return pad(horz(w), vert(h));
-        }
-
-        [[nodiscard]] inline constexpr rect_type pad(fraction f) const
-        {
-            return pad(f, f);
-        }
-
-        [[nodiscard]] inline constexpr split_type splitTop(scalar_type dh) const
+        M_DECL_PURE split_type splitTop(scalar_type dh) const
         {
             return
             {
@@ -173,7 +118,7 @@ namespace ut
             };
         }
 
-        [[nodiscard]] inline constexpr split_type splitLeft(scalar_type dw) const
+        M_DECL_PURE split_type splitLeft(scalar_type dw) const
         {
             return
             {
@@ -182,7 +127,7 @@ namespace ut
             };
         }
 
-        [[nodiscard]] inline constexpr split_type splitBottom(scalar_type dh) const
+        M_DECL_PURE split_type splitBottom(scalar_type dh) const
         {
             return
             {
@@ -191,35 +136,17 @@ namespace ut
             };
         }
 
-        [[nodiscard]] inline static constexpr rect_type fromBound(point_type const& min, point_type const& max)
-        {
-            scalar_type x = min.x;
-            scalar_type y = min.y;
-            scalar_type w = max.x - min.x;
-            scalar_type h = max.y - min.y;
-            return {x, y, w, h};
-        }
+        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < 4); return elements[i]; }
+        M_DECL_PURE scalar_type& operator[] (size_t i)       { assert(i < 4); return elements[i]; }
 
-        [[nodiscard]] inline static constexpr rect_type fromBound(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
-        {
-            scalar_type x = min_x;
-            scalar_type y = min_y;
-            scalar_type w = max_x - min_x;
-            scalar_type h = max_y - min_y;
-            return {x, y, w, h};
-        }
+        M_DECL_PURE auto begin()       { return std::begin(elements); }
+        M_DECL_PURE auto begin() const { return std::begin(elements); }
 
-        [[nodiscard]] inline constexpr scalar_type  operator[] (size_t i) const { assert(i < 4); return elements[i]; }
-        [[nodiscard]] inline constexpr scalar_type& operator[] (size_t i)       { assert(i < 4); return elements[i]; }
+        M_DECL_PURE auto end()       { return std::end(elements); }
+        M_DECL_PURE auto end() const { return std::end(elements); }
 
-        [[nodiscard]] inline constexpr auto begin()       { return std::begin(elements); }
-        [[nodiscard]] inline constexpr auto begin() const { return std::begin(elements); }
-
-        [[nodiscard]] inline constexpr auto end()       { return std::end(elements); }
-        [[nodiscard]] inline constexpr auto end() const { return std::end(elements); }
-
-        [[nodiscard]] inline constexpr scalar_type const* data() const { return elements; }
-        [[nodiscard]] inline constexpr scalar_type*       data()       { return elements; }
+        M_DECL_PURE scalar_type const* data() const { return elements; }
+        M_DECL_PURE scalar_type*       data()       { return elements; }
     };
 
     using rect = rectx<int>;
@@ -246,4 +173,8 @@ namespace ut
     }
 #endif
 }
+
+#undef M_DECL_PURE
+#undef M_DECL
+
 #endif // RECT_HPP

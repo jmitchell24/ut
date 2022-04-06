@@ -18,8 +18,8 @@ namespace ut
         using region_type       = regionx<N>;
         using rect_type         = rectx<N>;
         using point_type        = vec2x<N>;
-        using split_type        = std::pair<region_type,region_type>;
-        using elements_type     = scalar_type[4];
+        using split_type        = std::tuple<region_type,region_type>;
+        using fit_type          = std::tuple<scalar_type,scalar_type>;
 
         point_type min, max;
 
@@ -259,34 +259,23 @@ namespace ut
         // fit
         //
 
-        M_DECL_PURE region_type fit(scalar_type dw, scalar_type dh) const
+        M_DECL_PURE fit_type fit(scalar_type dw, scalar_type dh) const
         {
-            auto w = (real_type)width();
-            auto h = (real_type)height();
-            auto scale = std::min(w / dw, h / dh);
+            auto w      = (real_type)width();
+            auto h      = (real_type)height();
+            auto scale  = std::min(w / dw, h / dh);
 
-            dw *= scale;
-            dh *= scale;
-
-            auto x = min.x + (w - dw) / 2;
-            auto y = min.y + (h - dh) / 2;
-
-            return { x, y, x+dw, y+dh };
+            return { dw*scale, dh*scale };
         }
 
-        M_DECL_PURE region_type fit(scalar_type dw, scalar_type dh, real_type& scale) const
+        M_DECL_PURE fit_type fit(scalar_type dw, scalar_type dh, real_type& scale) const
         {
             auto w = (real_type)width();
             auto h = (real_type)height();
+
             scale = std::min(w / dw, h / dh);
 
-            dw *= scale;
-            dh *= scale;
-
-            auto x = min.x + (w - dw) / 2;
-            auto y = min.y + (h - dh) / 2;
-
-            return { x, y, x+dw, y+dh };
+            return { dw*scale, dh*scale };
         }
     };
 

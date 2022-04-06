@@ -12,6 +12,8 @@ using namespace std;
 
 int main()
 {
+    auto [x,y] = vec2(1,2).elements;
+
     auto s1 = FMT("hello, %d, %s", 1, "world");
     auto s2 = FMT("hello, %d, %s", 2, "world");
     auto s3 = FMT("hello, %d, %s", 3, "world");
@@ -49,7 +51,10 @@ int main()
     PRINT(alignBRtoBL)
     PRINT(alignBRtoBR)
     cout << endl;
-    PRINT(fit)
+
+    auto [w,h] = r.fit(100,100);
+    cout << w << ' ' << h << endl;
+
     cout << endl;
 //    PRINT(alignTCtoTC)
 //    PRINT(alignTCtoBC)
