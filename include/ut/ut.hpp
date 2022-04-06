@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Algorithms.hpp"
+#include "ut/algorithm/StringMetric.hpp"
 #include "Bit.hpp"
 #include "Fmt.hpp"
 #include "Gulp.hpp"

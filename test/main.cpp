@@ -52,8 +52,8 @@ int main()
     PRINT(alignBRtoBR)
     cout << endl;
 
-    auto [w,h] = r.size().fit(100,100);
-    cout << w << ' ' << h << endl;
+    auto sz = r.fit(100,100);
+    cout << r.alignCCtoCC(sz).shrink(.23_fc) << endl;
 
     cout << endl;
 //    PRINT(alignTCtoTC)

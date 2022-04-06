@@ -17,7 +17,6 @@ namespace ut
         using real_type         = real_t;
         using region_type       = regionx<N>;
         using rect_type         = rectx<N>;
-        using size_type         = size2x<N>;
         using point_type        = vec2x<N>;
         using split_type        = std::tuple<region_type,region_type>;
         using fit_type          = std::tuple<scalar_type,scalar_type>;
@@ -28,10 +27,6 @@ namespace ut
         // ctor
         //
 
-        constexpr regionx()
-            : min{0,0}, max{0,0}
-        { }
-
         constexpr regionx(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
             : min{min_x, min_y}, max{max_x, max_y}
         { }
@@ -41,9 +36,10 @@ namespace ut
         { }
 
         constexpr explicit regionx(rect_type const& rect)
-                : min{rect.x, rect.y}, max{rect.x+rect.w, rect.y+rect.h}
+            : min{rect.x, rect.y}, max{rect.x+rect.w, rect.y+rect.h}
         { }
 
+        constexpr regionx()=default;
         constexpr regionx(regionx const&)=default;
         constexpr regionx(regionx&&) noexcept =default;
 
@@ -60,7 +56,7 @@ namespace ut
 
         M_DECL_PURE scalar_type area() const { return width() * height(); }
 
-        M_DECL_PURE size_type  size  () const { return size_type{max - min}; }
+        M_DECL_PURE point_type size  () const { return max - min; }
         M_DECL_PURE point_type pos   () const { return min; }
         M_DECL_PURE point_type center() const { return min + (size() / 2); }
 
@@ -124,7 +120,7 @@ namespace ut
         //
 
 #define DECL_ALIGN(__name__) \
-    M_DECL_PURE region_type __name__(size_type const& s) const { return __name__(s.w, s.h); } \
+    M_DECL_PURE region_type __name__(point_type const& s) const { return __name__(s.x, s.y); } \
     M_DECL_PURE region_type __name__
 
         DECL_ALIGN(alignTLtoTL) (scalar_type w, scalar_type h) const { return {{min.x    , min.y     }, {min.x + w, min.y + h } }; }
@@ -262,7 +258,27 @@ namespace ut
         M_DECL_PURE region_type expand(fraction f) const
         { return expand(f, f); }
 
+        //
+        // fit
+        //
 
+        M_DECL_PURE point_type fit(scalar_type dw, scalar_type dh) const
+        {
+            real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
+            return { dw*scale, dh*scale };
+        }
+
+        M_DECL_PURE point_type fit(point_type const& d) const
+        { return fit(d.w, d.h); }
+
+        M_DECL_PURE std::tuple<point_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
+        {
+            real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
+            return { { dw*scale, dh*scale }, scale };
+        }
+
+        M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
+        { return fitScale(d.w, d.h); }
     };
 
     using region = regionx<int>;
