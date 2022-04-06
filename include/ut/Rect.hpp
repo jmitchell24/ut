@@ -23,9 +23,67 @@ namespace ut
         { assert(v >= 0 && v <= 1); }
 
         template <typename T>
-        [[nodiscard]] inline constexpr T operator() (T t) const
+        inline constexpr T operator() (T t) const
         { return T(t * v); }
     };
+
+    template <typename N>
+    struct size2x
+    {
+        using scalar_type   = N;
+        using real_type     = real_t;
+        using size_type     = size2x<N>;
+        using rect_type     = rectx<N>;
+        using vec_type      = vec2x<N>;
+
+        scalar_type w,h;
+
+        inline constexpr size2x(scalar_type w, scalar_type h)
+            : w{w}, h{h}
+        {}
+
+        inline constexpr explicit size2x(vec_type const& v)
+            : w{v.x}, h{v.y}
+        {}
+
+        constexpr explicit operator rect_type() const { return vec(); }
+
+        //
+        // accessors
+        //
+
+        M_DECL_PURE vec_type vec() const { return vec_type{w,h}; }
+
+        //
+        // fit
+        //
+
+        M_DECL_PURE size_type fit(scalar_type dw, scalar_type dh) const
+        {
+            auto scale = std::min((real_type)w / dw, (real_type)h / dh);
+            return { dw*scale, dh*scale };
+        }
+
+        M_DECL_PURE size_type fit(size_type const& d) const
+        { return fit(d.w, d.h); }
+
+        M_DECL_PURE std::tuple<size_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
+        {
+            auto scale = std::min((real_type)w / dw, (real_type)h / dh);
+            return { { dw*scale, dh*scale }, scale };
+        }
+
+        M_DECL_PURE std::tuple<size_type, real_type> fitScale(size_type const& d) const
+        { return fitScale(d.w, d.h); }
+    };
+
+    using size2 = size2x<int>;
+
+    typedef size2x<float>        size2f;
+    typedef size2x<double>       size2d;
+    typedef size2x<int>          size2i;
+    typedef size2x<unsigned>     size2u;
+    typedef size2x<std::uint8_t> size2b;
 
     template <typename N>
     struct rectx

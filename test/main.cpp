@@ -52,7 +52,7 @@ int main()
     PRINT(alignBRtoBR)
     cout << endl;
 
-    auto [w,h] = r.fit(100,100);
+    auto [w,h] = r.size().fit(100,100);
     cout << w << ' ' << h << endl;
 
     cout << endl;
