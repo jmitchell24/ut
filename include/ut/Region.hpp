@@ -100,6 +100,44 @@ namespace ut
         M_DECL void height(scalar_type s) { max.y = min.y + s; }
 
         //
+        // set ops
+        //
+
+        M_DECL void add(region_type const& r)
+        {
+            if ((r.min.x < r.max.x) && (r.min.y < r.max.y))
+            {
+                if ((min.x < max.x) && (min.y < max.y))
+                {
+                    if (min.x > r.min.x) min.x = r.min.x;
+                    if (min.y > r.min.y) min.y = r.min.y;
+                    if (max.x < r.max.x) max.x = r.max.x;
+                    if (max.y < r.max.y) max.y = r.max.y;
+                }
+                else
+                {
+                    min.x = r.min.x;
+                    min.y = r.min.y;
+                    max.x = r.max.x;
+                    max.y = r.max.y;
+                }
+            }
+        }
+
+        M_DECL void add(point_type const& p)
+        {
+            if (p.x < min.x)
+                min.x = p.x;
+            else if (p.x > max.x)
+                max.x = p.x;
+
+            if (p.y < min.y)
+                min.y = p.y;
+            else if (p.y > max.y)
+                max.y = p.y;
+        }
+
+        //
         // utility
         //
 
@@ -116,7 +154,7 @@ namespace ut
         M_DECL_PURE bool overlaps(region_type const& r) const { return r.min.y < max.y && r.max.y > min.y && r.Min.x < max.x && r.max.x > min.x; }
 
         //
-        // alignment helpers
+        // alignment
         //
 
 #define DECL_ALIGN(__name__) \
