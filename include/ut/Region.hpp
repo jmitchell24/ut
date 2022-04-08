@@ -317,6 +317,50 @@ namespace ut
 
         M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
         { return fitScale(d.w, d.h); }
+
+        //
+        // split
+        //
+
+        M_DECL_PURE region_type splitV(scalar_type vmin, scalar_type vmax) const
+        {
+            assert(vmin <= vmax);
+            assert(vmax >= min.y && vmax <= max.y);
+            assert(vmin >= min.y && vmin <= max.y);
+            return {{ min.x, vmin }, { max.x, vmax }};
+        }
+
+        M_DECL_PURE region_type splitH(scalar_type hmin, scalar_type hmax) const
+        {
+            assert(hmin <= hmax);
+            assert(hmax >= min.x && hmax <= max.x);
+            assert(hmin >= min.x && hmin <= max.x);
+            return {{ min.x, hmin }, { max.x, hmax }};
+        }
+
+        M_DECL_PURE split_type splitTop(scalar_type dh) const
+        {
+            auto split = min.y + dh;
+            return {splitV(min.y, split), splitV(split, max.y)};
+        }
+
+        M_DECL_PURE split_type splitBottom(scalar_type dh) const
+        {
+            auto split = max.y - dh;
+            return {splitV(min.y, split), splitV(split, max.y)};
+        }
+
+        M_DECL_PURE split_type splitLeft(scalar_type dw) const
+        {
+            auto split = min.x + dw;
+            return {splitH(min.x, split), splitV(split, max.x)};
+        }
+
+        M_DECL_PURE split_type splitRight(scalar_type dw) const
+        {
+            auto split = max.x - dw;
+            return {splitH(min.x, split), splitV(split, max.x)};
+        }
     };
 
     using region = regionx<int>;

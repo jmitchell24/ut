@@ -53,7 +53,9 @@ int main()
     cout << endl;
 
     auto sz = r.fit(100,100);
-    cout << r.alignCCtoCC(sz).shrink(.23_fc) << endl;
+    auto [ra,rb] = r.splitBottom(334);
+    cout << ra << endl;
+    cout << rb << endl;
 
     cout << endl;
 //    PRINT(alignTCtoTC)

@@ -27,7 +27,7 @@ namespace ut
         { return T(t * v); }
     };
 
-    inline fraction operator "" _fc(long double x) noexcept
+    inline constexpr fraction operator "" _fc(long double x) noexcept
     {
         return fraction{(real_t)x};
     }
