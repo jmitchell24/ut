@@ -89,18 +89,22 @@ namespace ut
         M_DECL void x(scalar_type s) { auto tmp = max.x - min.x; min.x = s; max.x = min.x + tmp; }
         M_DECL void y(scalar_type s) { auto tmp = max.y - min.y; min.y = s; max.y = min.y + tmp; }
 
-        M_DECL void pos(point_type const& p) { auto tmp = max - min; min = p; max = min + tmp; }
         M_DECL void pos(scalar_type x, scalar_type y) { pos({x,y}); }
+        M_DECL void pos(point_type const& p) { auto tmp = max - min; min = p; max = min + tmp; }
 
         M_DECL void translate (point_type  p) { min += p; max += p; }
         M_DECL void translateX(scalar_type o) { min.x += o; max.x += o; }
         M_DECL void translateY(scalar_type o) { min.y += o; max.y += o; }
 
+        M_DECL void width(scaler sc)     { width(sc(width())); }
         M_DECL void width(scalar_type s) { max.x = min.x + s; }
+
+        M_DECL void height(scaler f)    { height(f(height())); }
         M_DECL void height(scalar_type s) { max.y = min.y + s; }
 
+        M_DECL void size(scaler scw, scaler sch)       { size(scw(width()), sch(height())); }
         M_DECL void size(scalar_type w, scalar_type h) { size({w,h}); }
-        M_DECL void size(point_type const& p) { max = min + p; }
+        M_DECL void size(point_type const& p)          { max = min + p; }
 
         //
         // copy mutators
@@ -117,11 +121,15 @@ namespace ut
         M_DECL_PURE region_type withOffsetY(scalar_type s)       const { MUT(translateY(s)); }
         M_DECL_PURE region_type withOffset (point_type const& p) const { MUT(translate(p)) }
 
+        M_DECL_PURE region_type withWidth (scaler sc)     const { MUT(width(sc)) }
         M_DECL_PURE region_type withWidth (scalar_type s) const { MUT(width(s)); }
+
+        M_DECL_PURE region_type withHeight(scaler sc)     const { MUT(height(sc)) }
         M_DECL_PURE region_type withHeight(scalar_type s) const { MUT(height(s)); }
 
-        M_DECL_PURE region_type withSize(scalar_type w, scalar_type h) { MUT(size({w,h})) }
-        M_DECL_PURE region_type withSize(point_type const& p)          { MUT(size(p)) }
+        M_DECL_PURE region_type withSize(scaler scw, scaler sch)       const { MUT(size(scw, sch)) }
+        M_DECL_PURE region_type withSize(scalar_type w, scalar_type h) const { MUT(size(w,h)) }
+        M_DECL_PURE region_type withSize(point_type const& p)          const { MUT(size(p)) }
 #undef MUT
 
         //
@@ -246,21 +254,21 @@ namespace ut
         M_DECL_PURE region_type shrunk(scalar_type sz) const
         { return shrunk({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE region_type shrunk(fraction left, fraction top, fraction right, fraction bottom) const
+        M_DECL_PURE region_type shrunk(scaler left, scaler top, scaler right, scaler bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return shrunk(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE region_type shrunk(fraction horz, fraction vert) const
+        M_DECL_PURE region_type shrunk(scaler horz, scaler vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return shrunk(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE region_type shrunk(fraction f) const
+        M_DECL_PURE region_type shrunk(scaler f) const
         { return shrunk(f, f); }
 
         //
@@ -279,21 +287,21 @@ namespace ut
         M_DECL_PURE region_type expanded(scalar_type sz) const
         { return expanded({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE region_type expanded(fraction left, fraction top, fraction right, fraction bottom) const
+        M_DECL_PURE region_type expanded(scaler left, scaler top, scaler right, scaler bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return expanded(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE region_type expanded(fraction horz, fraction vert) const
+        M_DECL_PURE region_type expanded(scaler horz, scaler vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return expanded(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE region_type expanded(fraction f) const
+        M_DECL_PURE region_type expanded(scaler f) const
         { return expanded(f, f); }
 
         //

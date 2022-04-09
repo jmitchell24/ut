@@ -55,7 +55,8 @@ int main()
     auto sz = r.fit(100,100);
     auto [ra,rb] = r.splitBottom(334);
     cout << ra << endl;
-    cout << rb << endl;
+    cout << rb.size() << endl;
+    cout << r.withSize(scaler(0.5), 50_pc).size();
 
     cout << endl;
 //    PRINT(alignTCtoTC)

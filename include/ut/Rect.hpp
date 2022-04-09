@@ -14,23 +14,24 @@ namespace ut
     struct rectx;
 
     /// strongly typed fractional value
-    struct fraction
+    struct scaler
     {
         real_t v;
 
-        inline constexpr explicit fraction(real_t v)
+        inline constexpr explicit scaler(real_t v)
             : v{v}
-        { assert(v >= 0 && v <= 1); }
+        {}
 
         template <typename T>
         inline constexpr T operator() (T t) const
         { return T(t * v); }
     };
 
-    inline constexpr fraction operator "" _fc(long double x) noexcept
-    {
-        return fraction{(real_t)x};
-    }
+    inline constexpr scaler operator "" _sc(long double x) noexcept
+    { return scaler{(real_t)x}; }
+
+    inline constexpr scaler operator "" _pc(unsigned long long i) noexcept
+    { return scaler((real_t)i / (real_t)100); }
 
     template <typename N>
     struct rectx
