@@ -31,25 +31,25 @@ int main()
 
 #define PRINT(__x__) cout << #__x__ << " --> " << r.__x__(100,100) << setw(25) << r.__x__(100,100).rect() << endl;
 
-    PRINT(alignTLtoTL)
-    PRINT(alignTLtoTR)
-    PRINT(alignTLtoBL)
-    PRINT(alignTLtoBR)
+    PRINT(alignedTLtoTL)
+    PRINT(alignedTLtoTR)
+    PRINT(alignedTLtoBL)
+    PRINT(alignedTLtoBR)
     cout << endl;
-    PRINT(alignTRtoTL)
-    PRINT(alignTRtoTR)
-    PRINT(alignTRtoBL)
-    PRINT(alignTRtoBR)
+    PRINT(alignedTRtoTL)
+    PRINT(alignedTRtoTR)
+    PRINT(alignedTRtoBL)
+    PRINT(alignedTRtoBR)
     cout << endl;
-    PRINT(alignBLtoTL)
-    PRINT(alignBLtoTR)
-    PRINT(alignBLtoBL)
-    PRINT(alignBLtoBR)
+    PRINT(alignedBLtoTL)
+    PRINT(alignedBLtoTR)
+    PRINT(alignedBLtoBL)
+    PRINT(alignedBLtoBR)
     cout << endl;
-    PRINT(alignBRtoTL)
-    PRINT(alignBRtoTR)
-    PRINT(alignBRtoBL)
-    PRINT(alignBRtoBR)
+    PRINT(alignedBRtoTL)
+    PRINT(alignedBRtoTR)
+    PRINT(alignedBRtoBL)
+    PRINT(alignedBRtoBR)
     cout << endl;
 
     auto sz = r.fit(100,100);
