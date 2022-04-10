@@ -86,6 +86,15 @@ namespace ut
         // mutators
         //
 
+        M_DECL void set(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
+        { min.set(min_x, min_y); max.set(max_x, max_y); }
+
+        M_DECL void set(point_type const& min, point_type const& max)
+        { this->min.set(min); this->max.set(max); }
+
+        M_DECL void set(rect_type const& rect)
+        { min.set(rect.x, rect.y); max.set(rect.x+rect.w, rect.y+rect.h); }
+
         M_DECL void x(scalar_type s) { auto tmp = max.x - min.x; min.x = s; max.x = min.x + tmp; }
         M_DECL void y(scalar_type s) { auto tmp = max.y - min.y; min.y = s; max.y = min.y + tmp; }
 
