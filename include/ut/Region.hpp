@@ -27,26 +27,26 @@ namespace ut
         // ctor
         //
 
-        constexpr regionx(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
+        M_DECL regionx(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
             : min{min_x, min_y}, max{max_x, max_y}
         { }
 
-        constexpr regionx(point_type const& min, point_type const& max)
+        M_DECL regionx(point_type const& min, point_type const& max)
             : min{min}, max{max}
         { }
 
-        constexpr explicit regionx(rect_type const& rect)
+        M_DECL explicit regionx(rect_type const& rect)
             : min{rect.x, rect.y}, max{rect.x+rect.w, rect.y+rect.h}
         { }
 
-        constexpr regionx()=default;
-        constexpr regionx(regionx const&)=default;
-        constexpr regionx(regionx&&) noexcept =default;
+        M_DECL regionx()=default;
+        M_DECL regionx(regionx const&)=default;
+        M_DECL regionx(regionx&&) noexcept =default;
 
-        constexpr regionx& operator=(regionx const&)=default;
-        constexpr regionx& operator=(regionx&&) noexcept =default;
+        M_DECL regionx& operator=(regionx const&)=default;
+        M_DECL regionx& operator=(regionx&&) noexcept =default;
 
-        constexpr explicit operator rect_type() const { return rect(); }
+        M_DECL explicit operator rect_type() const { return rect(); }
 
         //
         // accessors
@@ -109,6 +109,10 @@ namespace ut
         //
         // copy mutators
         //
+
+        M_DECL_PURE region_type const withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
+        M_DECL_PURE region_type const withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
+        M_DECL_PURE region_type const with(point_type const& min, point_type const& max) { auto tmp = *this; tmp.min = min; tmp.max = max; return tmp; }
 
 #define MUT(op) auto tmp = *this; tmp.op; return tmp;
         M_DECL_PURE region_type withX(scalar_type s) const { MUT(x(s)) }
@@ -330,6 +334,7 @@ namespace ut
         // split
         //
 
+        // TODO: add output parameter option (and maybe eliminate return value)
         M_DECL_PURE region_type splitV(scalar_type vmin, scalar_type vmax) const
         {
             assert(vmin <= vmax);
