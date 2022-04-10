@@ -66,6 +66,9 @@ namespace ut
         M_DECL void set(elements_type const& e)
         { x = e[0]; y = e[1]; }
 
+        M_DECL void set(vector_type const& p)
+        { x = p.x; y = p.y; }
+
         M_DECL void add(scalar_type s) { x += s; y += s; }
         M_DECL void sub(scalar_type s) { x -= s; y -= s; }
         M_DECL void mul(scalar_type s) { x *= s; y *= s; }

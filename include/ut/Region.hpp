@@ -92,8 +92,11 @@ namespace ut
         M_DECL void set(point_type const& min, point_type const& max)
         { this->min.set(min); this->max.set(max); }
 
-        M_DECL void set(rect_type const& rect)
-        { min.set(rect.x, rect.y); max.set(rect.x+rect.w, rect.y+rect.h); }
+        M_DECL void set(rect_type const& r)
+        { min.set(r.x, r.y); max.set(r.x + r.w, r.y + r.h); }
+
+        M_DECL void set(region_type const& r)
+        { min = r.min; max = r.max; }
 
         M_DECL void x(scalar_type s) { auto tmp = max.x - min.x; min.x = s; max.x = min.x + tmp; }
         M_DECL void y(scalar_type s) { auto tmp = max.y - min.y; min.y = s; max.y = min.y + tmp; }
