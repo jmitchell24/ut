@@ -28,6 +28,10 @@ namespace ut
             elements_type elements;
         };
 
+        //
+        // ctor
+        //
+
         M_DECL vec()
             : x{scalar_type(0)}, y{scalar_type(0)}
         {}
@@ -51,7 +55,7 @@ namespace ut
         M_DECL vec& operator=(vector_type&&) noexcept =default;
 
         template <typename T>
-        M_DECL vec<T,SIZE> cast() const { return vec<T,SIZE>{T(x), T(y)}; }
+        M_DECL_PURE vec<T,SIZE> cast() const { return vec<T,SIZE>{T(x), T(y)}; }
 
         //
         // mutators
@@ -123,6 +127,10 @@ namespace ut
         ENABLE_IF_FLOAT M_DECL_PURE bool isNan() const { return std::isnan(x) || std::isnan(y); }
         ENABLE_IF_FLOAT M_DECL_PURE bool isInf() const { return std::isinf(x) || std::isinf(y); }
 
+        //
+        // operators
+        //
+
         M_DECL_PURE vector_type operator - () const { return neg(); }
 
         M_DECL_PURE vector_type operator+(scalar_type s) const { return vector_type(x + s, y + s); }
@@ -164,19 +172,23 @@ namespace ut
         M_DECL_PURE bool operator<= (vector_param v) const { return !(*this < v); }
         M_DECL_PURE bool operator>= (vector_param v) const { return !(v < *this); }
 
-        inline scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
-        inline scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
+        //
+        // container utilities
+        //
 
-        [[nodiscard]] inline auto begin()       { return std::begin(elements); }
-        [[nodiscard]] inline auto begin() const { return std::begin(elements); }
+        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
+        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
 
-        [[nodiscard]] inline auto end()       { return std::end(elements); }
-        [[nodiscard]] inline auto end() const { return std::end(elements); }
+        M_DECL_PURE auto begin() const { return std::begin(elements); }
+        M_DECL      auto begin()       { return std::begin(elements); }
 
-        [[nodiscard]] inline size_t size() const { return SIZE; }
+        M_DECL_PURE auto end() const { return std::end(elements); }
+        M_DECL      auto end()       { return std::end(elements); }
 
-        [[nodiscard]] inline scalar_type const* data() const { return elements; }
-        [[nodiscard]] inline scalar_type*       data()       { return elements; }
+        M_DECL_PURE scalar_type const* data() const { return elements; }
+        M_DECL      scalar_type*       data()       { return elements; }
+
+        M_DECL_PURE size_t size() const { return SIZE; }
     };
 
     template <typename N> using vec2x = vec<N, 2>;

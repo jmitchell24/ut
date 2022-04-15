@@ -12,6 +12,17 @@ using namespace std;
 
 int main()
 {
+    regionx<int, true> asdf{1,1, 5,5};
+
+    cout << "asdf: " << asdf << " sz: " << asdf.size() << endl;
+
+
+    asdf.pos(4,3);
+
+    cout << "asdf: " << asdf << " sz: " << asdf.size() << endl;
+
+    return EXIT_SUCCESS;
+
     auto [x,y] = vec2(1,2).elements;
 
     auto s1 = FMT("hello, %d, %s", 1, "world");

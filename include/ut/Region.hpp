@@ -5,14 +5,20 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
+#define ENABLE_IF_INCLUSIVE template <bool I_ = I, typename = std::enable_if_t<I>>
 
 namespace ut
 {
     /// Similar to Rect. Represented by min and max coordinates instead of position and size.
     /// Makes some calculations more efficient.
-    template <typename N>
+    ///
+    /// 'I' indicates the use of Inclusive Maximum for all size (width/height) calculations. (e.g. "(1,1), (2,2)" will
+    /// have size "(2,2)", instead of "(1,1)". It is disallowed for non-integer types.
+    template <typename N, bool I = false>
     struct regionx
     {
+        static_assert(std::is_integral_v<N> || !I, "Inclusive Maximum only supported for integral types");
+
         using scalar_type       = N;
         using real_type         = real_t;
         using region_type       = regionx<N>;
@@ -20,6 +26,8 @@ namespace ut
         using point_type        = vec2x<N>;
         using split_type        = std::tuple<region_type,region_type>;
         using fit_type          = std::tuple<scalar_type,scalar_type>;
+
+        constexpr static bool INCLUSIVE = I;
 
         point_type min, max;
 
@@ -56,25 +64,25 @@ namespace ut
 
         M_DECL_PURE scalar_type area() const { return width() * height(); }
 
-        M_DECL_PURE point_type size  () const { return max - min; }
+        M_DECL_PURE point_type size  () const { if constexpr(INCLUSIVE) return max - min + point_type{1,1}; else return max - min; }
         M_DECL_PURE point_type pos   () const { return min; }
         M_DECL_PURE point_type center() const { return min + (size() / 2); }
 
         M_DECL_PURE scalar_type x() const { return min.x; }
         M_DECL_PURE scalar_type y() const { return min.y; }
 
-        M_DECL_PURE scalar_type width () const { return max.x - min.x; }
-        M_DECL_PURE scalar_type height() const { return max.y - min.y; }
+        M_DECL_PURE scalar_type width () const { if constexpr (INCLUSIVE) return max.x - min.x + 1; else return max.x - min.x; }
+        M_DECL_PURE scalar_type height() const { if constexpr (INCLUSIVE) return max.y - min.y + 1; else return max.y - min.y; }
 
         M_DECL_PURE point_type tl() const { return min; }              /// Top Left
         M_DECL_PURE point_type tr() const { return {max.x, min.y }; }  /// Top Right
         M_DECL_PURE point_type bl() const { return {min.x, max.y }; }  /// Bottom Left
         M_DECL_PURE point_type br() const { return max; }              /// Bottom Right
 
-        M_DECL_PURE point_type tc() const { return {min.x + (max.x - min.x) / 2, min.y }; } /// Top Center
-        M_DECL_PURE point_type bc() const { return {min.x + (max.x - min.x) / 2, max.y }; } /// Bottom Center
-        M_DECL_PURE point_type lc() const { return {min.x, min.y + (max.y - min.y) / 2 }; } /// Left Center
-        M_DECL_PURE point_type rc() const { return {max.x, min.y + (max.y - min.y) / 2 }; } /// Right Center
+        M_DECL_PURE point_type tc() const { return {min.x + (width()) / 2, min.y }; } /// Top Center
+        M_DECL_PURE point_type bc() const { return {min.x + (width()) / 2, max.y }; } /// Bottom Center
+        M_DECL_PURE point_type lc() const { return {min.x, min.y + (height()) / 2 }; } /// Left Center
+        M_DECL_PURE point_type rc() const { return {max.x, min.y + (height()) / 2 }; } /// Right Center
 
         template <typename T>
         M_DECL_PURE regionx<T> cast() const { return regionx<T>(min.template cast<T>(), max.template cast<T>()); }
@@ -98,33 +106,33 @@ namespace ut
         M_DECL void set(region_type const& r)
         { min = r.min; max = r.max; }
 
-        M_DECL void x(scalar_type s) { auto tmp = max.x - min.x; min.x = s; max.x = min.x + tmp; }
-        M_DECL void y(scalar_type s) { auto tmp = max.y - min.y; min.y = s; max.y = min.y + tmp; }
-
         M_DECL void pos(scalar_type x, scalar_type y) { pos({x,y}); }
-        M_DECL void pos(point_type const& p) { auto tmp = max - min; min = p; max = min + tmp; }
+        M_DECL void pos(point_type const& p) { translate(p - min); }
+        M_DECL void x(scalar_type s) { translateX(s - min.x); }
+        M_DECL void y(scalar_type s) { translateY(s - min.y); }
 
+        M_DECL void translate (scalar_type x, scalar_type y) { translate({x,y}); }
         M_DECL void translate (point_type  p) { min += p; max += p; }
         M_DECL void translateX(scalar_type o) { min.x += o; max.x += o; }
         M_DECL void translateY(scalar_type o) { min.y += o; max.y += o; }
 
         M_DECL void width(scaler sc)     { width(sc(width())); }
-        M_DECL void width(scalar_type s) { max.x = min.x + s; }
+        M_DECL void width(scalar_type s) { if constexpr(INCLUSIVE) max.x = min.x + s - 1; else max.x = min.x + s; }
 
-        M_DECL void height(scaler f)    { height(f(height())); }
-        M_DECL void height(scalar_type s) { max.y = min.y + s; }
+        M_DECL void height(scaler sc)     { height(sc(height())); }
+        M_DECL void height(scalar_type s) { if constexpr(INCLUSIVE) max.y = min.y + s - 1; else max.y = min.y + s; }
 
         M_DECL void size(scaler scw, scaler sch)       { size(scw(width()), sch(height())); }
         M_DECL void size(scalar_type w, scalar_type h) { size({w,h}); }
-        M_DECL void size(point_type const& p)          { max = min + p; }
+        M_DECL void size(point_type const& p)          { if constexpr (INCLUSIVE) max = min + p - point_type{1,1}; else max = min + p; }
 
         //
         // copy mutators
         //
 
-        M_DECL_PURE region_type const withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
-        M_DECL_PURE region_type const withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
-        M_DECL_PURE region_type const with(point_type const& min, point_type const& max) { auto tmp = *this; tmp.min = min; tmp.max = max; return tmp; }
+        M_DECL_PURE region_type withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
+        M_DECL_PURE region_type withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
+        M_DECL_PURE region_type with(point_type const& min, point_type const& max) { auto tmp = *this; tmp.min = min; tmp.max = max; return tmp; }
 
 #define MUT(op) auto tmp = *this; tmp.op; return tmp;
         M_DECL_PURE region_type withX(scalar_type s) const { MUT(x(s)) }
@@ -397,14 +405,14 @@ namespace ut
     typedef regionx<std::uint8_t> regionb;
 
 #if defined(UT_STL_INTEROP)
-    template <typename N>
-    inline std::ostream& operator<<(std::ostream& os, regionx<N> const& r)
+    template <typename N, bool I>
+    inline std::ostream& operator<<(std::ostream& os, regionx<N,I> const& r)
     {
         return os << r.min << ", " << r.max;
     }
 
-    template <typename N, size_t D>
-    inline std::string to_string(regionx<N> const& v)
+    template <typename N, bool I>
+    inline std::string to_string(regionx<N,I> const& v)
     {
         std::ostringstream ss;
         ss << v;
