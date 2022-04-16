@@ -147,9 +147,9 @@ namespace ut
         M_DECL_PURE region_type withPosX(scalar_type s) const { MUT(x(s)) }
         M_DECL_PURE region_type withPosY(scalar_type s) const { MUT(y(s)) }
 
-        M_DECL_PURE region_type withOffsetX(scalar_type s)       const { MUT(translateX(s)) }
-        M_DECL_PURE region_type withOffsetY(scalar_type s)       const { MUT(translateY(s)); }
-        M_DECL_PURE region_type withOffset (point_type const& p) const { MUT(translate(p)) }
+        M_DECL_PURE region_type withOffsetX(scalar_type s)       const { MUT(offsetX(s)) }
+        M_DECL_PURE region_type withOffsetY(scalar_type s)       const { MUT(offsetY(s)); }
+        M_DECL_PURE region_type withOffset (point_type const& p) const { MUT(offset(p)) }
 
         M_DECL_PURE region_type withWidth (scaler sc)     const { MUT(width(sc)) }
         M_DECL_PURE region_type withWidth (scalar_type s) const { MUT(width(s)); }
