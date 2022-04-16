@@ -84,6 +84,11 @@ namespace ut
         M_DECL_PURE point_type lc() const { return {min.x, min.y + (height()) / 2 }; } /// Left Center
         M_DECL_PURE point_type rc() const { return {max.x, min.y + (height()) / 2 }; } /// Right Center
 
+        M_DECL_PURE scalar_type left    () const { return min.x; }
+        M_DECL_PURE scalar_type right   () const { return max.x; }
+        M_DECL_PURE scalar_type top     () const { return min.y; }
+        M_DECL_PURE scalar_type bottom  () const { return max.y; }
+
         template <typename T>
         M_DECL_PURE regionx<T> cast() const { return regionx<T>(min.template cast<T>(), max.template cast<T>()); }
 
