@@ -107,14 +107,16 @@ namespace ut
         { min = r.min; max = r.max; }
 
         M_DECL void pos(scalar_type x, scalar_type y) { pos({x,y}); }
-        M_DECL void pos(point_type const& p) { translate(p - min); }
-        M_DECL void x(scalar_type s) { translateX(s - min.x); }
-        M_DECL void y(scalar_type s) { translateY(s - min.y); }
+        M_DECL void pos(point_type const& p) { offset(p - min); }
 
-        M_DECL void translate (scalar_type x, scalar_type y) { translate({x,y}); }
-        M_DECL void translate (point_type  p) { min += p; max += p; }
-        M_DECL void translateX(scalar_type o) { min.x += o; max.x += o; }
-        M_DECL void translateY(scalar_type o) { min.y += o; max.y += o; }
+        M_DECL void posX(scalar_type s) { offsetX(s - min.x); }
+        M_DECL void posY(scalar_type s) { offsetY(s - min.y); }
+
+        M_DECL void offset (scalar_type x, scalar_type y) { point_type p{x,y}; min += p; max += p; }
+        M_DECL void offset (point_type  p) { offset(p.x, p.y); }
+
+        M_DECL void offsetX(scalar_type o) { min.x += o; max.x += o; }
+        M_DECL void offsetY(scalar_type o) { min.y += o; max.y += o; }
 
         M_DECL void width(scaler sc)     { width(sc(width())); }
         M_DECL void width(scalar_type s) { if constexpr(INCLUSIVE) max.x = min.x + s - 1; else max.x = min.x + s; }
@@ -132,14 +134,13 @@ namespace ut
 
         M_DECL_PURE region_type withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
         M_DECL_PURE region_type withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
-        M_DECL_PURE region_type with(point_type const& min, point_type const& max) { auto tmp = *this; tmp.min = min; tmp.max = max; return tmp; }
 
 #define MUT(op) auto tmp = *this; tmp.op; return tmp;
-        M_DECL_PURE region_type withX(scalar_type s) const { MUT(x(s)) }
-        M_DECL_PURE region_type withY(scalar_type s) const { MUT(y(s)) }
-
         M_DECL_PURE region_type withPos(scalar_type x, scalar_type y) const { MUT(pos({x,y})); }
         M_DECL_PURE region_type withPos(point_type const& p)          const { MUT(pos(p)) }
+
+        M_DECL_PURE region_type withPosX(scalar_type s) const { MUT(x(s)) }
+        M_DECL_PURE region_type withPosY(scalar_type s) const { MUT(y(s)) }
 
         M_DECL_PURE region_type withOffsetX(scalar_type s)       const { MUT(translateX(s)) }
         M_DECL_PURE region_type withOffsetY(scalar_type s)       const { MUT(translateY(s)); }

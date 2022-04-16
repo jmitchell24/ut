@@ -81,6 +81,14 @@ namespace ut
         ENABLE_IF_INTEGRAL
         M_DECL void mod(scalar_type s) { x %= s; y %= s; }
 
+        M_DECL void add(scalar_type x, scalar_type y) { this->x += x; this->y += y; }
+        M_DECL void sub(scalar_type x, scalar_type y) { this->x -= x; this->y -= y; }
+        M_DECL void mul(scalar_type x, scalar_type y) { this->x *= x; this->y *= y; }
+        M_DECL void div(scalar_type x, scalar_type y) { this->x /= x; this->y /= y; }
+
+        ENABLE_IF_INTEGRAL
+        M_DECL void mod(scalar_type x, scalar_type y) { this->x %= x; this->y %= y; }
+
         M_DECL void add(vector_param p) { x += p.x; y += p.y; }
         M_DECL void sub(vector_param p) { x -= p.x; y -= p.y; }
         M_DECL void mul(vector_param p) { x *= p.x; y *= p.y; }
@@ -89,12 +97,26 @@ namespace ut
         ENABLE_IF_INTEGRAL
         M_DECL void mod(vector_param p) { x %= p.x; y %= p.y; }
 
+        M_DECL void offset (vector_param p) { x += p.x; y += p.y; }
+        M_DECL void offsetX(scalar_type  s) { x += s; }
+        M_DECL void offsetY(scalar_type  s) { y += s; }
+
+        M_DECL void scale (vector_param p) { x *= p.x; y *= p.y; }
+        M_DECL void scaleX(scalar_type  s) { x *= s; }
+        M_DECL void scaleY(scalar_type  s) { y *= s; }
+
         //
-        // accessors
+        // copy mutators
         //
 
-        M_DECL_PURE vector_type withX(scalar_type s) { return vector_type{s,y}; }
-        M_DECL_PURE vector_type withY(scalar_type s) { return vector_type{x,s}; }
+        M_DECL_PURE vector_type withX(scalar_type s) const { return vector_type{s,y}; }
+        M_DECL_PURE vector_type withY(scalar_type s) const { return vector_type{x,s}; }
+
+        M_DECL_PURE vector_type withOffsetX(scalar_type s) const { return vector_type{x+s, y}; }
+        M_DECL_PURE vector_type withOffsetY(scalar_type s) const { return vector_type{x, y+s}; }
+
+        M_DECL_PURE vector_type withScaleX(scalar_type s) const { return vector_type{x*s, y}; }
+        M_DECL_PURE vector_type withScaleY(scalar_type s) const { return vector_type{x, y*s}; }
 
         //
         // utilities
