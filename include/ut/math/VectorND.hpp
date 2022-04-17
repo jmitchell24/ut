@@ -5,6 +5,10 @@
 #define ENABLE_IF_INTEGRAL template <typename N_ = N, typename = std::enable_if_t<std::is_integral_v<N_>>>
 #define ENABLE_IF_FLOAT    template <typename N_ = N, typename = std::enable_if_t<std::is_floating_point_v<N_>>>
 
+#define M_DECL_PURE             [[nodiscard]] inline constexpr
+#define M_DECL                  inline constexpr
+
+#define FOR_SIZE(i_)            for (size_t i_ = 0; i_ < SIZE; ++i)
 
 #include <array>
 #include <cassert>
@@ -23,8 +27,19 @@ namespace ut
 {
     using real_t = float;
 
+    template <typename N, size_t D>
+    struct vec;
+
+    template<typename N, size_t D>
+    constexpr bool less(vec<N,D> const& a, vec<N,D> const& b);
+
+    template<typename N, size_t D>
+    constexpr bool same(vec<N,D> const& a, vec<N,D> const& b);
+
     template <typename N, size_t D> struct vec
     {
+        static_assert(D > 1, "D must be greater than one");
+
         using scalar_type       = N;
         using vector_type       = vec<N,D>;
         using vector_ref        = vector_type&;
@@ -37,180 +52,193 @@ namespace ut
 
         elements_type elements;
 
-        inline constexpr vec()
-        { std::fill(std::begin(elements), std::end(elements), (scalar_type)0); }
+        //
+        // ctor
+        //
 
-        inline constexpr explicit vec(scalar_param n)
-        { std::fill(std::begin(elements), std::end(elements), n); }
+        M_DECL vec()
+            : elements{}
+        { for (auto& e: elements) e = (scalar_type)0; }
 
-        inline explicit vec(elements_type const& components)
-        { std::copy(std::begin(components), std::end(components), begin()); }
+        M_DECL explicit vec(scalar_param s)
+            : elements{}
+        { for (auto& e: elements) e = s; }
 
-        vec(vector_type const&)=default;
-        vec(vector_type&&) noexcept =default;
+        M_DECL vec(elements_type const& e)
+            : elements{}
+        { for (size_t i = 0; i < SIZE; ++i) this->elements[i] = e[i]; }
 
-        vec& operator=(vector_type const&)=default;
-        vec& operator=(vector_type&&) noexcept =default;
+        M_DECL vec(vector_type const&)=default;
+        M_DECL vec(vector_type&&) noexcept =default;
+
+        M_DECL vec& operator=(vector_type const&)=default;
+        M_DECL vec& operator=(vector_type&&) noexcept =default;
 
         template <typename T>
-        inline vec<T,SIZE> cast() const
+        M_DECL_PURE vec<T,SIZE> cast() const
         {
-            T temp[SIZE];
-            for (size_t i = 0; i < SIZE; ++i)
-                temp[i] = static_cast<T>(elements[i]);
-            return vec<T,SIZE>{temp};
+            T tmp[SIZE];
+            FOR_SIZE(i) tmp[i] = static_cast<T>(elements[i]);
+            return vec<T,SIZE>{tmp};
         }
 
+        //
+        // mutators
+        //
 
+        M_DECL void set(scalar_param s)
+        { FOR_SIZE(i) this->elements[i] = s; }
 
+        M_DECL void set(elements_type const& e)
+        { FOR_SIZE(i) this->elements[i] = e[i];  }
 
+        M_DECL void set(vector_param p)
+        { FOR_SIZE(i) this->elements[i] = p.elements[i];  }
 
-        inline vector_type round() const
-        {
-            elements_type temp;
-            for (size_t i = 0; i < SIZE; ++i)
-                temp[i] = std::round(this->elements[i]);
-            return {temp};
-        }
-
-        inline vector_type floor() const
-        {
-            elements_type temp;
-            for (size_t i = 0; i < SIZE; ++i)
-                temp[i] = std::floor(this->elements[i]);
-            return {temp};
-        }
-
-        inline vector_type ceil() const
-        {
-            elements_type temp;
-            for (size_t i = 0; i < SIZE; ++i)
-                temp[i] = std::ceil(this->elements[i]);
-            return {temp};
-        }
-
-
-
-
-
-
-
-        inline void add(scalar_type s) { transform([s](scalar_param x){ return x + s; }); }
-        inline void sub(scalar_type s) { transform([s](scalar_param x){ return x - s; }); }
-        inline void mul(scalar_type s) { transform([s](scalar_param x){ return x * s; }); }
-        inline void div(scalar_type s) { transform([s](scalar_param x){ return x / s; }); }
+        M_DECL void add(scalar_param s) { transform([s](scalar_param x){ return x + s; }); }
+        M_DECL void sub(scalar_param s) { transform([s](scalar_param x){ return x - s; }); }
+        M_DECL void mul(scalar_param s) { transform([s](scalar_param x){ return x * s; }); }
+        M_DECL void div(scalar_param s) { transform([s](scalar_param x){ return x / s; }); }
 
         ENABLE_IF_INTEGRAL
-        inline void mod(scalar_type s) { transform([s](scalar_param x){ return x % s; }); }
+        M_DECL void mod(scalar_param s) { transform([s](scalar_param x){ return x % s; }); }
 
-        inline void add(vector_param p) { transform(std::plus      <scalar_type>()); }
-        inline void sub(vector_param p) { transform(std::minus     <scalar_type>()); }
-        inline void mul(vector_param p) { transform(std::multiplies<scalar_type>()); }
-        inline void div(vector_param p) { transform(std::divides   <scalar_type>()); }
+        M_DECL void add(vector_param p) { transform(std::plus      <scalar_type>()); }
+        M_DECL void sub(vector_param p) { transform(std::minus     <scalar_type>()); }
+        M_DECL void mul(vector_param p) { transform(std::multiplies<scalar_type>()); }
+        M_DECL void div(vector_param p) { transform(std::divides   <scalar_type>()); }
 
         ENABLE_IF_INTEGRAL
-        inline void mod(vector_param p) { transform(std::modulus   <scalar_type>()); }
+        M_DECL void mod(vector_param p) { transform(std::modulus   <scalar_type>()); }
 
-        [[nodiscard]] inline scalar_type sum       () const { return std::accumulate(begin(), end(), (scalar_type)0, std::plus<scalar_type>()); }
-        [[nodiscard]] inline scalar_type sumSquared() const { return std::inner_product(begin(), end(), begin(), (scalar_type)0); }
-        [[nodiscard]] inline scalar_type length    () const { return std::sqrt(sumSquared()); }
+        //
+        // utilities
+        //
 
-        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type dot     (vector_param v) const { return std::inner_product(begin(), end(), v.begin(), (scalar_type)0); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type angle   (vector_param v) const { return (*this == v) ? (scalar_type)0 : std::acos(dot(v) / (length() * v.length())); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
+        M_DECL_PURE scalar_type sum       () const { return std::accumulate(begin(), end(), (scalar_type)0, std::plus<scalar_type>()); }
+        M_DECL_PURE scalar_type sumSquared() const { return std::inner_product(begin(), end(), begin(), (scalar_type)0); }
+        M_DECL_PURE scalar_type length    () const { return std::sqrt(sumSquared()); }
 
-        [[nodiscard]] inline vector_type neg() const
+        ENABLE_IF_FLOAT M_DECL_PURE scalar_type dot     (vector_param v) const { return std::inner_product(begin(), end(), v.begin(), (scalar_type)0); }
+        ENABLE_IF_FLOAT M_DECL_PURE scalar_type angle   (vector_param v) const { return (*this == v) ? (scalar_type)0 : std::acos(dot(v) / (length() * v.length())); }
+        ENABLE_IF_FLOAT M_DECL_PURE scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
+
+        M_DECL_PURE vector_type round() const
+        {
+            elements_type tmp;
+            FOR_SIZE(i) tmp[i] = std::round(this->elements[i]);
+            return {tmp};
+        }
+
+        M_DECL_PURE vector_type floor() const
+        {
+            elements_type tmp;
+            FOR_SIZE(i) tmp[i] = std::floor(this->elements[i]);
+            return {tmp};
+        }
+
+        M_DECL_PURE vector_type ceil() const
+        {
+            elements_type tmp;
+            FOR_SIZE(i) tmp[i] = std::ceil(this->elements[i]);
+            return {tmp};
+        }
+
+        M_DECL_PURE vector_type neg() const
         { return transform(std::negate<scalar_type>()); }
 
-        [[nodiscard]] inline vector_type reverse() const
+        M_DECL_PURE vector_type reverse() const
         {
             elements_type temp;
             std::reverse_copy(begin(), end(), std::begin(temp));
             return vector_type(temp);
         }
 
-        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type normal() const { return *this / length(); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type project(vector_param base)   const { return base * ((*this * base) / base.sumSquared() ); }
-        ENABLE_IF_FLOAT [[nodiscard]] inline vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * (scalar_type)2); }
+        ENABLE_IF_FLOAT M_DECL_PURE vector_type normal() const { return *this / length(); }
+        ENABLE_IF_FLOAT M_DECL_PURE vector_type project(vector_param base)   const { return base * ((*this * base) / base.sumSquared() ); }
+        ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * (scalar_type)2); }
 
-        [[nodiscard]] inline bool isNan() const
+        M_DECL_PURE bool isNan() const
         { return std::accumulate(begin(), end(), false, [](auto a, auto b){ return a|std::isnan(b); }); }
 
-        [[nodiscard]] inline bool isInf() const
+        M_DECL_PURE bool isInf() const
         { return std::accumulate(begin(), end(), false, [](auto a, auto b){ return a|std::isinf(b); }); }
 
 
-        inline vector_type operator - () const { return neg(); }
+        M_DECL_PURE vector_type operator - () const { return neg(); }
 
-        inline vector_type operator+ (scalar_param s) const { return transform([s](scalar_param x){ return x + s; }); }
-        inline vector_type operator- (scalar_param s) const { return transform([s](scalar_param x){ return x - s; }); }
-        inline vector_type operator* (scalar_param s) const { return transform([s](scalar_param x){ return x * s; }); }
-        inline vector_type operator/ (scalar_param s) const { return transform([s](scalar_param x){ return x / s; }); }
-
-        ENABLE_IF_INTEGRAL
-        inline vector_type operator% (scalar_param s) const { return transform([s](scalar_param x){ return x % s; }); }
-
-        inline vector_type operator+ (vector_param v) const { return transform(v, std::plus<scalar_type>()); }
-        inline vector_type operator- (vector_param v) const { return transform(v, std::minus<scalar_type>()); }
-        inline vector_type operator* (vector_param v) const { return transform(v, std::multiplies<scalar_type>()); }
-        inline vector_type operator/ (vector_param v) const { return transform(v, std::divides<scalar_type>()); }
+        M_DECL_PURE vector_type operator+ (scalar_param s) const { return transform([s](scalar_param x){ return x + s; }); }
+        M_DECL_PURE vector_type operator- (scalar_param s) const { return transform([s](scalar_param x){ return x - s; }); }
+        M_DECL_PURE vector_type operator* (scalar_param s) const { return transform([s](scalar_param x){ return x * s; }); }
+        M_DECL_PURE vector_type operator/ (scalar_param s) const { return transform([s](scalar_param x){ return x / s; }); }
 
         ENABLE_IF_INTEGRAL
-        inline vector_type operator% (vector_param v) const { return transform(v, std::modulus<scalar_type>()); }
+        M_DECL_PURE vector_type operator% (scalar_param s) const { return transform([s](scalar_param x){ return x % s; }); }
 
-        inline vector_type& operator += (vector_param p) { add(p); return *this; }
-        inline vector_type& operator -= (vector_param p) { sub(p); return *this; }
-        inline vector_type& operator *= (vector_param p) { mul(p); return *this; }
-        inline vector_type& operator /= (vector_param p) { div(p); return *this; }
-
-        ENABLE_IF_INTEGRAL
-        inline vector_type& operator %= (vector_param p) { mod(p); return *this; }
-
-        inline vector_type& operator += (scalar_param s) { add(s); return *this; }
-        inline vector_type& operator -= (scalar_param s) { sub(s); return *this; }
-        inline vector_type& operator *= (scalar_param s) { mul(s); return *this; }
-        inline vector_type& operator /= (scalar_param s) { div(s); return *this; }
+        M_DECL_PURE vector_type operator+ (vector_param v) const { return transform(v, std::plus<scalar_type>()); }
+        M_DECL_PURE vector_type operator- (vector_param v) const { return transform(v, std::minus<scalar_type>()); }
+        M_DECL_PURE vector_type operator* (vector_param v) const { return transform(v, std::multiplies<scalar_type>()); }
+        M_DECL_PURE vector_type operator/ (vector_param v) const { return transform(v, std::divides<scalar_type>()); }
 
         ENABLE_IF_INTEGRAL
-        inline vector_type& operator %= (scalar_param s) { mod(s); return *this; }
+        M_DECL_PURE vector_type operator% (vector_param v) const { return transform(v, std::modulus<scalar_type>()); }
 
-        inline bool operator== (vector_param v) const { return std::equal(begin(), end(), v.begin()); }
-        inline bool operator!= (vector_param v) const { return !(*this == v); }
-        inline bool operator<  (vector_param v) const { return std::lexicographical_compare(begin(), end(), v.begin(), v.end()); }
-        inline bool operator>  (vector_param v) const { return *this < v; }
-        inline bool operator<= (vector_param v) const { return !(*this < v); }
-        inline bool operator>= (vector_param v) const { return !(v < *this); }
+        M_DECL vector_type& operator += (vector_param p) { add(p); return *this; }
+        M_DECL vector_type& operator -= (vector_param p) { sub(p); return *this; }
+        M_DECL vector_type& operator *= (vector_param p) { mul(p); return *this; }
+        M_DECL vector_type& operator /= (vector_param p) { div(p); return *this; }
 
-        [[nodiscard]] inline scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
-        [[nodiscard]] inline scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
+        ENABLE_IF_INTEGRAL
+        M_DECL vector_type& operator %= (vector_param p) { mod(p); return *this; }
 
-        [[nodiscard]] inline auto begin()       { return std::begin(elements); }
-        [[nodiscard]] inline auto begin() const { return std::begin(elements); }
+        M_DECL vector_type& operator += (scalar_param s) { add(s); return *this; }
+        M_DECL vector_type& operator -= (scalar_param s) { sub(s); return *this; }
+        M_DECL vector_type& operator *= (scalar_param s) { mul(s); return *this; }
+        M_DECL vector_type& operator /= (scalar_param s) { div(s); return *this; }
 
-        [[nodiscard]] inline auto end()       { return std::end(elements); }
-        [[nodiscard]] inline auto end() const { return std::end(elements); }
+        ENABLE_IF_INTEGRAL
+        M_DECL vector_type& operator %= (scalar_param s) { mod(s); return *this; }
 
-        [[nodiscard]] inline size_t size() const { return SIZE; }
+        M_DECL_PURE bool operator== (vector_param v) const { return same(*this, v); }
+        M_DECL_PURE bool operator!= (vector_param v) const { return !(*this == v); }
+        M_DECL_PURE bool operator<  (vector_param v) const { return less(*this, v); }
+        M_DECL_PURE bool operator>  (vector_param v) const { return *this < v; }
+        M_DECL_PURE bool operator<= (vector_param v) const { return !(*this < v); }
+        M_DECL_PURE bool operator>= (vector_param v) const { return !(v < *this); }
 
-        [[nodiscard]] inline scalar_type const* data() const { return elements; }
-        [[nodiscard]] inline scalar_type*       data()       { return elements; }
+        //
+        // container utilities
+        //
 
-        static_assert(D > 1, "D must be greater than one");
+        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
+        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
+
+        M_DECL_PURE scalar_type const* begin() const { return &elements[0]; }
+        M_DECL      scalar_type*       begin()       { return &elements[0]; }
+
+        M_DECL_PURE scalar_type const* end() const { return &elements[SIZE-1]; }
+        M_DECL      scalar_type*       end()       { return &elements[SIZE-1]; }
+
+        M_DECL_PURE scalar_type const* data() const { return elements; }
+        M_DECL      scalar_type*       data()       { return elements; }
+
+        M_DECL_PURE size_t size() const { return SIZE; }
 
     private:
-        template <typename P> inline void transform(P predicate)
-        {
-            std::transform(begin(), end(), begin(), predicate);
-        }
+        template <typename P>
+        M_DECL void transform(P predicate)
+        { std::transform(begin(), end(), begin(), predicate); }
 
-        template <typename P> inline vector_type transform(P predicate) const
+        template <typename P>
+        M_DECL_PURE vector_type transform(P predicate) const
         {
             vector_type copy = *this;
             std::transform(begin(), end(), copy.begin(), predicate);
             return copy;
         }
 
-        template <typename P> inline vector_type transform(vector_param v, P predicate) const
+        template <typename P>
+        M_DECL_PURE vector_type transform(vector_param v, P predicate) const
         {
             vector_type copy = *this;
             std::transform(v.begin(), v.end(), copy.begin(), copy.begin(), predicate);
@@ -226,9 +254,32 @@ namespace ut
     template <size_t D> using vecnb  = vec<std::uint8_t, D>;
 
     template <typename N, typename... T>
-    inline vec<N,sizeof...(T)> make_vec(T&&... t)
+    constexpr inline vec<N,sizeof...(T)> make_vec(T&&... t)
     {
         return vec<N,sizeof...(T)>( {t...} );
+    }
+
+    template<typename N, size_t D>
+    constexpr bool less(vec<N,D> const& a, vec<N,D> const& b)
+    {
+        // https://en.cppreference.com/w/cpp/algorithm/lexicographical_compare
+        auto first1 = a.begin(), last1 = a.end();
+        auto first2 = b.begin(), last2 = b.end();
+        for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 )
+        {
+            if (*first1 < *first2) return true;
+            if (*first2 < *first1) return false;
+        }
+        return (first1 == last1) && (first2 != last2);
+    }
+
+    template<typename N, size_t D>
+    constexpr bool same(vec<N,D> const& a, vec<N,D> const& b)
+    {
+        for (size_t i = 0; i < D; ++i)
+            if (a.elements[i] != b.elements[i])
+                return false;
+        return true;
     }
 
 #if defined(UT_STL_INTEROP)
@@ -267,3 +318,7 @@ namespace ut
     }
 #endif
 }
+
+#undef M_DECL_PURE
+#undef M_DECL
+#undef FOR_SIZE

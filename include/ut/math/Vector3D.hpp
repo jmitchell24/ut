@@ -14,8 +14,6 @@ namespace ut
     public:
         using scalar_type       = N;
         using vector_type       = vec<N,3>;
-        using vector_ref        = vector_type&;
-        using scalar_ref        = scalar_type&;
         using vector_param      = vector_type const&;
         using scalar_param      = scalar_type;
         using elements_type     = scalar_type[3];
@@ -93,9 +91,9 @@ namespace ut
         // accessors
         //
 
-        M_DECL_PURE vector_type withX(scalar_type s) { return vector_type{s,y,z}; }
-        M_DECL_PURE vector_type withY(scalar_type s) { return vector_type{x,s,z}; }
-        M_DECL_PURE vector_type withZ(scalar_type s) { return vector_type{x,y,s}; }
+        M_DECL_PURE vector_type withX(scalar_param s) { return vector_type{s,y,z}; }
+        M_DECL_PURE vector_type withY(scalar_param s) { return vector_type{x,s,z}; }
+        M_DECL_PURE vector_type withZ(scalar_param s) { return vector_type{x,y,s}; }
 
         //
         // utilities
@@ -130,37 +128,37 @@ namespace ut
 
         M_DECL_PURE vector_type operator - () const { return neg(); }
 
-        M_DECL_PURE vector_type operator+(scalar_type s) const { return vector_type(x + s, y + s, z + s); }
-        M_DECL_PURE vector_type operator-(scalar_type s) const { return vector_type(x - s, y - s, z - s); }
-        M_DECL_PURE vector_type operator*(scalar_type s) const { return vector_type(x * s, y * s, z * s); }
-        M_DECL_PURE vector_type operator/(scalar_type s) const { return vector_type(x / s, y / s, z / s); }
+        M_DECL_PURE vector_type operator+(scalar_param s) const { return vector_type(x + s, y + s, z + s); }
+        M_DECL_PURE vector_type operator-(scalar_param s) const { return vector_type(x - s, y - s, z - s); }
+        M_DECL_PURE vector_type operator*(scalar_param s) const { return vector_type(x * s, y * s, z * s); }
+        M_DECL_PURE vector_type operator/(scalar_param s) const { return vector_type(x / s, y / s, z / s); }
 
         ENABLE_IF_INTEGRAL
-        M_DECL_PURE vector_type operator%(scalar_type s) const { return vector_type(x % s, y % s, z % s); }
+        M_DECL_PURE vector_type operator%(scalar_param s) const { return vector_type(x % s, y % s, z % s); }
 
-        M_DECL_PURE vector_type operator+(vector_type const& p) const { return vector_type(x + p.x, y + p.y, z + p.z); }
-        M_DECL_PURE vector_type operator-(vector_type const& p) const { return vector_type(x - p.x, y - p.y, z - p.z); }
-        M_DECL_PURE vector_type operator*(vector_type const& p) const { return vector_type(x * p.x, y * p.y, z * p.z); }
-        M_DECL_PURE vector_type operator/(vector_type const& p) const { return vector_type(x / p.x, y / p.y, z / p.z); }
-
-        ENABLE_IF_INTEGRAL
-        M_DECL_PURE vector_type operator%(vector_type const& p) const { return vector_type(x % p.x, y % p.y, z % p.z); }
-
-        M_DECL vector_type& operator += (vector_type const& p) { add(p); return *this; }
-        M_DECL vector_type& operator -= (vector_type const& p) { sub(p); return *this; }
-        M_DECL vector_type& operator *= (vector_type const& p) { mul(p); return *this; }
-        M_DECL vector_type& operator /= (vector_type const& p) { div(p); return *this; }
+        M_DECL_PURE vector_type operator+(vector_param p) const { return vector_type(x + p.x, y + p.y, z + p.z); }
+        M_DECL_PURE vector_type operator-(vector_param p) const { return vector_type(x - p.x, y - p.y, z - p.z); }
+        M_DECL_PURE vector_type operator*(vector_param p) const { return vector_type(x * p.x, y * p.y, z * p.z); }
+        M_DECL_PURE vector_type operator/(vector_param p) const { return vector_type(x / p.x, y / p.y, z / p.z); }
 
         ENABLE_IF_INTEGRAL
-        M_DECL vector_type& operator %= (vector_type const& p) { mod(p); return *this; }
+        M_DECL_PURE vector_type operator%(vector_param p) const { return vector_type(x % p.x, y % p.y, z % p.z); }
 
-        M_DECL vector_type& operator += (scalar_type s) { add(s); return *this; }
-        M_DECL vector_type& operator -= (scalar_type s) { sub(s); return *this; }
-        M_DECL vector_type& operator *= (scalar_type s) { mul(s); return *this; }
-        M_DECL vector_type& operator /= (scalar_type s) { div(s); return *this; }
+        M_DECL vector_type& operator += (vector_param p) { add(p); return *this; }
+        M_DECL vector_type& operator -= (vector_param p) { sub(p); return *this; }
+        M_DECL vector_type& operator *= (vector_param p) { mul(p); return *this; }
+        M_DECL vector_type& operator /= (vector_param p) { div(p); return *this; }
 
         ENABLE_IF_INTEGRAL
-        M_DECL vector_type& operator %= (scalar_type s) { mod(s); return *this; }
+        M_DECL vector_type& operator %= (vector_param p) { mod(p); return *this; }
+
+        M_DECL vector_type& operator += (scalar_param s) { add(s); return *this; }
+        M_DECL vector_type& operator -= (scalar_param s) { sub(s); return *this; }
+        M_DECL vector_type& operator *= (scalar_param s) { mul(s); return *this; }
+        M_DECL vector_type& operator /= (scalar_param s) { div(s); return *this; }
+
+        ENABLE_IF_INTEGRAL
+        M_DECL vector_type& operator %= (scalar_param s) { mod(s); return *this; }
 
         M_DECL_PURE bool operator== (vector_param v) const { return std::equal(begin(), end(), v.begin()); }
         M_DECL_PURE bool operator!= (vector_param v) const { return !(*this == v); }

@@ -12,75 +12,22 @@ using namespace std;
 
 int main()
 {
-    regionx<int, true> asdf{1,1, 5,5};
+    using vec10f = vec<float,10>;
 
-    cout << "asdf: " << asdf << " sz: " << asdf.size() << endl;
-
-
-    asdf.pos(4,3);
-
-    cout << "asdf: " << asdf << " sz: " << asdf.size() << endl;
-
-    return EXIT_SUCCESS;
-
-    auto [x,y] = vec2(1,2).elements;
-
-    auto s1 = FMT("hello, %d, %s", 1, "world");
-    auto s2 = FMT("hello, %d, %s", 2, "world");
-    auto s3 = FMT("hello, %d, %s", 3, "world");
-    auto s4 = FMT("hello, %d, %s", 4, "world");
-
-    cout << s1 << endl;
-    cout << s2 << endl;
-    cout << s3 << endl;
-    cout << s4 << endl;
-
-    regionf r(rectf{0,0,800,600});
-
-    cout << r << endl;
+    constexpr vec10f v1{{1,2,3,4,5,6,7,8,9,10}};
+    constexpr vec10f v2{};
+    constexpr vec10f v3{1};
 
 
-#define PRINT(__x__) cout << #__x__ << " --> " << r.__x__(100,100) << setw(25) << r.__x__(100,100).rect() << endl;
 
-    PRINT(alignedTLtoTL)
-    PRINT(alignedTLtoTR)
-    PRINT(alignedTLtoBL)
-    PRINT(alignedTLtoBR)
-    cout << endl;
-    PRINT(alignedTRtoTL)
-    PRINT(alignedTRtoTR)
-    PRINT(alignedTRtoBL)
-    PRINT(alignedTRtoBR)
-    cout << endl;
-    PRINT(alignedBLtoTL)
-    PRINT(alignedBLtoTR)
-    PRINT(alignedBLtoBL)
-    PRINT(alignedBLtoBR)
-    cout << endl;
-    PRINT(alignedBRtoTL)
-    PRINT(alignedBRtoTR)
-    PRINT(alignedBRtoBL)
-    PRINT(alignedBRtoBR)
-    cout << endl;
+    cout << v1.length() << endl;
+    cout << v2 << endl;
+    cout << v3 << endl;
+    cout << (v2 < v3) << endl;
 
-    auto sz = r.fit(100,100);
-    auto [ra,rb] = r.splitBottom(334);
-    cout << ra << endl;
-    cout << rb.size() << endl;
-    cout << r.withSize(scaler(0.5), 50_pc).size();
+    for (auto& x : v3)
+        cout << x << endl;
 
-    cout << endl;
-//    PRINT(alignTCtoTC)
-//    PRINT(alignTCtoBC)
-//    PRINT(alignBCtoTC)
-//    PRINT(alignBCtoBC)
-//    PRINT(alignLCtoLC)
-//    PRINT(alignLCtoRC)
-//    PRINT(alignRCtoLC)
-//    PRINT(alignRCtoRC)
-
-#undef PRINT
-    return EXIT_SUCCESS;
 }
 
 
