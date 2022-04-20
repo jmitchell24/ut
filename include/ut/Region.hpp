@@ -369,7 +369,7 @@ namespace ut
             return {{ min.x, vmin }, { max.x, vmax }};
         }
 
-        M_DECL_PURE region_type splitNH(scalar_type hmin, scalar_type hmax) const
+        M_DECL_PURE region_type splitH(scalar_type hmin, scalar_type hmax) const
         {
             assert(hmin <= hmax);
             assert(hmax >= min.x && hmax <= max.x);
