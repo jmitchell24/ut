@@ -160,9 +160,9 @@ namespace ut
         ENABLE_IF_INTEGRAL
         M_DECL vector_type& operator %= (scalar_param s) { mod(s); return *this; }
 
-        M_DECL_PURE bool operator== (vector_param v) const { return std::equal(begin(), end(), v.begin()); }
+        M_DECL_PURE bool operator== (vector_param v) const { return same(*this, v); }
         M_DECL_PURE bool operator!= (vector_param v) const { return !(*this == v); }
-        M_DECL_PURE bool operator<  (vector_param v) const { return std::lexicographical_compare(begin(), end(), v.begin(), v.end()); }
+        M_DECL_PURE bool operator<  (vector_param v) const { return less(*this, v); }
         M_DECL_PURE bool operator>  (vector_param v) const { return *this < v; }
         M_DECL_PURE bool operator<= (vector_param v) const { return !(*this < v); }
         M_DECL_PURE bool operator>= (vector_param v) const { return !(v < *this); }
@@ -174,11 +174,11 @@ namespace ut
         M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
         M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
 
-        M_DECL_PURE auto begin() const { return std::begin(elements); }
-        M_DECL      auto begin()       { return std::begin(elements); }
+        M_DECL_PURE scalar_type const* begin() const { return &elements[0]; }
+        M_DECL      scalar_type*       begin()       { return &elements[0]; }
 
-        M_DECL_PURE auto end() const { return std::end(elements); }
-        M_DECL      auto end()       { return std::end(elements); }
+        M_DECL_PURE scalar_type const* end() const { return &elements[SIZE-1]; }
+        M_DECL      scalar_type*       end()       { return &elements[SIZE-1]; }
 
         M_DECL_PURE scalar_type const* data() const { return elements; }
         M_DECL      scalar_type*       data()       { return elements; }

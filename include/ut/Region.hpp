@@ -369,12 +369,62 @@ namespace ut
             return {{ min.x, vmin }, { max.x, vmax }};
         }
 
-        M_DECL_PURE region_type splitH(scalar_type hmin, scalar_type hmax) const
+        M_DECL_PURE region_type splitNH(scalar_type hmin, scalar_type hmax) const
         {
             assert(hmin <= hmax);
             assert(hmax >= min.x && hmax <= max.x);
             assert(hmin >= min.x && hmin <= max.x);
             return {{ min.x, hmin }, { max.x, hmax }};
+        }
+
+        template <size_t Count>
+        M_DECL_PURE std::array<region_type, Count> splitNV(scalar_type inner_margin = 0) const
+        {
+            static_assert(Count > 0);
+
+            auto step   = (height() - (inner_margin * (Count - 1)) ) / Count;
+            auto vmin   = min.y;
+            auto vmax   = vmin + step;
+
+            assert(step > 0 && "total inner margin must be less than height");
+
+            std::array<region_type, Count> tmp;
+            tmp[0] = {{ min.x, vmin }, { max.x, vmax }};
+
+            step += inner_margin;
+
+            for (size_t i = 1; i < Count; ++i)
+            {
+                vmin += step;
+                vmax += step;
+                tmp[i] = {{ min.x, vmin }, { max.x, vmax }};
+            }
+            return tmp;
+        }
+
+        template <size_t Count>
+        M_DECL_PURE std::array<region_type, Count> splitNH(scalar_type inner_margin = 0) const
+        {
+            static_assert(Count > 0);
+
+            auto step   = (width() - (inner_margin * (Count - 1)) ) / Count;
+            auto hmin   = min.x;
+            auto hmax   = hmin + step;
+
+            assert(step > 0 && "total inner margin must be less than height");
+
+            std::array<region_type, Count> tmp;
+            tmp[0] = {{ min.x, hmin }, { max.x, hmax }};
+
+            step += inner_margin;
+
+            for (size_t i = 1; i < Count; ++i)
+            {
+                hmin += step;
+                hmax += step;
+                tmp[i] = {{ min.x, hmin }, { max.x, hmax }};
+            }
+            return tmp;
         }
 
         M_DECL_PURE split_type splitTop(scalar_type dh) const

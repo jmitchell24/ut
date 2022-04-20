@@ -12,23 +12,36 @@ using namespace std;
 
 int main()
 {
-    using vec10f = vec<float,10>;
+    constexpr regionf r{0,0,800,600};
 
-    constexpr vec10f v1{{1,2,3,4,5,6,7,8,9,10}};
-    constexpr vec10f v2{};
-    constexpr vec10f v3{1};
+    for (auto x : r.splitNV<17>())
+        cout << x << " : " << x.size() << endl;
 
+    for (auto x : r.splitNH<17>())
+        cout << x << " : " << x.size() << endl;
 
-
-    cout << v1.length() << endl;
-    cout << v2 << endl;
-    cout << v3 << endl;
-    cout << (v2 < v3) << endl;
-
-    for (auto& x : v3)
-        cout << x << endl;
-
+    return EXIT_SUCCESS;
 }
+
+//int main()
+//{
+//    using vec10f = vec<float,10>;
+//
+//    constexpr vec10f v1{{1,2,3,4,5,6,7,8,9,10}};
+//    constexpr vec10f v2{};
+//    constexpr vec10f v3{1};
+//
+//
+//
+//    cout << v1.length() << endl;
+//    cout << v2 << endl;
+//    cout << v3 << endl;
+//    cout << (v2 < v3) << endl;
+//
+//    for (auto& x : v3)
+//        cout << x << endl;
+//
+//}
 
 
 //
