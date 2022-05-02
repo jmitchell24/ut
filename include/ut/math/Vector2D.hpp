@@ -24,6 +24,8 @@ namespace ut
 
         size_t static constexpr SIZE = 2;
 
+
+
         union
         {
             struct { scalar_type x,y; };

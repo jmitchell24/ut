@@ -2,7 +2,7 @@
 #include "Vector3D.hpp"
 #include "Vector4D.hpp"
 
-namespace util
+namespace ut
 {
     template struct VecND<float        , 4>;
     template struct VecND<double       , 4>;

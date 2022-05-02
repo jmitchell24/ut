@@ -8,11 +8,19 @@
 //---- Use ut::cstrview if enabled, otherwise use std::string_view
 //#define UT_FMT_USE_CSTRVIEW
 
-//---- Specify string buffer size, default is 512
-//#define UT_FMT_BUFFER_SIZE
+//---- Specify string buffer size
+//#define UT_FMT_BUFFER_SIZE 512
 
-//---- Specify number of string buffers, default is 8
-//#define UT_FMT_BUFFER_COUNT
+#if !defined(UT_FMT_BUFFER_SIZE)
+#define UT_FMT_BUFFER_SIZE 512
+#endif
+
+//---- Specify number of string buffers
+//#define UT_FMT_BUFFER_COUNT 8
+
+#if !defined(UT_FMT_BUFFER_COUNT)
+#define UT_FMT_BUFFER_COUNT 8
+#endif
 
 #include <array>
 #include <vector>
@@ -45,17 +53,8 @@ namespace ut
     class Fmt
     {
     public:
-#if defined(UT_FMT_BUFFER_SIZE)
-        int static constexpr BUFFER_SIZE = UT_FMT_BUFFER_SIZE;
-#else
-        int static constexpr BUFFER_SIZE = 512;
-#endif
-
-#if defined(UT_FMT_BUFFER_COUNT)
+        int static constexpr BUFFER_SIZE  = UT_FMT_BUFFER_SIZE;
         int static constexpr BUFFER_COUNT = UT_FMT_BUFFER_COUNT;
-#else
-        int static constexpr BUFFER_COUNT = 8;
-#endif
 
 #if defined(UT_FMT_USE_CSTRVIEW)
         using stringview_type = cstrview;
@@ -119,8 +118,8 @@ namespace ut
 
     private:
         buffer_container_type   m_buffer;
-        size_t                  m_counter;
-        int                     m_result;
+        size_t                  m_counter =0;
+        int                     m_result  =0;
 
         M_DECL int printNextBuffer(char const* fmt, va_list args)
         {

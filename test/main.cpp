@@ -12,13 +12,9 @@ using namespace std;
 
 int main()
 {
-    constexpr regionf r{0,0,800,600};
+    auto one = vec2(1,0);
 
-    for (auto x : r.splitNV<17>())
-        cout << x << " : " << x.size() << endl;
-
-    for (auto x : r.splitNH<17>())
-        cout << x << " : " << x.size() << endl;
+    cout << FMT("%.2f %.2f\n", one.x, one.y) << endl;
 
     return EXIT_SUCCESS;
 }

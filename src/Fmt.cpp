@@ -2,7 +2,7 @@
 using namespace ut;
 
 Fmt::Fmt() noexcept
-        : m_buffer{}, m_counter{0}, m_result{0}
+    : m_buffer{}, m_counter{0}, m_result{0}
 {}
 
 Fmt& Fmt::instance() noexcept
