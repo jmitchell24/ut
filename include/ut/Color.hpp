@@ -311,17 +311,6 @@ namespace ut
         }
     };
 
-#if defined(UT_STL_INTEROP)
-    inline std::ostream& operator<<(std::ostream& os, color const& c)
-    { return os << (vec4b)c; }
-
-    inline std::ostream& operator<<(std::ostream& os, color::normal const& c)
-    { return os << (vec4)c; }
-
-    inline std::ostream& operator<<(std::ostream& os, color::hsv const& c)
-    { return os << (vec4)c; }
-#endif
-
 namespace colors
 {
 #define COLOR(_name, _i) static constexpr color _name{_i};
