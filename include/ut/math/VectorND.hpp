@@ -200,11 +200,11 @@ namespace ut
         M_DECL vector_type& operator %= (scalar_param s) { mod(s); return *this; }
 
         M_DECL_PURE bool operator== (vector_param v) const { return same(*this, v); }
-        M_DECL_PURE bool operator!= (vector_param v) const { return !(*this == v); }
+        M_DECL_PURE bool operator!= (vector_param v) const { return !(*this == v);  }
         M_DECL_PURE bool operator<  (vector_param v) const { return less(*this, v); }
-        M_DECL_PURE bool operator>  (vector_param v) const { return *this < v; }
-        M_DECL_PURE bool operator<= (vector_param v) const { return !(*this < v); }
-        M_DECL_PURE bool operator>= (vector_param v) const { return !(v < *this); }
+        M_DECL_PURE bool operator>  (vector_param v) const { return *this < v;      }
+        M_DECL_PURE bool operator<= (vector_param v) const { return !(*this < v);   }
+        M_DECL_PURE bool operator>= (vector_param v) const { return !(v < *this);   }
 
         //
         // container utilities

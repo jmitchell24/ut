@@ -9,6 +9,10 @@
 #include <ut/math/Vector4D.hpp>
 #include <ut/Bit.hpp>
 
+#if defined(UT_STL_INTEROP)
+#include <ut/Fmt.hpp>
+#endif
+
 #define UT_COLORS \
     COLOR(black,                0x000000ff) \
     COLOR(silver,               0xc0c0c0ff) \
@@ -164,6 +168,11 @@
 
 namespace ut
 {
+    union color;
+
+    constexpr bool less(color const& a, color const& b);
+    constexpr bool same(color const& a, color const& b);
+
     /// color (RGBA) class with standard functionality.
     /// Stores color components as a 32-bit integer, with little endian byte order
     union color
@@ -177,7 +186,7 @@ namespace ut
             M_DECL_PURE normal withB(real_t x) const { return {r, g, x, a}; }
             M_DECL_PURE normal withA(real_t x) const { return {r, g, b, x}; }
 
-            inline constexpr explicit operator vec4() const
+            M_DECL explicit operator vec4() const
             { return { r,g,b,a }; }
         };
 
@@ -190,52 +199,57 @@ namespace ut
             M_DECL_PURE hsv withV(real_t x) const { return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { return {h, s, v, x}; }
 
-            inline constexpr explicit operator vec4() const
+            M_DECL explicit operator vec4() const
             { return { h,s,v,a }; }
         };
 
         b32 i;
         struct { b8 a,b,g,r; };
 
-        inline constexpr color()
+        M_DECL color()
             : i{0}
         {}
 
-        inline constexpr color(b8 r, b8 g, b8 b, b8 a = 255)
+        M_DECL color(b8 r, b8 g, b8 b, b8 a = 255)
             : r{r}, g{g}, b{b}, a{a}
         {}
 
-        inline constexpr explicit color(b32 i)
+        M_DECL explicit color(b32 i)
             : i{i}
         {}
 
-        inline constexpr explicit color(vec4b const& v)
+        M_DECL explicit color(vec4b const& v)
             : r{v.x}, g{v.y}, b{v.z}, a{v.w}
         {}
 
-        inline constexpr explicit color(normal const& n)
+        M_DECL explicit color(normal const& n)
             : color{NORMALtoRGB(n)}
         {}
 
-        inline constexpr explicit color(hsv const& h)
+        M_DECL explicit color(hsv const& h)
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
+
+        M_DECL_PURE color inverted() const { return color(255-r,255-g,255-b,255-a); }
 
         M_DECL_PURE color withR(b8 x) const { return {x, g, b, a}; }
         M_DECL_PURE color withG(b8 x) const { return {r, x, b, a}; }
         M_DECL_PURE color withB(b8 x) const { return {r, g, x, a}; }
         M_DECL_PURE color withA(b8 x) const { return {r, g, b, x}; }
 
-        inline constexpr explicit operator vec4b () const { return {r,g,b,a}; }
-        inline constexpr explicit operator normal() const { return RGBtoNORMAL(*this); }
-        inline constexpr explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE explicit operator vec4b () const { return {r,g,b,a}; }
+        M_DECL_PURE explicit operator normal() const { return RGBtoNORMAL(*this); }
+        M_DECL_PURE explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
 
-        inline constexpr bool operator== (color const& c) const { return i == c.i; }
-        inline constexpr bool operator!= (color const& c) const { return !(*this == c); }
-        inline constexpr bool operator<  (color const& c) const { return i < c.i; }
-        inline constexpr bool operator>  (color const& c) const { return *this < c; }
-        inline constexpr bool operator<= (color const& c) const { return !(*this < c); }
-        inline constexpr bool operator>= (color const& c) const { return !(c < *this); }
+        M_DECL_PURE bool operator== (color const& c) const { return same(*this, c); }
+        M_DECL_PURE bool operator!= (color const& c) const { return !(*this == c);  }
+        M_DECL_PURE bool operator<  (color const& c) const { return less(*this, c); }
+        M_DECL_PURE bool operator>  (color const& c) const { return *this < c;      }
+        M_DECL_PURE bool operator<= (color const& c) const { return !(*this < c);   }
+        M_DECL_PURE bool operator>= (color const& c) const { return !(c < *this);   }
+
+        M_DECL static color grayscale(b8 x) { return { x,x,x,x }; }
+        M_DECL static color grayscale(b8 x, b8 a=255) { return { x,x,x,a }; }
 
         static color parseRGBA(char const* s);
         static bool tryParseRGBA(char const* s, color& c);
@@ -244,19 +258,19 @@ namespace ut
         static bool tryParseARGB(char const* s, color& c);
 
     private:
-        static constexpr color::normal RGBtoNORMAL(color c)
+        M_DECL static color::normal RGBtoNORMAL(color c)
         {
             return {real_t(c.r) / 255, real_t(c.g) / 255, real_t(c.b) / 255, real_t(c.a) / 255 };
         }
 
-        static constexpr color NORMALtoRGB(normal n)
+        M_DECL static color NORMALtoRGB(normal n)
         {
             return { b8(n.r * 255), b8(n.g * 255), b8(n.b * 255), b8(n.a * 255)  };
         }
 
         // Convert color3 floats ([0-1],[0-1],[0-1]) to hsv floats ([0-1],[0-1],[0-1]), from Foley & van Dam p592
         // Optimized http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
-        static constexpr color::hsv NORMALtoHSV(normal c)
+        M_DECL static color::hsv NORMALtoHSV(normal c)
         {
             auto K = real_t(0);
 
@@ -285,7 +299,7 @@ namespace ut
 
         // Convert hsv floats ([0-1],[0-1],[0-1]) to color3 floats ([0-1],[0-1],[0-1]), from Foley & van Dam p593
         // also http://en.wikipedia.org/wiki/HSL_and_HSV
-        static constexpr normal HSVtoNORMAL(hsv c)
+        M_DECL static normal HSVtoNORMAL(hsv c)
         {
             if (c.s == real_t(0.0))
             {
@@ -310,6 +324,16 @@ namespace ut
             }
         }
     };
+
+    constexpr bool less(color const& a, color const& b) { return a.i <  b.i; }
+    constexpr bool same(color const& a, color const& b) { return a.i == b.i; }
+
+#if defined(UT_STL_INTEROP)
+    inline std::ostream& operator<<(std::ostream& os, color const& c)
+    {
+        return os << FMT("#%.8x", c.i);
+    }
+#endif
 
 namespace colors
 {

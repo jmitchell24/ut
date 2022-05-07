@@ -12,9 +12,10 @@ using namespace std;
 
 int main()
 {
-    auto one = vec2(1,0);
+    auto c = ut::colors::white;
 
-    cout << FMT("%.2f %.2f\n", one.x, one.y) << endl;
+    cout << c << endl;
+    cout << c.inverted() << endl;
 
     return EXIT_SUCCESS;
 }
