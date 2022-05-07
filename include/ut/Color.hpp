@@ -249,7 +249,7 @@ namespace ut
         M_DECL_PURE bool operator>= (color const& c) const { return !(c < *this);   }
 
         M_DECL static color grayscale(b8 x) { return { x,x,x,x }; }
-        M_DECL static color grayscale(b8 x, b8 a=255) { return { x,x,x,a }; }
+        M_DECL static color grayscale(b8 x, b8 a) { return { x,x,x,a }; }
 
         static color parseRGBA(char const* s);
         static bool tryParseRGBA(char const* s, color& c);
