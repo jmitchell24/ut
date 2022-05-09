@@ -181,6 +181,14 @@ namespace ut
         {
             real_t r,g,b,a;
 
+            M_DECL normal()
+                : r{ 0 }, g{ 0 }, b{ 0 }, a{ 0 }
+            {}
+
+            M_DECL normal(real_t r, real_t g, real_t b, real_t a = 1.0f)
+                : r{ r }, g{ g }, b{ b }, a{ a }
+            { }
+
             M_DECL_PURE normal withR(real_t x) const { return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { return {r, x, b, a}; }
             M_DECL_PURE normal withB(real_t x) const { return {r, g, x, a}; }
@@ -193,6 +201,14 @@ namespace ut
         struct hsv
         {
             real_t h,s,v,a;
+
+            M_DECL hsv()
+                : h{ 0 }, s{ 0 }, v{ 0 }, a{ 0 }
+            {}
+
+            M_DECL hsv(real_t h, real_t s, real_t v, real_t a = 1.0f)
+                : h{ h }, s{ s }, v{ v }, a{ a }
+            { }
 
             M_DECL_PURE hsv withH(real_t x) const { return {x, s, v, a}; }
             M_DECL_PURE hsv withS(real_t x) const { return {h, x, v, a}; }
@@ -207,7 +223,7 @@ namespace ut
         struct { b8 a,b,g,r; };
 
         M_DECL color()
-            : i{0}
+            : i{0x000000ff}
         {}
 
         M_DECL color(b8 r, b8 g, b8 b, b8 a = 255)

@@ -116,11 +116,11 @@ namespace ut
         M_DECL_PURE vector_type withX(scalar_param s) const { return vector_type{s,y}; }
         M_DECL_PURE vector_type withY(scalar_param s) const { return vector_type{x,s}; }
 
-        M_DECL_PURE vector_type withOffsetX(scalar_param s) const { return vector_type{x+s, y}; }
-        M_DECL_PURE vector_type withOffsetY(scalar_param s) const { return vector_type{x, y+s}; }
+        M_DECL_PURE vector_type withOffsetX(scalar_param s) const { return vector_type(x+s, y); }
+        M_DECL_PURE vector_type withOffsetY(scalar_param s) const { return vector_type(x, y+s); }
 
-        M_DECL_PURE vector_type withScaleX(scalar_param s) const { return vector_type{x*s, y}; }
-        M_DECL_PURE vector_type withScaleY(scalar_param s) const { return vector_type{x, y*s}; }
+        M_DECL_PURE vector_type withScaleX(scalar_param s) const { return vector_type(x*s, y); }
+        M_DECL_PURE vector_type withScaleY(scalar_param s) const { return vector_type(x, y*s); }
 
         //
         // utilities
@@ -173,7 +173,7 @@ namespace ut
         M_DECL_PURE vector_type operator/(vector_param p) const { return vector_type(x / p.x, y / p.y); }
 
         ENABLE_IF_INTEGRAL
-        M_DECL_PURE vector_type operator%(vector_param p) const { return vector_type{x % p.x, y % p.y}; }
+        M_DECL_PURE vector_type operator%(vector_param p) const { return vector_type(x % p.x, y % p.y); }
 
         M_DECL vector_type& operator += (vector_param p) { add(p); return *this; }
         M_DECL vector_type& operator -= (vector_param p) { sub(p); return *this; }

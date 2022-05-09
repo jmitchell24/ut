@@ -17,6 +17,8 @@ int main()
     cout << c << endl;
     cout << c.inverted() << endl;
 
+    cout << vec4(1, 2, 3, 4) << endl;
+
     return EXIT_SUCCESS;
 }
 

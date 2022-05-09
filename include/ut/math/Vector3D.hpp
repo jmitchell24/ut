@@ -88,19 +88,27 @@ namespace ut
         M_DECL void mod(vector_param p) { x %= p.x, y %= p.y; z %= p.z; }
 
         //
-        // accessors
+        // copy mutators
         //
 
-        M_DECL_PURE vector_type withX(scalar_param s) { return vector_type{s,y,z}; }
-        M_DECL_PURE vector_type withY(scalar_param s) { return vector_type{x,s,z}; }
-        M_DECL_PURE vector_type withZ(scalar_param s) { return vector_type{x,y,s}; }
+        M_DECL_PURE vector_type withX(scalar_param s) const { return vector_type{ s,y,z }; }
+        M_DECL_PURE vector_type withY(scalar_param s) const { return vector_type{ x,s,z }; }
+        M_DECL_PURE vector_type withZ(scalar_param s) const { return vector_type{ x,y,s }; }
+
+        M_DECL_PURE vector_type withOffsetX(scalar_param s) const { return vector_type(x + s, y, z); }
+        M_DECL_PURE vector_type withOffsetY(scalar_param s) const { return vector_type(x, y + s, z); }
+        M_DECL_PURE vector_type withOffsetZ(scalar_param s) const { return vector_type(x, y, z + s); }
+
+        M_DECL_PURE vector_type withScaleX(scalar_param s) const { return vector_type(x * s, y, z); }
+        M_DECL_PURE vector_type withScaleY(scalar_param s) const { return vector_type(x, y * s, z); }
+        M_DECL_PURE vector_type withScaleZ(scalar_param s) const { return vector_type(x, y, z * s); }
 
         //
         // utilities
         //
 
-        M_DECL_PURE scalar_type sum       () const { return x + y; }
-        M_DECL_PURE scalar_type sumSquared() const { return x*x + y*y; }
+        M_DECL_PURE scalar_type sum       () const { return x + y + z; }
+        M_DECL_PURE scalar_type sumSquared() const { return x*x + y*y + z*z; }
         M_DECL_PURE scalar_type length    () const { return std::sqrt(sumSquared()); }
 
         ENABLE_IF_FLOAT M_DECL_PURE scalar_type dot     (vector_param v) const { return x*v.x + y*v.y + z*v.z; }
