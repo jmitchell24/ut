@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ut/func/Delegate.hpp>
 #include <ut/algorithm/StringMetric.hpp>
 #include <ut/Bit.hpp>
 #include <ut/Fmt.hpp>

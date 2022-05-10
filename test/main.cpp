@@ -10,6 +10,11 @@ using namespace ut;
 #include <iomanip>
 using namespace std;
 
+void foo()
+{
+    cout << "foo\n";
+}
+
 int main()
 {
     auto c = ut::colors::white;
@@ -18,6 +23,12 @@ int main()
     cout << c.inverted() << endl;
 
     cout << vec4(1, 2, 3, 4) << endl;
+
+    auto d = fn(&foo);
+
+    cout << "isClosure: " << (d.isClosure() ? "yes" : "no") << "\n";
+
+    d();
 
     return EXIT_SUCCESS;
 }
