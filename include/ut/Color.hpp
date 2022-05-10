@@ -189,7 +189,7 @@ namespace ut
                 : r{ r }, g{ g }, b{ b }, a{ a }
             { }
 
-            M_DECL_PURE color inverted() const { return color(real_t(1)-r,real_t(1)-g,real_t(1)-b,real_t(1)-a); }
+            M_DECL_PURE normal inverted() const { return normal(real_t(1)-r, real_t(1)-g, real_t(1)-b, real_t(1)-a); }
 
             M_DECL_PURE normal withR(real_t x) const { return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { return {r, x, b, a}; }
