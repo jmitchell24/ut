@@ -15,20 +15,34 @@ void foo()
     cout << "foo\n";
 }
 
+struct Bar
+{
+    void bar()
+    {
+        cout << "bar\n";
+    }
+};
+
 int main()
 {
-    auto c = ut::colors::white;
+    using fn_type = void(*)();
 
-    cout << c << endl;
-    cout << c.inverted() << endl;
+    auto a = fn_object([a=1]()mutable{ cout << "lambda: " << (++a) << "\n"; });
+    auto a2 = fn_object([a=1]()mutable{ cout << "lambda: " << (++a) << "\n"; });
+    auto b = fn_pointer(&foo);
 
-    cout << vec4(1, 2, 3, 4) << endl;
+    Bar bar;
 
-    auto d = fn(&foo);
+    auto c = fn(Bar(), &Bar::bar);
 
-    cout << "isClosure: " << (d.isClosure() ? "yes" : "no") << "\n";
+    auto asdf = fn(std::plus<int>());
 
-    d();
+    a();
+    a2();
+
+    c();
+
+    cout << "isClosure: " << (a == a2) << endl;
 
     return EXIT_SUCCESS;
 }
