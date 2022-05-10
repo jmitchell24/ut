@@ -10,39 +10,17 @@ using namespace ut;
 #include <iomanip>
 using namespace std;
 
-void foo()
-{
-    cout << "foo\n";
-}
-
-struct Bar
-{
-    void bar()
-    {
-        cout << "bar\n";
-    }
-};
-
 int main()
 {
-    using fn_type = void(*)();
+    auto c = color::normal::grayscale(1).toColor();
 
-    auto a = fn_object([a=1]()mutable{ cout << "lambda: " << (++a) << "\n"; });
-    auto a2 = fn_object([a=1]()mutable{ cout << "lambda: " << (++a) << "\n"; });
-    auto b = fn_pointer(&foo);
+    int sz = 100;
+    for (int i = 0; i < sz; ++i)
+    {
+        cout << setw(3) << i << ": " << color::normal::grayscale((float)i / 100).toColor() << "\n";
+    }
 
-    Bar bar;
 
-    auto c = fn(Bar(), &Bar::bar);
-
-    auto asdf = fn(std::plus<int>());
-
-    a();
-    a2();
-
-    c();
-
-    cout << "isClosure: " << (a == a2) << endl;
 
     return EXIT_SUCCESS;
 }

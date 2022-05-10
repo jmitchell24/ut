@@ -189,13 +189,20 @@ namespace ut
                 : r{ r }, g{ g }, b{ b }, a{ a }
             { }
 
+            M_DECL_PURE color inverted() const { return color(real_t(1)-r,real_t(1)-g,real_t(1)-b,real_t(1)-a); }
+
             M_DECL_PURE normal withR(real_t x) const { return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { return {r, x, b, a}; }
             M_DECL_PURE normal withB(real_t x) const { return {r, g, x, a}; }
             M_DECL_PURE normal withA(real_t x) const { return {r, g, b, x}; }
 
-            M_DECL explicit operator vec4() const
+            M_DECL_PURE explicit operator vec4() const
             { return { r,g,b,a }; }
+
+            M_DECL_PURE color toColor() const { return NORMALtoRGB(*this); }
+
+            M_DECL static normal grayscale(real_t x) { return { x,x,x,x }; }
+            M_DECL static normal grayscale(real_t x, real_t a) { return { x,x,x,a }; }
         };
 
         struct hsv
@@ -215,7 +222,9 @@ namespace ut
             M_DECL_PURE hsv withV(real_t x) const { return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { return {h, s, v, x}; }
 
-            M_DECL explicit operator vec4() const
+            M_DECL_PURE color toColor() const { return NORMALtoRGB(HSVtoNORMAL(*this)); }
+
+            M_DECL_PURE explicit operator vec4() const
             { return { h,s,v,a }; }
         };
 
@@ -245,6 +254,9 @@ namespace ut
         M_DECL explicit color(hsv const& h)
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
+
+        M_DECL_PURE normal toNormal() const { return RGBtoNORMAL(*this); }
+        M_DECL_PURE hsv    toHSV   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
 
         M_DECL_PURE color inverted() const { return color(255-r,255-g,255-b,255-a); }
 
