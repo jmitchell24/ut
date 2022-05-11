@@ -198,8 +198,30 @@ namespace ut
                 : r{ r }, g{ g }, b{ b }, a{ a }
             { ASSERT_NORMAL4(r,g,b,a); }
 
-            M_DECL_PURE color inverted()         const {                   return color(real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a); }
-            M_DECL_PURE color inverted(real_t a) const { ASSERT_NORMAL(a); return color(real_t(1)-r,real_t(1)-g,real_t(1)-b, a); }
+            M_DECL explicit normal(vec4 const& v)
+                : normal(v.x, v.y, v.z, v.w)
+            {}
+
+            M_DECL explicit normal(vec3 const& v, real_t a = 1.0f)
+                : normal(v.x, v.y, v.z, a)
+            {}
+
+            M_DECL explicit normal(hsv const& hsv)
+                : normal(HSVtoNORMAL(hsv))
+            {}
+
+            M_DECL explicit normal(color const& c)
+                : normal(RGBtoNORMAL(c))
+            {}
+
+            M_DECL normal(normal const&)=default;
+            M_DECL normal(normal&&) noexcept =default;
+
+            M_DECL normal& operator=(normal const&)=default;
+            M_DECL normal& operator=(normal&&) noexcept =default;
+
+            M_DECL_PURE normal inverted()         const {                   return normal(real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a); }
+            M_DECL_PURE normal inverted(real_t a) const { ASSERT_NORMAL(a); return normal(real_t(1)-r,real_t(1)-g,real_t(1)-b, a); }
 
             M_DECL_PURE normal withR(real_t x) const { ASSERT_NORMAL(x); return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { ASSERT_NORMAL(x); return {r, x, b, a}; }
@@ -232,6 +254,28 @@ namespace ut
             M_DECL hsv(real_t h, real_t s, real_t v, real_t a = 1.0f)
                 : h{ h }, s{ s }, v{ v }, a{ a }
             { ASSERT_NORMAL4(h,s,v,a); }
+
+            M_DECL explicit hsv(vec4 const& v)
+                : hsv(v.x, v.y, v.z, v.w)
+            {}
+
+            M_DECL explicit hsv(vec3 const& v, real_t a = 1.0f)
+                : hsv(v.x, v.y, v.z, a)
+            {}
+
+            M_DECL explicit hsv(normal const& n)
+                : hsv(NORMALtoHSV(n))
+            {}
+
+            M_DECL explicit hsv(color const& c)
+                : hsv(NORMALtoHSV(RGBtoNORMAL(c)))
+            {}
+
+            M_DECL hsv(hsv const&)=default;
+            M_DECL hsv(hsv&&) noexcept =default;
+
+            M_DECL hsv& operator=(hsv const&)=default;
+            M_DECL hsv& operator=(hsv&&) noexcept =default;
 
             M_DECL_PURE hsv withH(real_t x) const { ASSERT_NORMAL(x); return {x, s, v, a}; }
             M_DECL_PURE hsv withS(real_t x) const { ASSERT_NORMAL(x); return {h, x, v, a}; }
