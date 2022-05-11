@@ -427,28 +427,28 @@ namespace ut
             return tmp;
         }
 
-        M_DECL_PURE split_type splitTop(scalar_type dh) const
+        M_DECL_PURE split_type splitTop(scalar_type dh, scalar_type inner_margin = 0) const
         {
             auto split = min.y + dh;
-            return {splitV(min.y, split), splitV(split, max.y)};
+            return { splitV(min.y, split), splitV(split+inner_margin, max.y) };
         }
 
-        M_DECL_PURE split_type splitBottom(scalar_type dh) const
+        M_DECL_PURE split_type splitBottom(scalar_type dh, scalar_type inner_margin = 0) const
         {
             auto split = max.y - dh;
-            return {splitV(min.y, split), splitV(split, max.y)};
+            return {splitV(min.y, split-inner_margin), splitV(split, max.y)};
         }
 
-        M_DECL_PURE split_type splitLeft(scalar_type dw) const
+        M_DECL_PURE split_type splitLeft(scalar_type dw, scalar_type inner_margin = 0) const
         {
             auto split = min.x + dw;
-            return {splitH(min.x, split), splitV(split, max.x)};
+            return {splitH(min.x, split), splitV(split+inner_margin, max.x)};
         }
 
-        M_DECL_PURE split_type splitRight(scalar_type dw) const
+        M_DECL_PURE split_type splitRight(scalar_type dw, scalar_type inner_margin = 0) const
         {
             auto split = max.x - dw;
-            return {splitH(min.x, split), splitV(split, max.x)};
+            return {splitH(min.x, split-inner_margin), splitV(split, max.x)};
         }
     };
 
