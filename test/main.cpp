@@ -12,12 +12,10 @@ using namespace std;
 
 int main()
 {
-    auto c = color::normal::grayscale(1).toColor();
-
     int sz = 100;
     for (int i = 0; i < sz; ++i)
     {
-        cout << setw(3) << i << ": " << color::normal::grayscale((float)i / 100).toColor() << "\n";
+        cout << setw(3) << i << ": " << color::normal::grayscale((float)i / 100).toColor(0.5) << "\n";
     }
 
 

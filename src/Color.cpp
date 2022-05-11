@@ -45,8 +45,8 @@ inline bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3)
 // color
 //
 
-color color::parseRGBA(const char *s) { color c; try_parse(s, c.r, c.g, c.b, c.a); return c; }
-bool color::tryParseRGBA(const char *s, color& c) { return try_parse(s, c.r, c.g, c.b, c.a); }
+color color::parseRGBA(char const* s) { color c; try_parse(s, c.r, c.g, c.b, c.a); return c; }
+bool color::tryParseRGBA(char const* s, color& c) { return try_parse(s, c.r, c.g, c.b, c.a); }
 
 color color::parseARGB(char const* s) { color c; try_parse(s, c.a, c.r, c.g, c.b); return c; }
 bool color::tryParseARGB(char const* s, color& c) { return try_parse(s, c.a, c.r, c.g, c.b); }

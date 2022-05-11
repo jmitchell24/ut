@@ -166,6 +166,8 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
+#define ASSERT_NORMAL(x_) assert(x_ >= 0 && x_ <= 1)
+
 namespace ut
 {
     union color;
@@ -177,32 +179,40 @@ namespace ut
     /// Stores color components as a 32-bit integer, with little endian byte order
     union color
     {
+        struct normal;
+        struct hsv;
+
         struct normal
         {
             real_t r,g,b,a;
 
             M_DECL normal()
                 : r{ 0 }, g{ 0 }, b{ 0 }, a{ 0 }
-            {}
+            { }
 
             M_DECL normal(real_t r, real_t g, real_t b, real_t a = 1.0f)
                 : r{ r }, g{ g }, b{ b }, a{ a }
-            { }
+            { ASSERT_NORMAL(r); ASSERT_NORMAL(g); ASSERT_NORMAL(b); ASSERT_NORMAL(a); }
 
-            M_DECL_PURE normal inverted() const { return normal(real_t(1)-r, real_t(1)-g, real_t(1)-b, real_t(1)-a); }
+            M_DECL_PURE color inverted()         const {                   return color(real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a); }
+            M_DECL_PURE color inverted(real_t a) const { ASSERT_NORMAL(a); return color(real_t(1)-r,real_t(1)-g,real_t(1)-b, a); }
 
-            M_DECL_PURE normal withR(real_t x) const { return {x, g, b, a}; }
-            M_DECL_PURE normal withG(real_t x) const { return {r, x, b, a}; }
-            M_DECL_PURE normal withB(real_t x) const { return {r, g, x, a}; }
-            M_DECL_PURE normal withA(real_t x) const { return {r, g, b, x}; }
+            M_DECL_PURE normal withR(real_t x) const { ASSERT_NORMAL(x); return {x, g, b, a}; }
+            M_DECL_PURE normal withG(real_t x) const { ASSERT_NORMAL(x); return {r, x, b, a}; }
+            M_DECL_PURE normal withB(real_t x) const { ASSERT_NORMAL(x); return {r, g, x, a}; }
+            M_DECL_PURE normal withA(real_t x) const { ASSERT_NORMAL(x); return {r, g, b, x}; }
 
             M_DECL_PURE explicit operator vec4() const
             { return { r,g,b,a }; }
 
-            M_DECL_PURE color toColor() const { return NORMALtoRGB(*this); }
+            M_DECL_PURE color toColor()         const { return NORMALtoRGB(*this); }
+            M_DECL_PURE color toColor(real_t a) const { return NORMALtoRGB(withA(a)); }
 
-            M_DECL static normal grayscale(real_t x) { return { x,x,x,x }; }
-            M_DECL static normal grayscale(real_t x, real_t a) { return { x,x,x,a }; }
+            M_DECL_PURE hsv toHSV()         const { return NORMALtoHSV(*this); }
+            M_DECL_PURE hsv toHSV(real_t a) const { return NORMALtoHSV(withA(a)); }
+
+            M_DECL static normal grayscale(real_t x)           { ASSERT_NORMAL(x);                   return { x,x,x,x }; }
+            M_DECL static normal grayscale(real_t x, real_t a) { ASSERT_NORMAL(x); ASSERT_NORMAL(a); return { x,x,x,a }; }
         };
 
         struct hsv
@@ -222,7 +232,11 @@ namespace ut
             M_DECL_PURE hsv withV(real_t x) const { return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { return {h, s, v, x}; }
 
-            M_DECL_PURE color toColor() const { return NORMALtoRGB(HSVtoNORMAL(*this)); }
+            M_DECL_PURE color toColor()         const { return NORMALtoRGB(HSVtoNORMAL(*this)); }
+            M_DECL_PURE color toColor(real_t a) const { return withA(a).toColor(); }
+
+            M_DECL_PURE normal toNormal()         const { return HSVtoNORMAL(*this); }
+            M_DECL_PURE normal toNormal(real_t a) const { return withA(a).toNormal(); }
 
             M_DECL_PURE explicit operator vec4() const
             { return { h,s,v,a }; }
@@ -255,10 +269,14 @@ namespace ut
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
 
-        M_DECL_PURE normal toNormal() const { return RGBtoNORMAL(*this); }
-        M_DECL_PURE hsv    toHSV   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE normal toNormal()     const { return RGBtoNORMAL(*this); }
+        M_DECL_PURE normal toNormal(b8 a) const { return withA(a).toNormal(); }
 
-        M_DECL_PURE color inverted() const { return color(255-r,255-g,255-b,255-a); }
+        M_DECL_PURE hsv    toHSV   ()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE hsv    toHSV   (b8 a) const { return withA(a).toHSV(); }
+
+        M_DECL_PURE color inverted()     const { return color(255-r,255-g,255-b,255-a); }
+        M_DECL_PURE color inverted(b8 a) const { return color(255-r,255-g,255-b, a); }
 
         M_DECL_PURE color withR(b8 x) const { return {x, g, b, a}; }
         M_DECL_PURE color withG(b8 x) const { return {r, x, b, a}; }
@@ -279,10 +297,16 @@ namespace ut
         M_DECL static color grayscale(b8 x) { return { x,x,x,x }; }
         M_DECL static color grayscale(b8 x, b8 a) { return { x,x,x,a }; }
 
-        static color parseRGBA(char const* s);
+        M_DECL static color fromNormal(normal const& n) { return NORMALtoRGB(n); }
+        M_DECL static color fromNormal(real_t r, real_t g, real_t b, real_t a = 1.0f) { return fromNormal({r,g,b,a}); }
+
+        M_DECL static color fromHSV(hsv const& hsv) { return NORMALtoRGB(HSVtoNORMAL(hsv)); }
+        M_DECL static color fromHSV(real_t h, real_t s, real_t v, real_t a = 1.0f) { return fromHSV({h,s,v,a}); }
+
+        static color   parseRGBA(char const* s);
         static bool tryParseRGBA(char const* s, color& c);
 
-        static color parseARGB(char const* s);
+        static color   parseARGB(char const* s);
         static bool tryParseARGB(char const* s, color& c);
 
     private:
@@ -318,10 +342,10 @@ namespace ut
 
             return
             {
-            std::fabs(K + (c.g - c.b) / (real_t(6) * chroma + real_t(1e-20))),
-            chroma / (c.r + real_t(1e-20)),
-            c.r,
-            c.a
+                std::fabs(K + (c.g - c.b) / (real_t(6) * chroma + real_t(1e-20))),
+                chroma / (c.r + real_t(1e-20)),
+                c.r,
+                c.a
             };
         }
 
@@ -370,6 +394,8 @@ namespace colors
 #undef COLOR
 }
 }
+
+#undef ASSERT_NORMAL
 
 #undef M_DECL_PURE
 #undef M_DECL
