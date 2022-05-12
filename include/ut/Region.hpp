@@ -7,6 +7,40 @@
 
 #define ENABLE_IF_INCLUSIVE template <bool I_ = I, typename = std::enable_if_t<I>>
 
+#define UT_REGION_ALIGNMENTS \
+    REGION_ALIGN(TLtoTL) \
+    REGION_ALIGN(TLtoTR) \
+    REGION_ALIGN(TLtoBL) \
+    REGION_ALIGN(TLtoBR) \
+    \
+    REGION_ALIGN(TRtoTL) \
+    REGION_ALIGN(TRtoTR) \
+    REGION_ALIGN(TRtoBL) \
+    REGION_ALIGN(TRtoBR) \
+    \
+    REGION_ALIGN(BLtoTL) \
+    REGION_ALIGN(BLtoTR) \
+    REGION_ALIGN(BLtoBL) \
+    REGION_ALIGN(BLtoBR) \
+    \
+    REGION_ALIGN(BRtoTL) \
+    REGION_ALIGN(BRtoTR) \
+    REGION_ALIGN(BRtoBL) \
+    REGION_ALIGN(BRtoBR) \
+    \
+    REGION_ALIGN(TCtoTC) \
+    REGION_ALIGN(TCtoBC) \
+    REGION_ALIGN(BCtoTC) \
+    REGION_ALIGN(BCtoBC) \
+    \
+    REGION_ALIGN(LCtoLC) \
+    REGION_ALIGN(LCtoRC) \
+    REGION_ALIGN(RCtoLC) \
+    REGION_ALIGN(RCtoRC) \
+    \
+    REGION_ALIGN(CCtoCC)
+
+
 namespace ut
 {
     /// Similar to Rect. Represented by min and max coordinates instead of position and size.
