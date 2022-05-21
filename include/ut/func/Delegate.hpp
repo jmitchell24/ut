@@ -82,15 +82,18 @@ namespace internal
         inline closure(closure const&) noexcept =default;
         inline closure& operator= (closure const&) noexcept =default;
 
-        inline void clear() noexcept { object = nullptr; static_function = nullptr; }
+        inline void clear() noexcept
+        { object = nullptr; static_function = nullptr; }
+
+        inline bool empty() const noexcept
+        { return object == nullptr && static_function == nullptr; }
 
         template<typename InvokerMemFunc>
-        inline bool isInvoker(InvokerMemFunc invoker) const
-        {
-            return evil_cast<any_memfunc>(invoker) == static_function;
-        }
+        inline bool isInvoker(InvokerMemFunc invoker) const noexcept
+        { return evil_cast<any_memfunc>(invoker) == static_function; }
 
-        inline closure_token token() const { return { static_function, object }; }
+        inline closure_token token() const noexcept
+        { return { static_function, object }; }
 
         template<typename X, typename XMemFunc> inline void setObjectFunction(X* x, XMemFunc x_memfunc) noexcept
         {

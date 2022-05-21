@@ -10,12 +10,16 @@ using namespace ut;
 #include <iomanip>
 using namespace std;
 
+int wrap(int i, int sz)
+{
+    return (i % sz + sz) % sz;
+}
+
 int main()
 {
-    int sz = 100;
-    for (int i = 0; i < sz; ++i)
+    for (int i = -10; i < 10; ++i)
     {
-        cout << setw(3) << i << ": " << color::normal::grayscale((float)i / 100).toColor(0.5) << "\n";
+        printf("%d wrap %d = %d\n", i, 7, wrap(i, 7));
     }
 
 
