@@ -33,13 +33,22 @@ namespace ut
     inline constexpr scaler operator "" _pc(unsigned long long i) noexcept
     { return scaler((real_t)i / (real_t)100); }
 
+    template <typename T1, typename T2>
+    struct duo { T1 first; T2 second; };
+
+    template <typename T1, typename T2, typename T3>
+    struct trio { T1 first; T2 second; T3 third; };
+
+    template <typename T1, typename T2, typename T3, typename T4>
+    struct quadro { T1 first; T2 second; T3 third; T4 fourth; };
+
     template <typename N>
     struct rectx
     {
         using scalar_type   = N;
         using rect_type     = rectx<N>;
         using point_type    = vec2x<N>;
-        using split_type    = std::tuple<rect_type,rect_type>;
+        using split_type    = duo<rect_type,rect_type>;
         using elements_type = scalar_type[4];
 
         union
@@ -85,7 +94,7 @@ namespace ut
         //
 
         M_DECL_PURE point_type pos () const { return point_type(x,y); }
-        M_DECL_PURE point_type size() const { return point_type(w,h); }
+        //M_DECL_PURE point_type size() const { return point_type(w,h); }
 
         template <typename T>
         M_DECL_PURE rectx<T> cast() const { return rectx<T>(T(x), T(y), T(w), T(h)); }
@@ -142,17 +151,23 @@ namespace ut
             };
         }
 
+        //
+        // container utilities
+        //
+
         M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < 4); return elements[i]; }
-        M_DECL_PURE scalar_type& operator[] (size_t i)       { assert(i < 4); return elements[i]; }
+        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < 4); return elements[i]; }
 
-        M_DECL_PURE auto begin()       { return std::begin(elements); }
-        M_DECL_PURE auto begin() const { return std::begin(elements); }
+        M_DECL_PURE scalar_type const* begin() const { return &elements[0]; }
+        M_DECL      scalar_type*       begin()       { return &elements[0]; }
 
-        M_DECL_PURE auto end()       { return std::end(elements); }
-        M_DECL_PURE auto end() const { return std::end(elements); }
+        M_DECL_PURE scalar_type const* end() const { return &elements[3]; }
+        M_DECL      scalar_type*       end()       { return &elements[3]; }
 
         M_DECL_PURE scalar_type const* data() const { return elements; }
-        M_DECL_PURE scalar_type*       data()       { return elements; }
+        M_DECL      scalar_type*       data()       { return elements; }
+
+        M_DECL_PURE size_t size() const { return 4; }
     };
 
     using rect = rectx<int>;
@@ -163,7 +178,7 @@ namespace ut
     typedef rectx<unsigned>     rectu;
     typedef rectx<std::uint8_t> rectb;
 
-#if defined(UT_STL_INTEROP)
+#if !defined(UT_NO_STL_INTEROP)
     template <typename N>
     inline std::ostream& operator<<(std::ostream& os, rectx<N> const& r)
     {

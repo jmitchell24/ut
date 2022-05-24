@@ -58,8 +58,8 @@ namespace ut
         using region_type       = regionx<N>;
         using rect_type         = rectx<N>;
         using point_type        = vec2x<N>;
-        using split_type        = std::tuple<region_type,region_type>;
-        using fit_type          = std::tuple<scalar_type,scalar_type>;
+        using split_type        = duo<region_type,region_type>;
+        using fit_type          = duo<scalar_type,scalar_type>;
 
         constexpr static bool INCLUSIVE = I;
 
@@ -494,7 +494,6 @@ namespace ut
     typedef regionx<unsigned>     regionu;
     typedef regionx<std::uint8_t> regionb;
 
-#if defined(UT_STL_INTEROP)
     template <typename N, bool I>
     inline std::ostream& operator<<(std::ostream& os, regionx<N,I> const& r)
     {
@@ -508,7 +507,6 @@ namespace ut
         ss << v;
         return ss.str();
     }
-#endif
 }
 
 #undef M_DECL_PURE

@@ -19,13 +19,13 @@
 #include <cstdint>
 #include <execution>
 
-#if defined(UT_STL_INTEROP)
+#include <cstddef>
 #include <sstream>
-#endif
 
 namespace ut
 {
     using real_t = float;
+    using size_t = std::size_t;
 
     template <typename N, size_t D>
     struct vec;
@@ -282,7 +282,6 @@ namespace ut
         return true;
     }
 
-#if defined(UT_STL_INTEROP)
     template <typename N, size_t D>
     inline std::ostream& operator<<(std::ostream& os, vec<N,D> const& v)
     {
@@ -316,7 +315,6 @@ namespace ut
         ss << v;
         return ss.str();
     }
-#endif
 }
 
 #undef M_DECL_PURE
