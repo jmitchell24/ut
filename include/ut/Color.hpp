@@ -228,6 +228,8 @@ namespace ut
             M_DECL_PURE normal withB(real_t x) const { ASSERT_NORMAL(x); return {r, g, x, a}; }
             M_DECL_PURE normal withA(real_t x) const { ASSERT_NORMAL(x); return {r, g, b, x}; }
 
+            M_DECL_PURE normal opaque() const { return { r, g, b, 1.0f }; }
+
             M_DECL_PURE explicit operator vec4() const { return toVec4(); }
 
             M_DECL_PURE vec4 toVec4() const { return { r,g,b,a }; }
@@ -281,6 +283,8 @@ namespace ut
             M_DECL_PURE hsv withS(real_t x) const { ASSERT_NORMAL(x); return {h, x, v, a}; }
             M_DECL_PURE hsv withV(real_t x) const { ASSERT_NORMAL(x); return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {h, s, v, x}; }
+
+            M_DECL_PURE hsv opaque() const { return { h, s, v, 1.0f }; }
 
             M_DECL_PURE color toColor()         const {                   return NORMALtoRGB(HSVtoNORMAL(*this)); }
             M_DECL_PURE color toColor(real_t a) const { ASSERT_NORMAL(a); return withA(a).toColor(); }
@@ -337,6 +341,8 @@ namespace ut
         M_DECL_PURE color withNormalG(real_t x) const { ASSERT_NORMAL(x); b8 y = b8(x*255); return color(r, y, b, a); }
         M_DECL_PURE color withNormalB(real_t x) const { ASSERT_NORMAL(x); b8 y = b8(x*255); return color(r, g, y, a); }
         M_DECL_PURE color withNormalA(real_t x) const { ASSERT_NORMAL(x); b8 y = b8(x*255); return color(r, g, b, y); }
+
+        M_DECL_PURE color opaque() const { return { r, g, b, 255 }; }
 
         M_DECL_PURE explicit operator vec4b () const { return {r,g,b,a}; }
         M_DECL_PURE explicit operator normal() const { return RGBtoNORMAL(*this); }
