@@ -220,8 +220,8 @@ namespace ut
             M_DECL normal& operator=(normal const&)=default;
             M_DECL normal& operator=(normal&&) noexcept =default;
 
-            M_DECL_PURE normal inverted()         const {                   return normal(real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a); }
-            M_DECL_PURE normal inverted(real_t a) const { ASSERT_NORMAL(a); return normal(real_t(1)-r,real_t(1)-g,real_t(1)-b, a); }
+            M_DECL_PURE normal inverted()    const {                   return {real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a}; }
+            M_DECL_PURE normal invertedRGB() const { ASSERT_NORMAL(a); return {real_t(1)-r,real_t(1)-g,real_t(1)-b, a}; }
 
             M_DECL_PURE normal withR(real_t x) const { ASSERT_NORMAL(x); return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { ASSERT_NORMAL(x); return {r, x, b, a}; }
@@ -325,8 +325,8 @@ namespace ut
         M_DECL_PURE hsv    toHSV   ()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
         M_DECL_PURE hsv    toHSV   (b8 a) const { return withA(a).toHSV(); }
 
-        M_DECL_PURE color inverted()     const { return color(255-r,255-g,255-b,255-a); }
-        M_DECL_PURE color inverted(b8 a) const { return color(255-r,255-g,255-b, a); }
+        M_DECL_PURE color inverted()    const { return color(255-r,255-g,255-b,255-a); }
+        M_DECL_PURE color invertedRGB() const { return color(255-r,255-g,255-b, a); }
 
         M_DECL_PURE color withR(b8 x) const { return {x, g, b, a}; }
         M_DECL_PURE color withG(b8 x) const { return {r, x, b, a}; }

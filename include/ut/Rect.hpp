@@ -33,22 +33,13 @@ namespace ut
     inline constexpr scaler operator "" _pc(unsigned long long i) noexcept
     { return scaler((real_t)i / (real_t)100); }
 
-    template <typename T1, typename T2>
-    struct duo { T1 first; T2 second; };
-
-    template <typename T1, typename T2, typename T3>
-    struct trio { T1 first; T2 second; T3 third; };
-
-    template <typename T1, typename T2, typename T3, typename T4>
-    struct quadro { T1 first; T2 second; T3 third; T4 fourth; };
-
     template <typename N>
     struct rectx
     {
         using scalar_type   = N;
         using rect_type     = rectx<N>;
         using point_type    = vec2x<N>;
-        using split_type    = duo<rect_type,rect_type>;
+        using split_type    = std::tuple<rect_type,rect_type>;
         using elements_type = scalar_type[4];
 
         union

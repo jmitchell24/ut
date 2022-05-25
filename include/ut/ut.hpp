@@ -6,6 +6,7 @@
 #include <ut/Fmt.hpp>
 #include <ut/Gulp.hpp>
 #include <ut/StringView.hpp>
+#include <ut/SortedVector.hpp>
 #include <ut/Rect.hpp>
 #include <ut/Region.hpp>
 #include <ut/math/Vector2D.hpp>

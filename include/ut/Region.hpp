@@ -58,8 +58,8 @@ namespace ut
         using region_type       = regionx<N>;
         using rect_type         = rectx<N>;
         using point_type        = vec2x<N>;
-        using split_type        = duo<region_type,region_type>;
-        using fit_type          = duo<scalar_type,scalar_type>;
+        using split_type        = std::tuple<region_type,region_type>;
+        using fit_type          = std::tuple<scalar_type,scalar_type>;
 
         constexpr static bool INCLUSIVE = I;
 

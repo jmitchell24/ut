@@ -1,7 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
-#define UT_STL_INTEROP
 #define UT_FMT_USE_CSTRVIEW
 #include <ut/ut.hpp>
 using namespace ut;
@@ -17,10 +16,15 @@ int wrap(int i, int sz)
 
 int main()
 {
-    for (int i = -10; i < 10; ++i)
+    sorted_vector<int> asdf;
+
+    for (int i = 0; i < 100; ++i)
     {
-        printf("%d wrap %d = %d\n", i, 7, wrap(i, 7));
+        asdf.insert(rand() % 1000);
     }
+
+    for (auto const& x: asdf)
+        cout << x << endl;
 
 
 
