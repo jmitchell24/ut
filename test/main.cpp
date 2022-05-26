@@ -16,6 +16,10 @@ int wrap(int i, int sz)
 
 int main()
 {
+    func<void()> callback;
+
+    callback.empty();
+
     sorted_vector<int> asdf;
 
     for (int i = 0; i < 100; ++i)
