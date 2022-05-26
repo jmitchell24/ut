@@ -408,7 +408,7 @@ namespace ut
             assert(hmin <= hmax);
             assert(hmax >= min.x && hmax <= max.x);
             assert(hmin >= min.x && hmin <= max.x);
-            return {{ min.x, hmin }, { max.x, hmax }};
+            return {{ hmin, min.y }, { hmax, max.y }};
         }
 
         template <size_t Count>
