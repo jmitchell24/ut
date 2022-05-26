@@ -476,13 +476,13 @@ namespace ut
         M_DECL_PURE split_type splitLeft(scalar_type dw, scalar_type inner_margin = 0) const
         {
             auto split = min.x + dw;
-            return {splitH(min.x, split), splitV(split+inner_margin, max.x)};
+            return {splitH(min.x, split), splitH(split+inner_margin, max.x)};
         }
 
         M_DECL_PURE split_type splitRight(scalar_type dw, scalar_type inner_margin = 0) const
         {
             auto split = max.x - dw;
-            return {splitH(min.x, split-inner_margin), splitV(split, max.x)};
+            return {splitH(min.x, split-inner_margin), splitH(split, max.x)};
         }
     };
 
