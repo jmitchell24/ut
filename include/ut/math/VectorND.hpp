@@ -46,27 +46,27 @@ namespace ut
         using scalar_ref        = scalar_type&;
         using vector_param      = vector_type const&;
         using scalar_param      = scalar_type;
-        using elements_type     = scalar_type[D];
+        using pack_type         = N[D];
 
         size_t static constexpr SIZE = D;
 
-        elements_type elements;
+        scalar_type pack[D];
 
         //
         // ctor
         //
 
         M_DECL vec()
-            : elements{}
-        { for (auto& e: elements) e = (scalar_type)0; }
+            : pack{}
+        { FOR_SIZE(i) pack[i] = (scalar_type)0; }
 
         M_DECL explicit vec(scalar_param s)
-            : elements{}
-        { for (auto& e: elements) e = s; }
+            : pack{}
+        { FOR_SIZE(i) pack[i] = s; }
 
-        M_DECL vec(elements_type const& e)
-            : elements{}
-        { for (size_t i = 0; i < SIZE; ++i) this->elements[i] = e[i]; }
+        M_DECL explicit vec(pack_type const& p)
+            : pack{}
+        { FOR_SIZE(i) pack[i] = p[i]; }
 
         M_DECL vec(vector_type const&)=default;
         M_DECL vec(vector_type&&) noexcept =default;
@@ -78,7 +78,7 @@ namespace ut
         M_DECL_PURE vec<T,SIZE> cast() const
         {
             T tmp[SIZE];
-            FOR_SIZE(i) tmp[i] = static_cast<T>(elements[i]);
+            FOR_SIZE(i) tmp[i] = static_cast<T>(pack[i]);
             return vec<T,SIZE>{tmp};
         }
 
@@ -87,13 +87,10 @@ namespace ut
         //
 
         M_DECL void set(scalar_param s)
-        { FOR_SIZE(i) this->elements[i] = s; }
-
-        M_DECL void set(elements_type const& e)
-        { FOR_SIZE(i) this->elements[i] = e[i];  }
+        { FOR_SIZE(i) this->pack[i] = s; }
 
         M_DECL void set(vector_param p)
-        { FOR_SIZE(i) this->elements[i] = p.elements[i];  }
+        { FOR_SIZE(i) this->pack[i] = p.pack[i];  }
 
         M_DECL void add(scalar_param s) { transform([s](scalar_param x){ return x + s; }); }
         M_DECL void sub(scalar_param s) { transform([s](scalar_param x){ return x - s; }); }
@@ -125,23 +122,23 @@ namespace ut
 
         M_DECL_PURE vector_type round() const
         {
-            elements_type tmp;
-            FOR_SIZE(i) tmp[i] = std::round(this->elements[i]);
-            return {tmp};
+            vector_type tmp;
+            FOR_SIZE(i) tmp[i] = std::round(this->pack[i]);
+            return tmp;
         }
 
         M_DECL_PURE vector_type floor() const
         {
-            elements_type tmp;
-            FOR_SIZE(i) tmp[i] = std::floor(this->elements[i]);
-            return {tmp};
+            vector_type tmp;
+            FOR_SIZE(i) tmp[i] = std::floor(this->pack[i]);
+            return tmp;
         }
 
         M_DECL_PURE vector_type ceil() const
         {
-            elements_type tmp;
-            FOR_SIZE(i) tmp[i] = std::ceil(this->elements[i]);
-            return {tmp};
+            vector_type tmp;
+            FOR_SIZE(i) tmp[i] = std::ceil(this->pack[i]);
+            return tmp;
         }
 
         M_DECL_PURE vector_type neg() const
@@ -149,7 +146,7 @@ namespace ut
 
         M_DECL_PURE vector_type reverse() const
         {
-            elements_type temp;
+            vector_type temp;
             std::reverse_copy(begin(), end(), std::begin(temp));
             return vector_type(temp);
         }
@@ -210,17 +207,17 @@ namespace ut
         // container utilities
         //
 
-        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
-        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
+        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return pack[i]; }
+        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return pack[i]; }
 
-        M_DECL_PURE scalar_type const* begin() const { return &elements[0]; }
-        M_DECL      scalar_type*       begin()       { return &elements[0]; }
+        M_DECL_PURE scalar_type const* begin() const { return &pack[0]; }
+        M_DECL      scalar_type*       begin()       { return &pack[0]; }
 
-        M_DECL_PURE scalar_type const* end() const { return &elements[SIZE-1]; }
-        M_DECL      scalar_type*       end()       { return &elements[SIZE-1]; }
+        M_DECL_PURE scalar_type const* end() const { return &pack[SIZE - 1]; }
+        M_DECL      scalar_type*       end()       { return &pack[SIZE - 1]; }
 
-        M_DECL_PURE scalar_type const* data() const { return elements; }
-        M_DECL      scalar_type*       data()       { return elements; }
+        M_DECL_PURE scalar_type const* data() const { return pack; }
+        M_DECL      scalar_type*       data()       { return pack; }
 
         M_DECL_PURE size_t size() const { return SIZE; }
 
@@ -277,7 +274,7 @@ namespace ut
     constexpr bool same(vec<N,D> const& a, vec<N,D> const& b)
     {
         for (size_t i = 0; i < D; ++i)
-            if (a.elements[i] != b.elements[i])
+            if (a.pack[i] != b.pack[i])
                 return false;
         return true;
     }

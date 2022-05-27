@@ -14,22 +14,18 @@ namespace ut
     template <typename N> class vec<N, 2>
     {
     public:
-        using scalar_type       = N;
-        using vector_type       = vec<N,2>;
-        using vector_ref        = vector_type&;
-        using scalar_ref        = scalar_type&;
-        using vector_param      = vector_type const&;
-        using scalar_param      = scalar_type;
-        using elements_type     = scalar_type[2];
+        using scalar_type   = N;
+        using vector_type   = vec<N, 2>;
+        using vector_param  = vector_type const&;
+        using scalar_param  = scalar_type;
+        using pack_type     = N[2];
 
-        size_t static constexpr SIZE = 2;
-
-
+        size_t static constexpr PACK_SIZE = 2;
 
         union
         {
             struct { scalar_type x,y; };
-            elements_type elements;
+            pack_type pack;
         };
 
         //
@@ -48,8 +44,8 @@ namespace ut
             : x{x}, y{y}
         {}
 
-        M_DECL vec(elements_type const& e)
-            : x{e[0]}, y{e[1]}
+        M_DECL explicit vec(pack_type const& p)
+            : x{p[0]}, y{p[1]}
         {}
 
         M_DECL vec(vector_type const&)=default;
@@ -59,7 +55,7 @@ namespace ut
         M_DECL vec& operator=(vector_type&&) noexcept =default;
 
         template <typename T>
-        M_DECL_PURE vec<T,SIZE> cast() const { return vec<T,SIZE>{T(x), T(y)}; }
+        M_DECL_PURE vec<T,2> cast() const { return vec<T,2>{T(x), T(y)}; }
 
         //
         // mutators
@@ -71,8 +67,8 @@ namespace ut
         M_DECL void set(scalar_param x, scalar_param y)
         { this->x = x; this->y = y; }
 
-        M_DECL void set(elements_type const& e)
-        { x = e[0]; y = e[1]; }
+        M_DECL void set(pack_type const& p)
+        { x = p[0]; y = p[1]; }
 
         M_DECL void set(vector_param p)
         { x = p.x; y = p.y; }
@@ -202,20 +198,30 @@ namespace ut
         // container utilities
         //
 
-        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < SIZE); return elements[i]; }
-        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < SIZE); return elements[i]; }
+        M_DECL_PURE scalar_type  operator[] (size_t i) const { assert(i < PACK_SIZE); return pack[i]; }
+        M_DECL      scalar_type& operator[] (size_t i)       { assert(i < PACK_SIZE); return pack[i]; }
 
-        M_DECL_PURE scalar_type const* begin() const { return &elements[0]; }
-        M_DECL      scalar_type*       begin()       { return &elements[0]; }
+        M_DECL_PURE scalar_type const* begin() const { return pack; }
+        M_DECL      scalar_type*       begin()       { return pack; }
 
-        M_DECL_PURE scalar_type const* end() const { return &elements[SIZE-1]; }
-        M_DECL      scalar_type*       end()       { return &elements[SIZE-1]; }
+        M_DECL_PURE scalar_type const* end() const { return pack+PACK_SIZE; }
+        M_DECL      scalar_type*       end()       { return pack+PACK_SIZE; }
 
-        M_DECL_PURE scalar_type const* data() const { return elements; }
-        M_DECL      scalar_type*       data()       { return elements; }
+        M_DECL_PURE scalar_type const* data() const { return pack; }
+        M_DECL      scalar_type*       data()       { return pack; }
 
-        M_DECL_PURE size_t size() const { return SIZE; }
+        M_DECL_PURE size_t size() const { return PACK_SIZE; }
+
+    private:
+        M_DECL vec(nullptr_t);
     };
+
+    template <typename N> constexpr vec<N,2>::vec(nullptr_t)
+    {
+        using vec_t = vec<N, 2>;
+        static_assert(offsetof(vec_t, x) == offsetof(vec_t, pack) + sizeof(N)*0, "wrong 'x' layout in pack");
+        static_assert(offsetof(vec_t, y) == offsetof(vec_t, pack) + sizeof(N)*1, "wrong 'y' layout in pack");
+    }
 
     template <typename N> using vec2x = vec<N, 2>;
 

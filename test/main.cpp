@@ -5,6 +5,7 @@
 #include <ut/ut.hpp>
 using namespace ut;
 
+#include <type_traits>
 #include <iostream>
 #include <iomanip>
 using namespace std;
@@ -14,24 +15,18 @@ int wrap(int i, int sz)
     return (i % sz + sz) % sz;
 }
 
+
+
+
 int main()
 {
-    func<void()> callback;
+    regionf r{1,2,3,4};
+    vec4 v4;
 
-    callback.empty();
+    v4.set(r.pack);
 
-    sorted_vector<int> asdf;
-
-    for (int i = 0; i < 100; ++i)
-    {
-        asdf.insert(rand() % 1000);
-    }
-
-    for (auto const& x: asdf)
+    for (auto x : v4)
         cout << x << endl;
-
-
-
     return EXIT_SUCCESS;
 }
 
