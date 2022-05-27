@@ -213,10 +213,10 @@ namespace ut
         M_DECL_PURE size_t size() const { return PACK_SIZE; }
 
     private:
-        M_DECL vec(nullptr_t);
+        M_DECL vec(std::nullptr_t);
     };
 
-    template <typename N> constexpr vec<N,2>::vec(nullptr_t)
+    template <typename N> constexpr vec<N,2>::vec(std::nullptr_t)
     {
         using vec_t = vec<N, 2>;
         static_assert(offsetof(vec_t, x) == offsetof(vec_t, pack) + sizeof(N)*0, "wrong 'x' layout in pack");
