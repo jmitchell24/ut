@@ -20,13 +20,15 @@ int wrap(int i, int sz)
 
 int main()
 {
-    regionf r{1,2,3,4};
-    vec4 v4;
+    vector<unsigned char> v = { 1,2,3,4,5 };
 
-    v4.set(r.pack);
+    auto s = base64::encode(v.data(), v.size());
+    auto v2 = base64::decode(s);
 
-    for (auto x : v4)
-        cout << x << endl;
+
+    auto range = {1,2,3};
+    cout << hasher::range(range) << endl;
+
     return EXIT_SUCCESS;
 }
 

@@ -2,6 +2,8 @@
 
 #include <ut/func/Delegate.hpp>
 #include <ut/algorithm/StringMetric.hpp>
+#include <ut/algorithm/Hash.hpp>
+#include <ut/algorithm/Base64.hpp>
 #include <ut/Bit.hpp>
 #include <ut/Fmt.hpp>
 #include <ut/Gulp.hpp>
