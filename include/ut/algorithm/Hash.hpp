@@ -18,11 +18,11 @@
 #include <cassert>
 #include <type_traits>
 
-#define M_DECL_PURE             [[nodiscard]] inline constexpr
-#define M_DECL                  inline constexpr
+#define M_DECL_PURE         [[nodiscard]] inline constexpr
+#define M_DECL              inline constexpr
 
-#define TM_DECL_PURE(t_)            template<typename t_>  M_DECL_PURE
-#define TM_DECL(t_)                 template<typename t_>  M_DECL
+#define TM_DECL_PURE(t_)    template<typename t_> M_DECL_PURE
+#define TM_DECL(t_)         template<typename t_> M_DECL
 
 namespace ut
 {
@@ -51,11 +51,11 @@ namespace ut
         // copy with hash
         //
 
-        TM_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)               const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
-        TM_DECL_PURE(T)      hasher_type withRange(T&& t)                    const { hasher_type h=*this; h.template putRange(t);            return h; }
-        TM_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)    const { hasher_type h=*this; h.template putRange(first, last);  return h; }
-        TM_DECL_PURE(T)      hasher_type withValue(T&& t)                    const { hasher_type h=*this; h.template putValue(t);            return h; }
-        M_DECL_PURE          hasher_type withBytes(void* data, size_t size)  const { hasher_type h=*this; h.putBytes(data, size);            return h; }
+        TM_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)                  const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
+        TM_DECL_PURE(T)      hasher_type withRange(T&& t)                       const { hasher_type h=*this; h.template putRange(t);            return h; }
+        TM_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)       const { hasher_type h=*this; h.template putRange(first, last);  return h; }
+        TM_DECL_PURE(T)      hasher_type withValue(T&& t)                       const { hasher_type h=*this; h.template putValue(t);            return h; }
+        M_DECL_PURE          hasher_type withBytes(void* data, size_type size)  const { hasher_type h=*this; h.putBytes(data, size);            return h; }
 
         //
         // incremental hash
@@ -91,7 +91,7 @@ namespace ut
         TM_DECL(T)      static result_type range(T&& t)                     { hasher_type h; h.template putRange(t);            return h.digest(); }
         TM_DECL(It)     static result_type range(It&& first, It&& last)     { hasher_type h; h.template putRange(first, last);  return h.digest(); }
         TM_DECL(T)      static result_type value(T&& t)                     { hasher_type h; h.template putValue(t);            return h.digest(); }
-        M_DECL          static result_type bytes(void* data, size_t size)   { hasher_type h; h.putBytes(data, size);            return h.digest(); }
+        M_DECL          static result_type bytes(void* data, size_type size){ hasher_type h; h.putBytes(data, size);            return h.digest(); }
 
     private:
         result_type m_state;
