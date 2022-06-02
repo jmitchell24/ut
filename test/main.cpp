@@ -5,6 +5,9 @@
 #include <ut/ut.hpp>
 using namespace ut;
 
+#include <fmt/core.h>
+using namespace fmt;
+
 #include <type_traits>
 #include <iostream>
 #include <iomanip>
@@ -20,14 +23,18 @@ int wrap(int i, int sz)
 
 int main()
 {
-    vector<unsigned char> v = { 1,2,3,4,5 };
+    unordered_map<cstrview, int> map;
 
-    auto s = base64::encode(v.data(), v.size());
-    auto v2 = base64::decode(s);
+    map["a"]++;
+    map["b"]++;
+    map["c"]++;
+    map["d"]++;
+    map["e"]++;
+    map["f"]++;
+    map["g"]++;
 
-
-    auto range = {1,2,3};
-    cout << hasher::range(range) << endl;
+    for (auto&& x : map)
+        print("{}: {}\n", x.first.c_str(), x.second);
 
     return EXIT_SUCCESS;
 }

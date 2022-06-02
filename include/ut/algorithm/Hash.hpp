@@ -21,6 +21,9 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
+#define MT_DECL_PURE(t_)            template<typename t_>  M_DECL_PURE
+#define MT_DECL(t_)                 template<typename t_>  M_DECL
+
 namespace ut
 {
     template <typename ResultT, ResultT OffsetBasis, ResultT Prime>
@@ -38,31 +41,21 @@ namespace ut
 
         M_DECL void reset() { m_state = OffsetBasis; }
 
-        template <typename T> M_DECL void putValue(T const& t)
-        {
-            putBytes(&t, sizeof(t));
-        }
+        MT_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)               const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
+        MT_DECL_PURE(T)      hasher_type withRange(T&& t)                    const { hasher_type h=*this; h.template putRange(t);            return h; }
+        MT_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)    const { hasher_type h=*this; h.template putRange(first, last);  return h; }
+        MT_DECL_PURE(T)      hasher_type withValue(T&& t)                    const { hasher_type h=*this; h.putValue(t);                     return h; }
+        M_DECL_PURE          hasher_type withBytes(void* data, size_t size)  const { hasher_type h=*this; h.putBytes(data, size);            return h; }
 
-        template <typename... Ts> M_DECL void putArgs(Ts&&... ts)
-        {
-            (putValue(ts), ...);
-        }
-
-        template <typename It> M_DECL void putRange(It first, It last)
-        {
-            for (; first != last; ++first)
-                putValue(*first);
-        }
-
-        template <typename T> M_DECL void putRange(T&& t)
-        {
-            for (auto&& x: t)
-                putValue(x);
-        }
+        MT_DECL(...Ts)  void putArgs (Ts&&... ts)           { (putValue(ts), ...); }
+        MT_DECL(T)      void putRange(T&& t)                { for (auto&& x: t) putValue(x); }
+        MT_DECL(It)     void putRange(It first, It last)    { for (; first != last; ++first) putValue(*first); }
+        MT_DECL(T)      void putValue(T const& t)           { putBytes(&t, sizeof(t)); }
 
         M_DECL void putBytes(void const* data, size_type size) noexcept
         {
             assert(data != nullptr);
+            assert(m_state != 0);
 
             auto cdata  = static_cast<std::uint8_t const*>(data);
             auto acc    = m_state;
@@ -76,20 +69,11 @@ namespace ut
             m_state = acc;
         }
 
-        template <typename... Ts> M_DECL static result_type args(Ts&&... ts)
-        { hasher_type h; h.template putArgs(ts...); return h.digest(); }
-
-        template <typename T> M_DECL static result_type range(T&& t)
-        { hasher_type h; h.template putRange(t); return h.digest(); }
-
-        template <typename It> M_DECL static result_type range(It&& first, It&& last)
-        { hasher_type h; h.template putRange(first, last); return h.digest(); }
-
-        template <typename T> M_DECL static result_type value(T&& t)
-        { hasher_type h; h.putValue(t); return h.digest(); }
-
-        M_DECL static result_type bytes(void* data, size_t size)
-        { hasher_type h; h.putBytes(data, size); return h.digest(); }
+        MT_DECL(...Ts)  static result_type args (Ts&&... ts)                { hasher_type h; h.template putArgs(ts...);         return h.digest(); }
+        MT_DECL(T)      static result_type range(T&& t)                     { hasher_type h; h.template putRange(t);            return h.digest(); }
+        MT_DECL(It)     static result_type range(It&& first, It&& last)     { hasher_type h; h.template putRange(first, last);  return h.digest(); }
+        MT_DECL(T)      static result_type value(T&& t)                     { hasher_type h; h.putValue(t);                     return h.digest(); }
+        M_DECL          static result_type bytes(void* data, size_t size)   { hasher_type h; h.putBytes(data, size);            return h.digest(); }
 
     private:
         result_type m_state;
@@ -106,3 +90,6 @@ namespace ut
 
 #undef M_DECL_PURE
 #undef M_DECL
+
+#undef MT_DECL_PURE
+#undef MT_DECL
