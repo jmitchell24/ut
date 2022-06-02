@@ -23,18 +23,16 @@ int wrap(int i, int sz)
 
 int main()
 {
-    unordered_map<cstrview, int> map;
+    hasher h;
 
-    map["a"]++;
-    map["b"]++;
-    map["c"]++;
-    map["d"]++;
-    map["e"]++;
-    map["f"]++;
-    map["g"]++;
+    auto h1 = h.withValue(1);  print("1: {}\n", h1.digest());
+    auto h2 = h1.withValue(2); print("2: {}\n", h2.digest());
+    auto h3 = h2.withValue(3); print("3: {}\n", h3.digest());
 
-    for (auto&& x : map)
-        print("{}: {}\n", x.first.c_str(), x.second);
+    print("\n\n\n");
+    h.putValue(1); print("1: {}\n", h.digest());
+    h.putValue(2); print("2: {}\n", h.digest());
+    h.putValue(3); print("3: {}\n", h.digest());
 
     return EXIT_SUCCESS;
 }

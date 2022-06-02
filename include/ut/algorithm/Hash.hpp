@@ -21,8 +21,8 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
-#define MT_DECL_PURE(t_)            template<typename t_>  M_DECL_PURE
-#define MT_DECL(t_)                 template<typename t_>  M_DECL
+#define TM_DECL_PURE(t_)            template<typename t_>  M_DECL_PURE
+#define TM_DECL(t_)                 template<typename t_>  M_DECL
 
 namespace ut
 {
@@ -35,22 +35,36 @@ namespace ut
         using result_type   = ResultT;
         using hasher_type   = basic_hasher<ResultT, OffsetBasis, Prime>;
 
-        M_DECL basic_hasher() noexcept : m_state {OffsetBasis} {}
+        M_DECL basic_hasher() : m_state {OffsetBasis} {}
 
-        M_DECL_PURE result_type digest() const noexcept { return m_state; }
+        M_DECL basic_hasher(basic_hasher const&)=default;
+        M_DECL basic_hasher(basic_hasher&&) noexcept =default;
+
+        M_DECL basic_hasher& operator=(basic_hasher const&)=default;
+        M_DECL basic_hasher& operator=(basic_hasher&&) noexcept =default;
+
+        M_DECL_PURE result_type digest() const { return m_state; }
 
         M_DECL void reset() { m_state = OffsetBasis; }
 
-        MT_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)               const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
-        MT_DECL_PURE(T)      hasher_type withRange(T&& t)                    const { hasher_type h=*this; h.template putRange(t);            return h; }
-        MT_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)    const { hasher_type h=*this; h.template putRange(first, last);  return h; }
-        MT_DECL_PURE(T)      hasher_type withValue(T&& t)                    const { hasher_type h=*this; h.putValue(t);                     return h; }
+        //
+        // copy with hash
+        //
+
+        TM_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)               const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
+        TM_DECL_PURE(T)      hasher_type withRange(T&& t)                    const { hasher_type h=*this; h.template putRange(t);            return h; }
+        TM_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)    const { hasher_type h=*this; h.template putRange(first, last);  return h; }
+        TM_DECL_PURE(T)      hasher_type withValue(T&& t)                    const { hasher_type h=*this; h.template putValue(t);            return h; }
         M_DECL_PURE          hasher_type withBytes(void* data, size_t size)  const { hasher_type h=*this; h.putBytes(data, size);            return h; }
 
-        MT_DECL(...Ts)  void putArgs (Ts&&... ts)           { (putValue(ts), ...); }
-        MT_DECL(T)      void putRange(T&& t)                { for (auto&& x: t) putValue(x); }
-        MT_DECL(It)     void putRange(It first, It last)    { for (; first != last; ++first) putValue(*first); }
-        MT_DECL(T)      void putValue(T const& t)           { putBytes(&t, sizeof(t)); }
+        //
+        // incremental hash
+        //
+
+        TM_DECL(...Ts)  void putArgs (Ts&&... ts)           { (putValue(ts), ...); }
+        TM_DECL(T)      void putRange(T&& t)                { for (auto&& x: t) putValue(x); }
+        TM_DECL(It)     void putRange(It first, It last)    { for (; first != last; ++first) putValue(*first); }
+        TM_DECL(T)      void putValue(T const& t)           { putBytes(&t, sizeof(t)); }
 
         M_DECL void putBytes(void const* data, size_type size) noexcept
         {
@@ -69,10 +83,14 @@ namespace ut
             m_state = acc;
         }
 
-        MT_DECL(...Ts)  static result_type args (Ts&&... ts)                { hasher_type h; h.template putArgs(ts...);         return h.digest(); }
-        MT_DECL(T)      static result_type range(T&& t)                     { hasher_type h; h.template putRange(t);            return h.digest(); }
-        MT_DECL(It)     static result_type range(It&& first, It&& last)     { hasher_type h; h.template putRange(first, last);  return h.digest(); }
-        MT_DECL(T)      static result_type value(T&& t)                     { hasher_type h; h.putValue(t);                     return h.digest(); }
+        //
+        // single-put convenience methods
+        //
+
+        TM_DECL(...Ts)  static result_type args (Ts&&... ts)                { hasher_type h; h.template putArgs(ts...);         return h.digest(); }
+        TM_DECL(T)      static result_type range(T&& t)                     { hasher_type h; h.template putRange(t);            return h.digest(); }
+        TM_DECL(It)     static result_type range(It&& first, It&& last)     { hasher_type h; h.template putRange(first, last);  return h.digest(); }
+        TM_DECL(T)      static result_type value(T&& t)                     { hasher_type h; h.template putValue(t);            return h.digest(); }
         M_DECL          static result_type bytes(void* data, size_t size)   { hasher_type h; h.putBytes(data, size);            return h.digest(); }
 
     private:
@@ -91,5 +109,5 @@ namespace ut
 #undef M_DECL_PURE
 #undef M_DECL
 
-#undef MT_DECL_PURE
-#undef MT_DECL
+#undef TM_DECL_PURE
+#undef TM_DECL
