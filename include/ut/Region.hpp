@@ -514,10 +514,10 @@ namespace ut
         // pack layout check
         //
 
-        M_DECL regionx(nullptr_t);
+        M_DECL regionx(std::nullptr_t);
     };
 
-    template <typename N, bool I> constexpr regionx<N,I>::regionx(nullptr_t)
+    template <typename N, bool I> constexpr regionx<N,I>::regionx(std::nullptr_t)
     {
         using rect_t = regionx<N, I>;
         constexpr auto off0 = offsetof(rect_t, min) + offsetof(rect_t::point_type, x);
