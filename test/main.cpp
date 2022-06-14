@@ -19,20 +19,22 @@ int wrap(int i, int sz)
 }
 
 
-
+class Foo
+{
+public:
+    Foo()
+    {}
+private:
+    regionf r;
+};
 
 int main()
 {
-    hasher h;
+    Foo f;
 
-    auto h1 = h.withValue(1);  print("1: {}\n", h1.digest());
-    auto h2 = h1.withValue(2); print("2: {}\n", h2.digest());
-    auto h3 = h2.withValue(3); print("3: {}\n", h3.digest());
 
-    print("\n\n\n");
-    h.putValue(1); print("1: {}\n", h.digest());
-    h.putValue(2); print("2: {}\n", h.digest());
-    h.putValue(3); print("3: {}\n", h.digest());
+
+
 
     return EXIT_SUCCESS;
 }

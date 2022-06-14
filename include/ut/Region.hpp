@@ -77,6 +77,10 @@ namespace ut
         // ctor
         //
 
+        M_DECL regionx()
+            : min{}, max{}
+        {}
+
         M_DECL regionx(scalar_type min_x, scalar_type min_y, scalar_type max_x, scalar_type max_y)
             : min{min_x, min_y}, max{max_x, max_y}
         { }
@@ -89,7 +93,6 @@ namespace ut
 //            : min(rect.x, rect.y), max(rect.x+rect.w, rect.y+rect.h)
 //        { }
 
-        M_DECL regionx()=default;
         M_DECL regionx(regionx const&)=default;
         M_DECL regionx(regionx&&) noexcept =default;
 
