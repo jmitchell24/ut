@@ -735,6 +735,20 @@ namespace ut
     using stringview = basic_stringview<char, std::char_traits<char>, false>;
     using cstrview = basic_stringview<char, std::char_traits<char>, true>;
 
+    //
+    // *new* aliases experiment
+    //
+
+    using strview = basic_stringview<char, std::char_traits<char>, false>;
+    //using cstrview = basic_stringview<char, std::char_traits<char>, true>;
+
+    using strparam = strview const&;
+    using cstrparam = cstrview const&;
+
+    //
+    //
+    //
+
     template <bool SkipEmpty = true>
     using svsplit = basic_svsplit<SkipEmpty, char, std::char_traits<char>>;
 
