@@ -27,6 +27,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdarg>
+#include <charconv>
 
 #if defined(UT_FMT_USE_CSTRVIEW)
 #include "StringView.hpp"
@@ -50,11 +51,12 @@
 
 namespace ut
 {
-    class Fmt
+    template <size_t BufferSize, size_t BufferCount>
+    class basic_fmt
     {
     public:
-        int static constexpr BUFFER_SIZE  = UT_FMT_BUFFER_SIZE;
-        int static constexpr BUFFER_COUNT = UT_FMT_BUFFER_COUNT;
+        int static constexpr BUFFER_SIZE  = BufferSize;
+        int static constexpr BUFFER_COUNT = BufferCount;
 
 #if defined(UT_FMT_USE_CSTRVIEW)
         using stringview_type = cstrview;
@@ -65,8 +67,11 @@ namespace ut
         using buffer_type           = std::array<char, BUFFER_SIZE>;
         using buffer_container_type = std::array<buffer_type, BUFFER_COUNT>;
 
-        Fmt() noexcept;
-        static Fmt& instance() noexcept;
+        basic_fmt() noexcept
+            : m_buffer{}, m_counter{0}, m_result{0}
+        {}
+
+        static basic_fmt& instance() noexcept;
 
         M_DECL_PURE char const* buffer() const { return M_CURRENT_BUFFER.data(); }
         M_DECL_PURE int         result() const { return m_result; }
@@ -116,6 +121,24 @@ namespace ut
             return view();
         }
 
+        M_DECL stringview_type toChars(short        x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(int          x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(long         x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(long long    x, int base = 10) { return toCharsInt(x, base); }
+
+        M_DECL stringview_type toChars(unsigned short       x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(unsigned int         x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(unsigned long        x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type toChars(unsigned long long   x, int base = 10) { return toCharsInt(x, base); }
+
+        M_DECL stringview_type toChars(float        x, int precision) { return toCharsFloat(x, precision); }
+        M_DECL stringview_type toChars(double       x, int precision) { return toCharsFloat(x, precision); }
+        M_DECL stringview_type toChars(long double  x, int precision) { return toCharsFloat(x, precision); }
+
+        M_DECL stringview_type toChars(float        x) { return toCharsFloat(x); }
+        M_DECL stringview_type toChars(double       x) { return toCharsFloat(x); }
+        M_DECL stringview_type toChars(long double  x) { return toCharsFloat(x); }
+
     private:
         buffer_container_type   m_buffer;
         size_t                  m_counter =0;
@@ -131,9 +154,59 @@ namespace ut
 
             return m_result;
         }
+
+        template <typename T>
+        M_DECL stringview_type toCharsInt(T x, int base)
+        {
+            ++m_counter;
+
+            char* first = M_CURRENT_BUFFER.data();
+            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+
+            if (auto [ptr, ec] = std::to_chars(first, last, x, base); ec == std::errc())
+                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
+            return {};
+        }
+
+        template <typename T>
+        M_DECL stringview_type toCharsFloat(T x, int precision)
+        {
+            ++m_counter;
+
+            char* first = M_CURRENT_BUFFER.data();
+            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+
+            if (auto [ptr, ec] = std::to_chars(first, last, x, std::chars_format::fixed, precision); ec == std::errc())
+                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
+            return {};
+        }
+
+        template <typename T>
+        M_DECL stringview_type toCharsFloat(T x)
+        {
+            ++m_counter;
+
+            char* first = M_CURRENT_BUFFER.data();
+            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+
+            if (auto [ptr, ec] = std::to_chars(first, last, x); ec == std::errc())
+                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
+            return {};
+        }
+
+
     };
 
-    [[maybe_unused]] static Fmt& FMT = Fmt::instance();
+    template <size_t BufferSize, size_t BufferCount>
+    basic_fmt<BufferSize, BufferCount>& basic_fmt<BufferSize, BufferCount>::instance() noexcept
+    {
+        static thread_local basic_fmt<BufferSize, BufferCount> fmt;
+        return fmt;
+    }
+
+    using fmt = basic_fmt<UT_FMT_BUFFER_SIZE, UT_FMT_BUFFER_COUNT>;
+
+    [[maybe_unused]] static fmt& FMT = fmt::instance();
 }
 
 #undef M_DECL_PURE

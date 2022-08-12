@@ -736,7 +736,7 @@ namespace ut
     using cstrview = basic_stringview<char, std::char_traits<char>, true>;
 
     //
-    // *new* aliases experiment
+    // *new* aliases (experiment)
     //
 
     using strview = basic_stringview<char, std::char_traits<char>, false>;

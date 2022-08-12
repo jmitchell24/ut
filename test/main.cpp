@@ -18,19 +18,17 @@ int wrap(int i, int sz)
     return (i % sz + sz) % sz;
 }
 
-
-class Foo
-{
-public:
-    Foo()
-    {}
-private:
-    regionf r;
-};
-
 int main()
 {
-    Foo f;
+    auto a = FMT.toChars(1.1);
+    auto b = FMT.toChars(2.2);
+    auto c = FMT.toChars(3.3);
+    auto d = FMT.toChars(4.4);
+
+    cout << a << endl;
+    cout << b << endl;
+    cout << c << endl;
+    cout << d << endl;
 
 
 
