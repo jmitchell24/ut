@@ -5,8 +5,8 @@
 // Preprocessor Options
 //
 
-//---- Use ut::cstrview if enabled, otherwise use std::string_view
-//#define UT_FMT_USE_CSTRVIEW
+//---- Use std::string_view if enabled, otherwise use ut::cstrview
+#define UT_FMT_USE_STL_STRINGVIEW
 
 //---- Specify string buffer size
 //#define UT_FMT_BUFFER_SIZE 256
@@ -29,10 +29,10 @@
 #include <cstdarg>
 #include <charconv>
 
-#if defined(UT_FMT_USE_CSTRVIEW)
-#include "StringView.hpp"
-#else
+#if defined(UT_FMT_USE_STL_STRINGVIEW)
 #include <string_view>
+#else
+#include "StringView.hpp"
 #endif
 
 #define FMT_VARARGS_OBJ(__obj__, __start_arg__) \
@@ -61,10 +61,10 @@ namespace ut
 
         using string_type = std::string;
 
-#if defined(UT_FMT_USE_CSTRVIEW)
-        using stringview_type = cstrview;
-#else
+#if defined(UT_FMT_USE_STL_STRINGVIEW)
         using stringview_type = std::string_view;
+#else
+        using stringview_type = cstrview;
 #endif
 
         struct buf { std::array<char, BUFFER_SIZE> arr; size_t sz=0; };
@@ -79,12 +79,13 @@ namespace ut
         M_DECL_PURE char const* data() const { return M_ARR.data(); }
         M_DECL_PURE int         sz  () const { return M_SZ; }
 
-#if defined(UT_FMT_USE_CSTRVIEW)
+#if defined(UT_FMT_USE_STL_STRINGVIEW)
+        M_DECL_PURE stringview_type view() const
+        { return {M_ARR.data(), M_SZ}; }
+#else
+
         M_DECL_PURE stringview_type view() const
         { return cstrview::explicit_construct_cstr(M_ARR.data(), M_SZ); }
-#else
-        M_DECL_PURE stringview_type view() const
-        { return {M_CURRENT_BUFFER.data(), M_SZ}; }
 #endif
 
         M_DECL_PURE string_type string() const
@@ -243,6 +244,7 @@ namespace ut
 
 #undef M_DECL_PURE
 #undef M_DECL
-#undef M_CURRENT_BUFFER
+#undef M_ARR
+#undef M_SZ
 
 #endif // STRING_HPP
