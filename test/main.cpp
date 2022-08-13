@@ -20,10 +20,10 @@ int wrap(int i, int sz)
 
 int main()
 {
-    auto a = FMT.toChars(1.1);
-    auto b = FMT.toChars(2.2);
-    auto c = FMT.toChars(3.3);
-    auto d = FMT.toChars(4.4);
+    auto a = FMTBUF.view(0xfefefefe, 16);
+    auto b = FMTBUF.view(2.2);
+    auto c = FMTBUF.view(3.3);
+    auto d = FMTBUF.view("asdf %s", "qwerty");
 
     cout << a << endl;
     cout << b << endl;

@@ -9,10 +9,10 @@
 //#define UT_FMT_USE_CSTRVIEW
 
 //---- Specify string buffer size
-//#define UT_FMT_BUFFER_SIZE 512
+//#define UT_FMT_BUFFER_SIZE 256
 
 #if !defined(UT_FMT_BUFFER_SIZE)
-#define UT_FMT_BUFFER_SIZE 512
+#define UT_FMT_BUFFER_SIZE 256
 #endif
 
 //---- Specify number of string buffers
@@ -47,16 +47,19 @@
 
 #define M_DECL_PURE             [[nodiscard]] inline
 #define M_DECL                  inline
-#define M_CURRENT_BUFFER        ( m_buffer[m_counter%BUFFER_COUNT] )
+#define M_ARR                   ( m_buffer[m_counter%BUFFER_COUNT].arr )
+#define M_SZ                    ( m_buffer[m_counter%BUFFER_COUNT].sz )
 
 namespace ut
 {
     template <size_t BufferSize, size_t BufferCount>
-    class basic_fmt
+    class basic_format_buffer
     {
     public:
         int static constexpr BUFFER_SIZE  = BufferSize;
         int static constexpr BUFFER_COUNT = BufferCount;
+
+        using string_type = std::string;
 
 #if defined(UT_FMT_USE_CSTRVIEW)
         using stringview_type = cstrview;
@@ -64,38 +67,34 @@ namespace ut
         using stringview_type = std::string_view;
 #endif
 
-        using buffer_type           = std::array<char, BUFFER_SIZE>;
-        using buffer_container_type = std::array<buffer_type, BUFFER_COUNT>;
+        struct buf { std::array<char, BUFFER_SIZE> arr; size_t sz=0; };
+        using buffer_container_type = std::array<buf, BUFFER_COUNT>;
 
-        basic_fmt() noexcept
-            : m_buffer{}, m_counter{0}, m_result{0}
+        basic_format_buffer() noexcept
+            : m_buffer{}, m_counter{0}
         {}
 
-        static basic_fmt& instance() noexcept;
+        static basic_format_buffer& instance() noexcept;
 
-        M_DECL_PURE char const* buffer() const { return M_CURRENT_BUFFER.data(); }
-        M_DECL_PURE int         result() const { return m_result; }
+        M_DECL_PURE char const* data() const { return M_ARR.data(); }
+        M_DECL_PURE int         sz  () const { return M_SZ; }
 
 #if defined(UT_FMT_USE_CSTRVIEW)
         M_DECL_PURE stringview_type view() const
-        { return cstrview::explicit_construct_cstr(M_CURRENT_BUFFER.data(), (size_t)m_result); }
+        { return cstrview::explicit_construct_cstr(M_ARR.data(), M_SZ); }
 #else
         M_DECL_PURE stringview_type view() const
-        { return {M_CURRENT_BUFFER.data(), (size_t)m_result}; }
+        { return {M_CURRENT_BUFFER.data(), M_SZ}; }
 #endif
 
-        M_DECL_PURE std::string string() const
-        {
-            if (m_result > 0)
-                return std::string{M_CURRENT_BUFFER.data(), M_CURRENT_BUFFER.data() + m_result};
-            return std::string{};
-        }
+        M_DECL_PURE string_type string() const
+        { return string_type{M_ARR.data(), M_ARR.data() + M_SZ}; }
 
-        M_DECL std::string string(char const* fmt, ...)
+        M_DECL string_type string(char const* fmt, ...)
         {
             va_list args;
             va_start(args, fmt);
-            m_result = printNextBuffer(fmt, args);
+            next(fmt, args);
             va_end(args);
 
             return string();
@@ -105,7 +104,7 @@ namespace ut
         {
             va_list args;
             va_start(args, fmt);
-            m_result = printNextBuffer(fmt, args);
+            next(fmt, args);
             va_end(args);
 
             return view();
@@ -115,98 +114,131 @@ namespace ut
         {
             va_list args;
             va_start(args, fmt);
-            m_result = printNextBuffer(fmt, args);
+            next(fmt, args);
             va_end(args);
 
             return view();
         }
 
-        M_DECL stringview_type toChars(short        x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(int          x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(long         x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(long long    x, int base = 10) { return toCharsInt(x, base); }
+        //
+        // integer format
+        //
 
-        M_DECL stringview_type toChars(unsigned short       x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(unsigned int         x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(unsigned long        x, int base = 10) { return toCharsInt(x, base); }
-        M_DECL stringview_type toChars(unsigned long long   x, int base = 10) { return toCharsInt(x, base); }
+        M_DECL stringview_type view(short     x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(int       x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(long      x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(long long x, int base = 10) { nextInt(x, base); return view(); }
 
-        M_DECL stringview_type toChars(float        x, int precision) { return toCharsFloat(x, precision); }
-        M_DECL stringview_type toChars(double       x, int precision) { return toCharsFloat(x, precision); }
-        M_DECL stringview_type toChars(long double  x, int precision) { return toCharsFloat(x, precision); }
+        M_DECL stringview_type view(unsigned short     x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(unsigned int       x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(unsigned long      x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL stringview_type view(unsigned long long x, int base = 10) { nextInt(x, base); return view(); }
 
-        M_DECL stringview_type toChars(float        x) { return toCharsFloat(x); }
-        M_DECL stringview_type toChars(double       x) { return toCharsFloat(x); }
-        M_DECL stringview_type toChars(long double  x) { return toCharsFloat(x); }
+        M_DECL string_type string(short     x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(int       x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(long      x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(long long x, int base = 10) { nextInt(x, base); return string(); }
+
+        M_DECL string_type string(unsigned short     x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(unsigned int       x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(unsigned long      x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL string_type string(unsigned long long x, int base = 10) { nextInt(x, base); return string(); }
+
+        //
+        // float format
+        //
+
+        M_DECL stringview_type view(float        x, int precision) { nextFloat(x, precision); return view(); }
+        M_DECL stringview_type view(double       x, int precision) { nextFloat(x, precision); return view(); }
+        M_DECL stringview_type view(long double  x, int precision) { nextFloat(x, precision); return view(); }
+
+        M_DECL stringview_type view(float        x) { nextFloat(x); return view(); }
+        M_DECL stringview_type view(double       x) { nextFloat(x); return view(); }
+        M_DECL stringview_type view(long double  x) { nextFloat(x); return view(); }
+
+        M_DECL string_type string(float        x, int precision) { nextFloat(x, precision); return string(); }
+        M_DECL string_type string(double       x, int precision) { nextFloat(x, precision); return string(); }
+        M_DECL string_type string(long double  x, int precision) { nextFloat(x, precision); return string(); }
+
+        M_DECL string_type string(float        x) { nextFloat(x); return string(); }
+        M_DECL string_type string(double       x) { nextFloat(x); return string(); }
+        M_DECL string_type string(long double  x) { nextFloat(x); return string(); }
 
     private:
         buffer_container_type   m_buffer;
-        size_t                  m_counter =0;
-        int                     m_result  =0;
+        size_t                  m_counter=0;
 
-        M_DECL int printNextBuffer(char const* fmt, va_list args)
+        M_DECL void reset()
+        {
+            M_SZ = 0;
+            M_ARR[0] = '\0';
+        }
+
+        M_DECL void next(char const* fmt, va_list args)
         {
             ++m_counter;
-            m_result = vsnprintf(M_CURRENT_BUFFER.data(), M_CURRENT_BUFFER.size(), fmt, args);
 
-            if (m_result < 0)
-                M_CURRENT_BUFFER[0] = '\0';
-
-            return m_result;
+            if (int res = vsnprintf(M_ARR.data(), M_ARR.size(), fmt, args); res >= 0)
+                M_SZ = res;
+            else
+                reset();
         }
 
         template <typename T>
-        M_DECL stringview_type toCharsInt(T x, int base)
+        M_DECL void nextInt(T x, int base)
         {
             ++m_counter;
 
-            char* first = M_CURRENT_BUFFER.data();
-            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+            char* first = M_ARR.data();
+            char* last  = M_ARR.data() + M_ARR.size();
 
             if (auto [ptr, ec] = std::to_chars(first, last, x, base); ec == std::errc())
-                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
-            return {};
+                M_SZ = std::distance(first, ptr);
+            else
+                reset();
         }
 
         template <typename T>
-        M_DECL stringview_type toCharsFloat(T x, int precision)
+        M_DECL void nextFloat(T x, int precision)
         {
             ++m_counter;
 
-            char* first = M_CURRENT_BUFFER.data();
-            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+            char* first = M_ARR.data();
+            char* last  = M_ARR.data() + M_ARR.size();
 
             if (auto [ptr, ec] = std::to_chars(first, last, x, std::chars_format::fixed, precision); ec == std::errc())
-                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
-            return {};
+                M_SZ = std::distance(first, ptr);
+            else
+                reset();
         }
 
         template <typename T>
-        M_DECL stringview_type toCharsFloat(T x)
+        M_DECL void nextFloat(T x)
         {
             ++m_counter;
 
-            char* first = M_CURRENT_BUFFER.data();
-            char* last  = M_CURRENT_BUFFER.data() + M_CURRENT_BUFFER.size();
+            char* first = M_ARR.data();
+            char* last  = M_ARR.data() + M_ARR.size();
 
             if (auto [ptr, ec] = std::to_chars(first, last, x); ec == std::errc())
-                return cstrview::explicit_construct_cstr(first, std::distance(first, ptr));
-            return {};
+                M_SZ = std::distance(first, ptr);
+            else
+                reset();
         }
 
 
     };
 
     template <size_t BufferSize, size_t BufferCount>
-    basic_fmt<BufferSize, BufferCount>& basic_fmt<BufferSize, BufferCount>::instance() noexcept
+    basic_format_buffer<BufferSize, BufferCount>& basic_format_buffer<BufferSize, BufferCount>::instance() noexcept
     {
-        static thread_local basic_fmt<BufferSize, BufferCount> fmt;
+        static thread_local basic_format_buffer<BufferSize, BufferCount> fmt;
         return fmt;
     }
 
-    using fmt = basic_fmt<UT_FMT_BUFFER_SIZE, UT_FMT_BUFFER_COUNT>;
+    using fmtbuf = basic_format_buffer<UT_FMT_BUFFER_SIZE, UT_FMT_BUFFER_COUNT>;
 
-    [[maybe_unused]] static fmt& FMT = fmt::instance();
+    [[maybe_unused]] static fmtbuf& FMTBUF = fmtbuf::instance();
 }
 
 #undef M_DECL_PURE
