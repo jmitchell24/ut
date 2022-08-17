@@ -6,6 +6,7 @@
 using namespace ut;
 
 #include <fmt/core.h>
+#include <fmt/color.h>
 using namespace fmt;
 
 #include <type_traits>
@@ -18,21 +19,98 @@ int wrap(int i, int sz)
     return (i % sz + sz) % sz;
 }
 
+class TreePrinter
+{
+public:
+    explicit TreePrinter(std::ostream* os)
+        : m_os{os}, m_next{0}, m_prev{0}
+    { assert(os != nullptr); }
+
+    ~TreePrinter()
+    { assert(m_next == 0); }
+
+    void node(cstrparam s)
+    {
+        printLine(s);
+        m_prev = m_next;
+    }
+
+    void push()
+    {
+        //m_prev = m_next;
+        ++m_next;
+    }
+
+    void pop()
+    {
+        assert(m_next > 0);
+        //m_prev = m_next;
+        --m_next;
+    }
+
+
+private:
+    std::ostream* m_os;
+    std::ostringstream m_prefix;
+    int m_next, m_prev;
+
+    void printLine(cstrparam prefix, cstrparam line, int depth)
+    {
+        //            char const* head = "├";
+        //            char const* node = "│";
+        //            char const* tail = "└";
+        char const* spaces = "  ";
+
+
+
+        for (int i = 0; i < m_next; ++i)
+        {
+            (*m_os) << spaces;
+        }
+
+        (*m_os) << line;
+        (*m_os) << "\n";
+
+    }
+
+
+};
+
+/*
+
+┌─┬┐  ╔═╦╗  ╓─╥╖  ╒═╤╕
+│ ││  ║ ║║  ║ ║║  │ ││
+├─┼┤  ╠═╬╣  ╟─╫╢  ╞═╪╡
+└─┴┘  ╚═╩╝  ╙─╨╜  ╘═╧╛
+
+┌───────────────────┐
+│  ╔═══╗ Some Text  │▒
+│  ╚═╦═╝ in the box │▒
+╞═╤══╩══╤═══════════╡▒
+│ ├──┬──┤           │▒
+│ └──┴──┘           │▒
+└───────────────────┘▒
+ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+
+*/
+
 int main()
 {
-    auto a = FMTBUF.view(0xfefefefe, 16);
-    auto b = FMTBUF.view(2.2);
-    auto c = FMTBUF.view(3.3);
-    auto d = FMTBUF.view("asdf %s", "qwerty");
 
-    cout << a << endl;
-    cout << b << endl;
-    cout << c << endl;
-    cout << d << endl;
+    TreePrinter tp{addressof(cout)};
 
-
-
-
+    tp.node("a");
+    tp.push();
+    tp.node("+");
+    tp.node("-");
+    tp.node(".");
+    tp.push();
+    tp.node("0");
+    tp.node("1");
+    tp.node("2");
+    tp.pop();
+    tp.pop();
+    tp.node("b");
 
     return EXIT_SUCCESS;
 }

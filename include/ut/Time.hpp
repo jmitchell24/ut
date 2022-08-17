@@ -21,6 +21,18 @@ namespace ut
         using milliseconds_type         = std::chrono::duration<count_type, std::milli>;
         using seconds_type              = std::chrono::duration<count_type>;
 
+        struct scope_guard
+        {
+            scope_guard(scope_guard const&)=delete;
+            scope_guard(scope_guard&&)=delete;
+            scope_guard& operator= (scope_guard const&)=delete;
+            scope_guard& operator= (scope_guard&&)=delete;
+            inline explicit scope_guard(timer& timer): m_timer{timer} { m_timer.reset(); }
+            inline ~scope_guard() { m_timer.next(); }
+        private:
+            timer& m_timer;
+        };
+
         M_DECL timer()
             : m_now{getNow()}, m_previous{}
         { }
@@ -36,6 +48,8 @@ namespace ut
             m_previous = now - m_now;
             m_now = now;
         }
+
+        M_DECL scope_guard scoped() { return scope_guard{*this}; }
 
         M_DECL_PURE count_type previousSeconds       () const { return m_previous.count(); }
         M_DECL_PURE count_type previousMilliseconds  () const { return milliseconds_type{m_previous}.count(); }
