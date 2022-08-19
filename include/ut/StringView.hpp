@@ -97,7 +97,7 @@ namespace ut
         /// Construct with a null-terminated string
         ENABLE_IF_NULL_TERMINATED
         M_DECL basic_stringview(pointer_type p)
-                : m_begin{p}, m_end{p+strlen(p)}
+                : m_begin{p}, m_end{p+traits_type::length(p)}
         {}
 
         M_DECL_PURE pointer_type begin() const { return m_begin; }
