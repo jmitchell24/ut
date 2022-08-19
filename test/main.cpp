@@ -19,62 +19,8 @@ int wrap(int i, int sz)
     return (i % sz + sz) % sz;
 }
 
-class TreePrinter
-{
-public:
-    explicit TreePrinter(std::ostream* os)
-        : m_os{os}, m_next{0}, m_prev{0}
-    { assert(os != nullptr); }
-
-    ~TreePrinter()
-    { assert(m_next == 0); }
-
-    void node(cstrparam s)
-    {
-        printLine(s);
-        m_prev = m_next;
-    }
-
-    void push()
-    {
-        //m_prev = m_next;
-        ++m_next;
-    }
-
-    void pop()
-    {
-        assert(m_next > 0);
-        //m_prev = m_next;
-        --m_next;
-    }
 
 
-private:
-    std::ostream* m_os;
-    std::ostringstream m_prefix;
-    int m_next, m_prev;
-
-    void printLine(cstrparam prefix, cstrparam line, int depth)
-    {
-        //            char const* head = "├";
-        //            char const* node = "│";
-        //            char const* tail = "└";
-        char const* spaces = "  ";
-
-
-
-        for (int i = 0; i < m_next; ++i)
-        {
-            (*m_os) << spaces;
-        }
-
-        (*m_os) << line;
-        (*m_os) << "\n";
-
-    }
-
-
-};
 
 /*
 
@@ -94,23 +40,13 @@ private:
 
 */
 
+int add(int a, int b) { timer::sleepSeconds(.25); return a + b; }
+
 int main()
 {
+    constexpr auto asdf = "asdf"_sv;
 
-    TreePrinter tp{addressof(cout)};
-
-    tp.node("a");
-    tp.push();
-    tp.node("+");
-    tp.node("-");
-    tp.node(".");
-    tp.push();
-    tp.node("0");
-    tp.node("1");
-    tp.node("2");
-    tp.pop();
-    tp.pop();
-    tp.node("b");
+    asdf.same(asdf);
 
     return EXIT_SUCCESS;
 }
