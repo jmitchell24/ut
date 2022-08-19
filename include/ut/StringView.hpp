@@ -64,7 +64,7 @@ namespace ut
         M_DECL basic_stringview& operator=(stringview_type const&)=default;
 
         /// Construct with default string ("")
-        M_DECL basic_stringview()
+        inline basic_stringview()
                 : m_begin{getDefaultString()}, m_end{getDefaultString()}
         {}
 

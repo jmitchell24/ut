@@ -42,11 +42,20 @@ int wrap(int i, int sz)
 
 int add(int a, int b) { timer::sleepSeconds(.25); return a + b; }
 
+struct foo
+{
+    static constexpr ut::strview LANG_NAME = "Toyl"_sv;
+
+
+};
+
 int main()
 {
-    constexpr auto asdf = "asdf"_sv;
+    cout << foo::LANG_NAME << endl;
 
-    asdf.same(asdf);
+
+
+
 
     return EXIT_SUCCESS;
 }
