@@ -44,10 +44,12 @@ int add(int a, int b) { timer::sleepSeconds(.25); return a + b; }
 
 struct foo
 {
-    static constexpr ut::strview LANG_NAME = "Toyl"_sv;
+    static constexpr  ut::strview LANG_NAME = "asdf"_sv;
 
 
 };
+
+
 
 int main()
 {

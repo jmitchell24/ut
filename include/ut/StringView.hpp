@@ -64,8 +64,8 @@ namespace ut
         M_DECL basic_stringview& operator=(stringview_type const&)=default;
 
         /// Construct with default string ("")
-        inline basic_stringview()
-                : m_begin{getDefaultString()}, m_end{getDefaultString()}
+        M_DECL basic_stringview()
+                : m_begin{""}, m_end{m_begin}
         {}
 
         /// Construct with an STL basic_string
@@ -347,12 +347,6 @@ namespace ut
         M_DECL_PURE explicit basic_stringview(pointer_type begin, size_type sz)
                 : m_begin{begin}, m_end{m_begin+sz}
         {}
-
-        static char_type const* getDefaultString()
-        {
-            static char_type buf[1];
-            return buf;
-        }
     };
 
 #undef ENABLE_IF_NULL_TERMINATED
