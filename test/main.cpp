@@ -53,7 +53,7 @@ struct foo
 
 int main()
 {
-    cout << foo::LANG_NAME << endl;
+    cout << FMTBUF("%d %d %d", 1, 2, 3) << endl;
 
 
 

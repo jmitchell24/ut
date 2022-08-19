@@ -6,7 +6,7 @@
 //
 
 //---- Use std::string_view if enabled, otherwise use ut::cstrview
-#define UT_FMT_USE_STL_STRINGVIEW
+//#define UT_FMT_USE_STL_STRINGVIEW
 
 //---- Specify string buffer size
 //#define UT_FMT_BUFFER_SIZE 256
