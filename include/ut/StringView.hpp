@@ -724,22 +724,11 @@ namespace ut
     template <typename Char, typename Traits, bool NullTerminated> inline Char const* begin(basic_stringview<Char,Traits,NullTerminated> const& s) { return s.begin(); }
     template <typename Char, typename Traits, bool NullTerminated> inline Char const* end  (basic_stringview<Char,Traits,NullTerminated> const& s) { return s.end(); }
 
-    using stringview = basic_stringview<char, std::char_traits<char>, false>;
+    using strview  = basic_stringview<char, std::char_traits<char>, false>;
     using cstrview = basic_stringview<char, std::char_traits<char>, true>;
 
-    //
-    // *new* aliases (experiment)
-    //
-
-    using strview = basic_stringview<char, std::char_traits<char>, false>;
-    //using cstrview = basic_stringview<char, std::char_traits<char>, true>;
-
-    using strparam = strview const&;
-    using cstrparam = cstrview const&;
-
-    //
-    //
-    //
+    using strparam  = strview;
+    using cstrparam = cstrview;
 
     template <bool SkipEmpty = true>
     using svsplit = basic_svsplit<SkipEmpty, char, std::char_traits<char>>;
