@@ -17,25 +17,6 @@ using namespace std;
 #include <thread>
 #include <functional>
 
-template <typename T> class waitable
-{
-public:
-    using func_type = std::function<T()>;
-
-    waitable(func_type func)
-        : m_func{std::move(func)}
-    { }
-
-    bool tryGet(T& t)
-    {
-        m_thread.joinable()
-        t = std::move(m_obj);
-    }
-private:
-    std::thread m_thread;
-    func_type   m_func;
-    T           m_obj;
-};
 
 
 
