@@ -14,18 +14,27 @@ using namespace fmt;
 #include <iomanip>
 using namespace std;
 
-int wrap(int i, int sz)
+#include <thread>
+#include <functional>
+
+template <typename T> class waitable
 {
-    return (i % sz + sz) % sz;
-}
+public:
+    using func_type = std::function<T()>;
 
-int add(int a, int b) { timer::sleepSeconds(.25); return a + b; }
+    waitable(func_type func)
+        : m_func{std::move(func)}
+    { }
 
-struct foo
-{
-    static constexpr  ut::cstrview LANG_NAME = "asdf";
-
-
+    bool tryGet(T& t)
+    {
+        m_thread.joinable()
+        t = std::move(m_obj);
+    }
+private:
+    std::thread m_thread;
+    func_type   m_func;
+    T           m_obj;
 };
 
 
