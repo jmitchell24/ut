@@ -2,7 +2,7 @@
 // Created by james on 29/03/22.
 //
 
-#include "ut/Color.hpp"
+#include "ut/color.hpp"
 
 #include <cmath>
 using namespace std;

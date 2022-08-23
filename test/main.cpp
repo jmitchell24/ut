@@ -19,27 +19,6 @@ int wrap(int i, int sz)
     return (i % sz + sz) % sz;
 }
 
-
-
-
-/*
-
-┌─┬┐  ╔═╦╗  ╓─╥╖  ╒═╤╕
-│ ││  ║ ║║  ║ ║║  │ ││
-├─┼┤  ╠═╬╣  ╟─╫╢  ╞═╪╡
-└─┴┘  ╚═╩╝  ╙─╨╜  ╘═╧╛
-
-┌───────────────────┐
-│  ╔═══╗ Some Text  │▒
-│  ╚═╦═╝ in the box │▒
-╞═╤══╩══╤═══════════╡▒
-│ ├──┬──┤           │▒
-│ └──┴──┘           │▒
-└───────────────────┘▒
- ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-
-*/
-
 int add(int a, int b) { timer::sleepSeconds(.25); return a + b; }
 
 struct foo
@@ -53,9 +32,12 @@ struct foo
 
 int main()
 {
-    cout << FMTBUF("%d %d %d", 1, 2, 3) << endl;
+    array<cstrview, 30> arr;
+    for (int i = 0; i < arr.size(); ++i)
+        arr[i] = FMTBUF.intView(i);
 
-
+    for (auto&& it : arr)
+        cout << it << endl;
 
 
 
