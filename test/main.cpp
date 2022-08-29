@@ -22,15 +22,13 @@ using namespace std;
 
 int main()
 {
-    auto s = "1234"_sv;
+    string s = "1234";
 
-    char buf[100];
+    strview v = s;
 
-    auto v = s.strncpy(buf, 100);
+    strview::make_cstrview("1234", 4);
 
 
-
-    cout << v;
 
     return EXIT_SUCCESS;
 }

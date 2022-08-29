@@ -31,6 +31,8 @@ namespace ut
     template <bool SkipEmpty, typename Char, typename Traits = std::char_traits<Char>>
     struct basic_strview_split;
 
+    struct basic_strview_cstr_tag {};
+
 #define ENABLE_IF_NULL_TERMINATED  template <bool N_ = NullTerminated, typename = std::enable_if_t<N_ == true>>
 #define ENABLE_IF_NOT_NULL_TERMINATED template <bool N_ = NullTerminated, typename = std::enable_if_t<N_ == false>>
 
@@ -54,7 +56,7 @@ namespace ut
         using stream_type           = basic_strview_stream  <char_type,traits_type>;
 
         template <bool SkipEmpty>
-        using split_type = basic_strview_split<SkipEmpty, char_type,traits_type>;
+        using split_type = basic_strview_split<SkipEmpty, char_type, traits_type>;
 
         inline constexpr static bool NULL_TERMINATED = NullTerminated;
 
@@ -93,6 +95,11 @@ namespace ut
         M_DECL_PURE explicit basic_strview(pointer_type begin, size_type sz)
             : m_begin{begin}, m_end{m_begin+sz}
         {}
+
+        /// Construct with a begin pointer and length. Will dereference to check null-terminated.
+        M_DECL_PURE basic_strview(pointer_type begin, size_type sz, basic_strview_cstr_tag)
+                : m_begin{begin}, m_end{m_begin+sz}
+        { assert(*m_end == '\0'); }
 
         /// Construct with a null-terminated stringview
         ENABLE_IF_NOT_NULL_TERMINATED
@@ -345,18 +352,13 @@ namespace ut
 
         /// make a cstrview from ptr+sz, dereference m_end to verify null-termination (assert).
         M_DECL_PURE static strview_cstr_type make_cstrview(pointer_type begin, size_type sz)
-        { return strview_cstr_type(begin, sz, make_cstr_tag{}); }
+        { return strview_cstr_type(begin, sz, basic_strview_cstr_tag{}); }
 
     private:
-        struct make_cstr_tag {};
-
         char_type const* m_begin;
         char_type const* m_end;
 
-        /// ctor used only by make_cstrview()
-        M_DECL_PURE explicit basic_strview(pointer_type begin, size_type sz, make_cstr_tag)
-                : m_begin{begin}, m_end{m_begin+sz}
-        { assert(*m_end == '\0'); }
+
     };
 
 #undef ENABLE_IF_NULL_TERMINATED
