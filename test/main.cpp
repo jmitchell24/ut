@@ -24,9 +24,8 @@ int main()
 {
     string s = "1234";
 
-    strview v = s;
-
-    strview::make_cstrview("1234", 4);
+    auto x = "1234"_sv.shared_ptr_copy();
+    cout << x.view;
 
 
 

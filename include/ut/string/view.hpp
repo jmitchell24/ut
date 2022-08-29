@@ -43,8 +43,8 @@ namespace ut
         using char_type             = Char;
         using traits_type           = Traits;
         using pointer_type          = char_type const*;
-        using unique_pointer_type   = std::unique_ptr<char_type>;
-        using shared_pointer_type   = std::shared_ptr<char_type>;
+        using unique_pointer_type   = std::unique_ptr<char_type[]>;
+        using shared_pointer_type   = std::shared_ptr<char_type[]>;
         using size_type             = std::size_t;
         using string_type           = std::basic_string     <char_type,traits_type>;
         using ostream_type          = std::basic_ostream    <char_type,traits_type>;
@@ -57,6 +57,9 @@ namespace ut
 
         template <bool SkipEmpty>
         using split_type = basic_strview_split<SkipEmpty, char_type, traits_type>;
+
+        struct unique_copy { unique_pointer_type ptr; strview_cstr_type view; };
+        struct shared_copy { shared_pointer_type ptr; strview_cstr_type view; };
 
         inline constexpr static bool NULL_TERMINATED = NullTerminated;
 
@@ -94,12 +97,15 @@ namespace ut
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL_PURE explicit basic_strview(pointer_type begin, size_type sz)
             : m_begin{begin}, m_end{m_begin+sz}
-        {}
+        { assert(m_begin != nullptr); }
 
         /// Construct with a begin pointer and length. Will dereference to check null-terminated.
         M_DECL_PURE basic_strview(pointer_type begin, size_type sz, basic_strview_cstr_tag)
                 : m_begin{begin}, m_end{m_begin+sz}
-        { assert(*m_end == '\0'); }
+        {
+            assert(m_begin != nullptr);
+            assert(*m_end == '\0');
+        }
 
         /// Construct with a null-terminated stringview
         ENABLE_IF_NOT_NULL_TERMINATED
@@ -135,22 +141,22 @@ namespace ut
             return ::strncpy(dest, m_begin, std::min<size_t>(n, m_end-m_begin));
         }
 
-        M_DECL_PURE std::pair<shared_pointer_type, strview_cstr_type> shared_ptr_copy() const
+        M_DECL_PURE shared_copy shared_ptr_copy() const
         {
             size_type sz = size();
-            shared_pointer_type ptr = shared_pointer_type(new char_type[sz+1]);
-            ::strncpy(ptr.get(), m_begin, sz);
-            *(ptr.get()+sz) = 0;
-            return {std::move(ptr), make_cstrview(ptr.get(), sz)};
+            auto ptr = new char_type[sz+1];
+            ::strncpy(ptr, m_begin, sz);
+            *(ptr+sz) = 0;
+            return {shared_pointer_type(ptr), make_cstrview(ptr, sz)};
         }
 
-        M_DECL_PURE std::pair<unique_pointer_type, strview_cstr_type> unique_ptr_copy() const
+        M_DECL_PURE unique_copy unique_ptr_copy() const
         {
             size_type sz = size();
-            unique_pointer_type ptr = unique_pointer_type(new char_type[sz+1]);
-            ::strncpy(ptr.get(), m_begin, sz);
-            *(ptr.get()+sz) = 0;
-            return {std::move(ptr), make_cstrview(ptr.get(), sz)};
+            auto ptr = new char_type[sz+1];
+            ::strncpy(ptr, m_begin, sz);
+            *(ptr+sz) = 0;
+            return {unique_pointer_type(ptr), make_cstrview(ptr, sz)};
         }
 
         /// Return c-string (if NullTerminated == true)
