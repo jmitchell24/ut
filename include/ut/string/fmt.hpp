@@ -81,7 +81,7 @@ namespace ut
 #else
 
         M_DECL_PURE view_type view() const
-        { return cstrview::explicit_construct_cstr(M_ARR.data(), M_SZ); }
+        { return cstrview::make_cstrview(M_ARR.data(), M_SZ); }
 #endif
 
         M_DECL_PURE string_type string() const

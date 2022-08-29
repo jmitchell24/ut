@@ -22,14 +22,15 @@ using namespace std;
 
 int main()
 {
-    array<cstrview, 30> arr;
-    for (int i = 0; i < arr.size(); ++i)
-        arr[i] = FMTBUF.intView(i);
+    auto s = "1234"_sv;
 
-    for (auto&& it : arr)
-        cout << it << endl;
+    char buf[100];
+
+    auto v = s.strncpy(buf, 100);
 
 
+
+    cout << v;
 
     return EXIT_SUCCESS;
 }
