@@ -185,7 +185,7 @@ namespace ut
             assert(end   <= m_end);
             assert(end   >= m_begin);
 
-            return strview_type{begin, end};
+            return strview_nstr_type{begin, end};
         }
 
         /// get sub-string from \a m_begin ptr to specified \p end ptr
@@ -205,6 +205,16 @@ namespace ut
 
         M_DECL_PURE strview_nstr_type takeEnd(size_type size) const
         { return sub(m_end-size, m_end); }
+
+        /// get sub-string from \a m_begin + \p size to \a m_end
+        M_DECL_PURE strview_nstr_type skip(size_type size) const
+        { return skipBegin(size); }
+
+        M_DECL_PURE strview_nstr_type skipBegin(size_type size) const
+        { return sub(m_begin+size, m_end); }
+
+        M_DECL_PURE strview_nstr_type skipEnd(size_type size) const
+        { return sub(m_begin, m_end-size); }
 
         M_DECL_PURE bool same(strview_type const& s) const { return same(*this, s); }
         M_DECL_PURE bool same(char_type c)              const { return same(*this, c); }
@@ -265,7 +275,7 @@ namespace ut
         M_DECL_PURE pointer_type findLastNot(char_type c) const
         {
             for (pointer_type i = m_end-1; i != m_begin-1; --i)
-                if (!traits_type::eq(*i != c))
+                if (!traits_type::eq(*i,c))
                     return i;
             return end;
         }

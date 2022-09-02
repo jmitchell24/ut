@@ -22,10 +22,18 @@ using namespace std;
 
 int main()
 {
-    string s = "1234";
+    auto s = "qwerty"_sv;
 
-    auto x = "1234"_sv.shared_ptr_copy();
-    cout << x.view;
+#define SV_TEST(...) cout << #__VA_ARGS__ << " : '" << __VA_ARGS__ << '\'' << endl
+
+    SV_TEST(s.take(2));
+    SV_TEST(s.skip(2));
+    SV_TEST(s.takeBegin(2));
+    SV_TEST(s.skipBegin(2));
+    SV_TEST(s.takeEnd(2));
+    SV_TEST(s.skipEnd(2));
+
+#undef SV_TEST
 
 
 
