@@ -74,10 +74,10 @@ namespace ut
         // return elapsed time between 't' timepoint and member timepoint
         //
 
-        M_DECL count_type seconds       (timer const& t) const { return seconds_type     {t.m_now - m_now}.count(); }
-        M_DECL count_type milliseconds  (timer const& t) const { return milliseconds_type{t.m_now - m_now}.count(); }
-        M_DECL count_type microseconds  (timer const& t) const { return microseconds_type{t.m_now - m_now}.count(); }
-        M_DECL count_type nanoseconds   (timer const& t) const { return nanoseconds_type {t.m_now - m_now}.count(); }
+        M_DECL_PURE count_type seconds       (timer const& t) const { return seconds_type     {t.m_now - m_now}.count(); }
+        M_DECL_PURE count_type milliseconds  (timer const& t) const { return milliseconds_type{t.m_now - m_now}.count(); }
+        M_DECL_PURE count_type microseconds  (timer const& t) const { return microseconds_type{t.m_now - m_now}.count(); }
+        M_DECL_PURE count_type nanoseconds   (timer const& t) const { return nanoseconds_type {t.m_now - m_now}.count(); }
 
         //
         // return elapsed time between now and member timepoint, then reset

@@ -14,11 +14,21 @@ using namespace fmt;
 #include <iomanip>
 using namespace std;
 
-#include <thread>
-#include <functional>
+//
+// forward declarations (to catch compile errors
+//
 
+namespace ut
+{
+    template struct basic_strview<char, std::char_traits<char>, false>;
+    template struct basic_strview<char, std::char_traits<char>, true>;
 
+    template struct basic_strview_split<true, char, std::char_traits<char>>;
+    template struct basic_strview_split<false, char, std::char_traits<char>>;
 
+    template struct basic_strview_buf<char>;
+    template struct basic_strview_stream<char>;
+}
 
 
 int main(int argc, char** argv)
