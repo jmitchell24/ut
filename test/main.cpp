@@ -20,24 +20,23 @@ using namespace std;
 
 
 
-int main()
+
+int main(int argc, char** argv)
 {
-    auto s = "qwerty"_sv;
+    doctest::Context context;
+    context.applyCommandLine(argc, argv);
+    context.setOption("no-breaks", true);
+    context.setOption("--version", true);
+    context.setOption("--count", true);
+    context.setOption("--list-test-cases", true);
+    context.setOption("--list-test-suites", true);
+    context.setOption("--success", false);
+    context.setOption("--exit", true);
 
-#define SV_TEST(...) cout << #__VA_ARGS__ << " : '" << __VA_ARGS__ << '\'' << endl
-
-    SV_TEST(s.take(2));
-    SV_TEST(s.skip(2));
-    SV_TEST(s.takeBegin(2));
-    SV_TEST(s.skipBegin(2));
-    SV_TEST(s.takeEnd(2));
-    SV_TEST(s.skipEnd(2));
-
-#undef SV_TEST
-
-
-
-    return EXIT_SUCCESS;
+    const int result = context.run();
+    if (context.shouldExit())
+        return result;
+    return result;
 }
 
 //int main()
@@ -61,22 +60,4 @@ int main()
 //}
 
 
-//
-//
-//int main(int argc, char** argv)
-//{
-//    doctest::Context context;
-//    context.applyCommandLine(argc, argv);
-//    context.setOption("no-breaks", true);
-//    context.setOption("--version", true);
-//    context.setOption("--count", true);
-//    context.setOption("--list-test-cases", true);
-//    context.setOption("--list-test-suites", true);
-//    context.setOption("--success", false);
-//    context.setOption("--exit", true);
-//
-//    const int result = context.run();
-//    if (context.shouldExit())
-//        return result;
-//    return result;
-//}
+
