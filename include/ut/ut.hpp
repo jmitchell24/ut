@@ -4,9 +4,7 @@
 #include <ut/algo/base64.hpp>
 #include <ut/algo/gulp.hpp>
 #include <ut/func/delegate.hpp>
-#include <ut/string/fmt.hpp>
-#include <ut/string/view.hpp>
-#include <ut/string/metric.hpp>
+#include <ut/string.hpp>
 #include <ut/Bit.hpp>
 #include <ut/SortedVector.hpp>
 #include <ut/Rect.hpp>
