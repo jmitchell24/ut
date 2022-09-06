@@ -202,11 +202,13 @@ namespace ut
             return strview_nstr_type{begin, end};
         }
 
+
         /// Returns a view of substring [begin(), end], where end <= end().
         /// \param end  Pointer to the char following following the last char of the view.
         /// \return     View of the substring [begin(), end]
         M_DECL_PURE strview_nstr_type withEnd(pointer_type end) const
         { return with(m_begin, end); }
+
 
         /// Returns a view of substring [begin, end()] where begin >= begin().
         /// \param begin    Pointer the first char of the substring.
@@ -214,11 +216,13 @@ namespace ut
         M_DECL_PURE strview_nstr_type withBegin(pointer_type begin) const
         { return with(begin, m_end); }
 
+
         /// Returns a view of substring [begin(), begin()+size]. Equivalent to takeBegin().
         /// \param size     Requested view size
         /// \return         View of the substring [begin(), begin()+size]
         M_DECL_PURE strview_nstr_type take(size_type size) const
         { return takeBegin(size); }
+
 
         /// Returns a view of substring [begin(), begin()+size]
         /// \param size     Requested view size
@@ -233,11 +237,13 @@ namespace ut
         M_DECL_PURE strview_nstr_type takeEnd(size_type size) const
         { return with(m_end-size, m_end); }
 
+
         /// Returns a view of substring [end()-size, end()]. Equivalent to \a skipBegin()
         /// \param size     Requested view size.
         /// \return         View of the substring [end()-size, end()].
         M_DECL_PURE strview_nstr_type skip(size_type size) const
         { return skipBegin(size); }
+
 
         /// Returns a view of the substring [ \a begin()+size, \a end() ].
         /// \param size     Requested view size.
@@ -245,11 +251,13 @@ namespace ut
         M_DECL_PURE strview_nstr_type skipBegin(size_type size) const
         { return with(m_begin+size, m_end); }
 
+
         /// Returns a view of the substring [ \a begin(), \a end()-size ].
         /// \param size     Requested view size.
         /// \return         View of the substring [ \a begin(), \a end()-size ].
         M_DECL_PURE strview_nstr_type skipEnd(size_type size) const
         { return with(m_begin, m_end-size); }
+
 
         M_DECL_PURE pointer_type find(strview_type const& s) const
         {
@@ -418,22 +426,6 @@ namespace ut
         return cstrview::make_cstrview(str, sz);
     }
 }
-
-namespace std
-{
-    template<class Key> struct hash;
-
-    template <typename Char, typename Traits, bool NullTerminated>
-    struct hash<ut::basic_strview<Char,Traits,NullTerminated>>
-    {
-        size_t operator()(ut::basic_strview<Char,Traits,NullTerminated> const& k) const
-        {
-            using string_view_type = typename ut::basic_strview<Char,Traits,NullTerminated>::string_view_type;
-            return hash<string_view_type>{}(k.view());
-        }
-    };
-}
-
 
 #undef M_DECL_PURE
 #undef M_DECL
