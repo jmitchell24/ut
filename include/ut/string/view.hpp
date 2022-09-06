@@ -427,6 +427,21 @@ namespace ut
     }
 }
 
+namespace std
+{
+    template<class Key> struct hash;
+
+    template <typename Char, typename Traits, bool NullTerminated>
+    struct hash<ut::basic_strview<Char,Traits,NullTerminated>>
+    {
+        size_t operator()(ut::basic_strview<Char,Traits,NullTerminated> const& k) const
+        {
+            using string_view_type = typename ut::basic_strview<Char,Traits,NullTerminated>::string_view_type;
+            return hash<string_view_type>{}(k.view());
+        }
+    };
+}
+
 #undef M_DECL_PURE
 #undef M_DECL
 
