@@ -216,4 +216,8 @@ namespace ut
     template <bool SkipEmpty = true>
     using split = basic_strview_split<SkipEmpty, char, std::char_traits<char>>;
 
+    template <char C>
+    inline static constexpr bool delim(char c)
+    { return C == c; }
+
 }

@@ -35,16 +35,6 @@
 #include "ut/string/view.hpp"
 #endif
 
-#define FMT_VARARGS_OBJ(__obj__, __start_arg__) \
-{ \
-    va_list __args__; \
-    va_start(__args__, __start_arg__); \
-    __obj__.vsprintf(__start_arg__, __args__); \
-    va_end(__args__); \
-}
-
-#define FMT_VARARGS(__start_arg__) FMT_VARARGS_OBJ(::ut::FMT, __start_arg__)
-
 #define M_DECL_PURE             [[nodiscard]] inline
 #define M_DECL                  inline
 #define M_ARR                   ( m_buffer[m_index%BUFFER_COUNT].arr )
@@ -55,6 +45,9 @@ namespace ut
     template <size_t BufferSize, size_t BufferCount>
     class basic_format_buffer
     {
+        static_assert(BufferSize > 1, "invalid BufferSize");
+        static_assert(BufferCount > 0, "invalid BufferCount");
+
     public:
         int static constexpr BUFFER_SIZE  = BufferSize;
         int static constexpr BUFFER_COUNT = BufferCount;
@@ -67,8 +60,17 @@ namespace ut
         using view_type = cstrview;
 #endif
 
-        struct buf { std::array<char, BUFFER_SIZE> arr; size_t sz=0; };
+        struct buf { std::array<char, BUFFER_SIZE> arr; size_t sz; };
         using buffer_container_type = std::array<buf, BUFFER_COUNT>;
+
+        basic_format_buffer()
+        {
+            for (auto&& it : m_buffer)
+            {
+                it.sz = 0;
+                it.arr[0] = '\0';
+            }
+        }
 
         static basic_format_buffer& instance() noexcept;
 

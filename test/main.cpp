@@ -30,23 +30,85 @@ namespace ut
     template struct basic_strview_stream<char>;
 }
 
+template <typename T, float LF> struct hash_table
+{
+    struct entry
+    {
+        std::string key;
+        bool empty=true;
+        union { char dummy; T value; };
+    };
+
+    static constexpr float LOAD_FACTOR = LF;
+    static_assert(LOAD_FACTOR > 0 && LOAD_FACTOR < 1, "invalid LOAD_FACTOR range");
+
+    using entries_type = std::vector<entry>;
+
+    entries_type buckets;
+    size_t count = 0;
+
+    inline size_t bucketIndex(strparam key)
+    { return hasher::range(key.begin(), key.end()) % buckets.size(); }
+
+    bool set(strparam key, T&& value)
+    {
+        if (count+1 > buckets.size() * 0.75)
+        {
+            buckets.reserve(buckets.capacity() * 1.5);
+        }
+
+        entry* e = findEntry(key);
+
+        bool is_new = e->empty;
+        if (is_new) ++count;
+
+        e->key = key.str();
+        e->operator=(value);
+        return is_new;
+    }
+
+    entry* findEntry(strparam key)
+    {
+        size_t index = bucketIndex(key);
+
+        for (;;)
+        {
+            auto entry = &buckets[index];
+            if (entry->key == key.str() || entry->empty)
+                return entry;
+            index = (index + 1) % buckets.size();
+        }
+    }
+
+    static hash64_t hash(strparam s)
+    {
+        return hasher::range(s.begin(), s.end());
+    }
+};
 
 int main(int argc, char** argv)
 {
-    doctest::Context context;
-    context.applyCommandLine(argc, argv);
-    context.setOption("no-breaks", true);
-    context.setOption("--version", true);
-    context.setOption("--count", true);
-    context.setOption("--list-test-cases", true);
-    context.setOption("--list-test-suites", true);
-    context.setOption("--success", false);
-    context.setOption("--exit", true);
+    using hasher_t = basic_hasher<std::uint8_t, 3, 7>;
 
-    const int result = context.run();
-    if (context.shouldExit())
-        return result;
-    return result;
+    cout << (int)hasher_t::args("foo") << endl;
+    cout << (int)hasher_t::args("bar") << endl;
+    cout << (int)hasher_t::args("baz") << endl;
+    cout << (int)hasher_t::args("cat") << endl;
+
+//    doctest::Context context;
+//    context.applyCommandLine(argc, argv);
+//    context.setOption("no-breaks", true);
+//    context.setOption("--version", true);
+//    context.setOption("--count", true);
+//    context.setOption("--list-test-cases", true);
+//    context.setOption("--list-test-suites", true);
+//    context.setOption("--success", false);
+//    context.setOption("--exit", true);
+//
+//    const int result = context.run();
+//    if (context.shouldExit())
+//        return result;
+//    return result;
 }
 
 //int main()

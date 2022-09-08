@@ -99,7 +99,7 @@ namespace ut
 
     using hash32_t = std::uint32_t;
     using hash64_t = std::uint64_t;
-    using hash_t = hash64_t;
+    using hash_t   = hash64_t;
 
     using hasher32  = basic_hasher<hash32_t, 2166136261u, 16777619u>;
     using hasher64  = basic_hasher<hash64_t, 14695981039346656037u, 1099511628211u>;
