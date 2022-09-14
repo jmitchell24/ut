@@ -188,6 +188,7 @@ namespace ut
         /// Returns an STL basic_string
         M_DECL_PURE string_type str() const { return string_type(m_begin, m_end); }
 
+
         /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().
         /// \param begin    Pointer to the first char of the substring.
         /// \param end      Pointer to the char following following the last char of the view.
@@ -199,6 +200,18 @@ namespace ut
             assert(end   <= m_end);
             assert(end   >= m_begin);
 
+            return strview_nstr_type{begin, end};
+        }
+
+
+        /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().
+        /// \param begin    Pointer to the first char of the substring.
+        /// \param end      Pointer to the char following following the last char of the view.
+        /// \return         View of the substring [begin, end].
+        M_DECL_PURE strview_nstr_type withClamp(pointer_type begin, pointer_type end) const
+        {
+            if (begin < m_begin) begin = m_begin;
+            if (end   > m_end  ) end   = m_end;
             return strview_nstr_type{begin, end};
         }
 
