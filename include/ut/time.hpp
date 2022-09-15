@@ -52,7 +52,7 @@ namespace ut
             : m_now{getNow()}, m_previous{}
         { }
 
-        M_DECL duration reset()
+        M_DECL void reset()
         {
             m_now = getNow();
         }
