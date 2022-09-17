@@ -88,27 +88,20 @@ template <typename T, float LF> struct hash_table
 
 int main(int argc, char** argv)
 {
-    using hasher_t = basic_hasher<std::uint8_t, 3, 7>;
+    doctest::Context context;
+    context.applyCommandLine(argc, argv);
+    context.setOption("no-breaks", true);
+    context.setOption("--version", true);
+    context.setOption("--count", true);
+    context.setOption("--list-test-cases", true);
+    context.setOption("--list-test-suites", true);
+    context.setOption("--success", false);
+    context.setOption("--exit", true);
 
-    cout << (int)hasher_t::args("foo") << endl;
-    cout << (int)hasher_t::args("bar") << endl;
-    cout << (int)hasher_t::args("baz") << endl;
-    cout << (int)hasher_t::args("cat") << endl;
-
-//    doctest::Context context;
-//    context.applyCommandLine(argc, argv);
-//    context.setOption("no-breaks", true);
-//    context.setOption("--version", true);
-//    context.setOption("--count", true);
-//    context.setOption("--list-test-cases", true);
-//    context.setOption("--list-test-suites", true);
-//    context.setOption("--success", false);
-//    context.setOption("--exit", true);
-//
-//    const int result = context.run();
-//    if (context.shouldExit())
-//        return result;
-//    return result;
+    const int result = context.run();
+    if (context.shouldExit())
+        return result;
+    return result;
 }
 
 //int main()

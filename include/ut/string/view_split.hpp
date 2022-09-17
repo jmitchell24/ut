@@ -62,13 +62,13 @@ namespace ut
 
             if constexpr(SkipEmpty)
             {
-                stringview_type tok = sv.withEnd(token_begin);
+                stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
                     callback(tok);
             }
             else
             {
-                callback(sv.withEnd(token_begin));
+                callback(sv.withBegin(token_begin));
             }
         }
 
@@ -219,5 +219,6 @@ namespace ut
     template <char C>
     inline static constexpr bool delim(char c)
     { return C == c; }
+
 
 }
