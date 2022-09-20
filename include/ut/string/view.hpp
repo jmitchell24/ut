@@ -137,7 +137,7 @@ namespace ut
 
         /// Returns the last char of the string.
         /// \return     The last char of the string.
-        M_DECL_PURE char_type last () const { assert(m_begin != m_end); return *(m_end-1); }
+        M_DECL_PURE char_type last() const { assert(m_begin != m_end); return *(m_end-1); }
 
         /// Returns the length of the string, in number of chars.
         /// \return     The number of chars in the string.
@@ -187,6 +187,21 @@ namespace ut
 
         /// Returns an STL basic_string
         M_DECL_PURE string_type str() const { return string_type(m_begin, m_end); }
+
+
+        /// Returns an equivalent sub-view for \p copy, assuming that this sub-view is of \p orig.
+        /// \p orig and \p copy are assumed to be equivalent.
+        /// \param orig     The view from which this sub-view is derived.
+        /// \param copy     The view from which the new sub-view will be derived.
+        /// \return         A new sub-view derived from \p copy and equivalent to this sub-view.
+        M_DECL_PURE strview_nstr_type mirror(strview_type orig, strview_type copy) const
+        {
+            assert(orig == copy);
+            size_t          i       = m_begin - orig.m_begin;
+            size_t          sz      = size();
+            pointer_type    data    = copy.m_begin;
+            return copy.with(data+i, data+i+sz);
+        }
 
 
         /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().

@@ -86,22 +86,35 @@ template <typename T, float LF> struct hash_table
     }
 };
 
+//template <typename Char, typename Traits, bool NullTerminated>
+//inline std::basic_ostream<Char, Traits>& operator << (std::basic_ostream<Char, Traits>& os, ut::basic_strview<Char, Traits, NullTerminated> const& s)
+//{ return os.write(s.begin(), (std::streamsize)s.size()); }
+
 int main(int argc, char** argv)
 {
-    doctest::Context context;
-    context.applyCommandLine(argc, argv);
-    context.setOption("no-breaks", true);
-    context.setOption("--version", true);
-    context.setOption("--count", true);
-    context.setOption("--list-test-cases", true);
-    context.setOption("--list-test-suites", true);
-    context.setOption("--success", false);
-    context.setOption("--exit", true);
+    string string1 = "string1";
+    string string2 = "string1";
 
-    const int result = context.run();
-    if (context.shouldExit())
-        return result;
-    return result;
+    auto view = strview(string1).takeEnd(1);
+    auto mirror = view.mirror(string1, string2);
+
+    cout << (size_t)view.begin() << endl;
+    cout << (size_t)mirror.end() << endl;
+    return EXIT_SUCCESS;
+//    doctest::Context context;
+//    context.applyCommandLine(argc, argv);
+//    context.setOption("no-breaks", true);
+//    context.setOption("--version", true);
+//    context.setOption("--count", true);
+//    context.setOption("--list-test-cases", true);
+//    context.setOption("--list-test-suites", true);
+//    context.setOption("--success", false);
+//    context.setOption("--exit", true);
+//
+//    const int result = context.run();
+//    if (context.shouldExit())
+//        return result;
+//    return result;
 }
 
 //int main()
