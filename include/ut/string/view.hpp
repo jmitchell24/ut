@@ -194,13 +194,17 @@ namespace ut
         /// \param orig     The view from which this sub-view is derived.
         /// \param copy     The view from which the new sub-view will be derived.
         /// \return         A new sub-view derived from \p copy and equivalent to this sub-view.
-        M_DECL_PURE strview_nstr_type mirror(strview_type orig, strview_type copy) const
+        M_DECL_PURE strview_nstr_type mirror(strview_type const& orig, strview_type const& copy) const
         {
             assert(orig == copy);
-            size_t          i       = m_begin - orig.m_begin;
-            size_t          sz      = size();
-            pointer_type    data    = copy.m_begin;
-            return copy.with(data+i, data+i+sz);
+            assert(m_begin >= orig.m_begin);
+            assert(m_begin <= orig.m_end);
+            assert(m_end   <= orig.m_end);
+            assert(m_end   >= orig.m_begin);
+
+            pointer_type begin = copy.m_begin + size_type(m_begin - orig.m_begin);
+            pointer_type end   = begin + size();
+            return copy.with(begin, end);
         }
 
 
