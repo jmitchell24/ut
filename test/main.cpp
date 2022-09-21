@@ -93,16 +93,23 @@ template <typename T, float LF> struct hash_table
 int main(int argc, char** argv)
 {
 
+auto s = R"(
+
+1
+2
+3
+4
+
+)"_str;
 
 
-
-    strview a,b,c;
-
-    split::tieComma("1, 2, 3"_str, a,b,c);
-
-    cout << a.trim() << endl;
-    cout << b.trim() << endl;
-    cout << c.trim() << endl;
+    cout << "---\n";
+    trimsplit::splitLn(s, [](auto&& s)
+    {
+        cout << s << endl;
+        return true;
+    });
+    cout << "---\n";
 
     return EXIT_SUCCESS;
 //    doctest::Context context;

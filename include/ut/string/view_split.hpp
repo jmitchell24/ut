@@ -8,7 +8,7 @@ namespace ut
     inline static constexpr bool delimUnary(Char c)
     { return C == c; }
 
-    template <bool SkipEmpty, typename Char, typename Traits>
+    template <bool Trim, typename Char, typename Traits>
     struct basic_strview_split
     {
         using char_type         = Char;
@@ -45,7 +45,7 @@ namespace ut
             {
                 if (static_cast<bool>(unary_delim(*i)))
                 {
-                    if constexpr(SkipEmpty)
+                    if constexpr(Trim)
                     {
                         stringview_type tok = sv.with(token_begin, i);
                         if (!tok.empty())
@@ -64,7 +64,7 @@ namespace ut
                 }
             }
 
-            if constexpr(SkipEmpty)
+            if constexpr(Trim)
             {
                 stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
@@ -147,7 +147,7 @@ namespace ut
             {
                 if (static_cast<bool>(unary_delim(*i)))
                 {
-                    if constexpr(SkipEmpty)
+                    if constexpr(Trim)
                     {
                         stringview_type tok = sv.with(token_begin, i);
                         if (!tok.empty())
@@ -166,7 +166,7 @@ namespace ut
                 }
             }
 
-            if constexpr(SkipEmpty)
+            if constexpr(Trim)
             {
                 stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
@@ -192,7 +192,7 @@ namespace ut
             {
                 if (static_cast<bool>(unary_delim(*i)))
                 {
-                    if constexpr(SkipEmpty)
+                    if constexpr(Trim)
                     {
                         stringview_type tok = sv.with(token_begin, i);
                         if (!tok.empty())
@@ -211,7 +211,7 @@ namespace ut
                 }
             }
 
-            if constexpr(SkipEmpty)
+            if constexpr(Trim)
             {
                 stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
@@ -229,5 +229,7 @@ namespace ut
         }
     };
 
-    using split = basic_strview_split<true, char, std::char_traits<char>>;
+    using split     = basic_strview_split<false, char, std::char_traits<char>>;
+    using trimsplit = basic_strview_split<true, char, std::char_traits<char>>;
+
 }
