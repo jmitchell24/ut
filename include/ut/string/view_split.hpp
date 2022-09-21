@@ -220,7 +220,5 @@ namespace ut
     inline static constexpr bool delim(char c)
     { return C == c; }
 
-
-
-
+    static const auto& DELIM_NEWLINE = &delim<'\n'>;
 }
