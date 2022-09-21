@@ -4,6 +4,10 @@
 
 namespace ut
 {
+    template <typename Char, Char C>
+    inline static constexpr bool delimUnary(Char c)
+    { return C == c; }
+
     template <bool SkipEmpty, typename Char, typename Traits>
     struct basic_strview_split
     {
@@ -75,10 +79,15 @@ namespace ut
 
         template <typename Callable>
         inline static void splitWS(stringview_type const& sv, Callable&& callback)
-        {
-            //static_assert (SkipEmpty, "SkipEmpty should be true when delim is white space ('  x  x  ' should only split once).");
-            return split(sv, callback, &std::iswspace);
-        }
+        { return split(sv, callback, &std::iswspace); }
+
+        template <typename Callable>
+        inline static void splitLn(stringview_type const& sv, Callable&& callback)
+        { return split(sv, callback, delimUnary<Char, '\n'>); }
+
+        template <typename Callable>
+        inline static void splitComma(stringview_type const& sv, Callable&& callback)
+        { return split(sv, callback, delimUnary<Char, ','>); }
 
         template <typename Unary>
         inline static container_type container(stringview_type const& sv, Unary&& unary_delim)
@@ -87,18 +96,21 @@ namespace ut
 
             container_type tokens;
             split(
-                    sv,
-                    [&tokens](auto&& s){ tokens.emplace_back(s); return true; },
-                    unary_delim
+                sv,
+                [&tokens](auto&& s){ tokens.emplace_back(s); return true; },
+                unary_delim
             );
             return tokens;
         }
 
         inline static container_type containerWS(stringview_type const& sv)
-        {
-            //static_assert (SkipEmpty, "SkipEmpty should be true when delim is white space ('  x  x  ' should only split once).");
-            return container(sv, &std::iswspace);
-        }
+        { return container(sv, &std::iswspace); }
+
+        inline static container_type containerLn(stringview_type const& sv)
+        { return container(sv, delimUnary<Char, '\n'>); }
+
+        inline static container_type containerComma(stringview_type const& sv)
+        { return container(sv, delimUnary<Char, ','>); }
 
         template <typename Unary, typename... Params>
         inline static size_type tie(stringview_type const& sv, Unary&& unary_delim, Params&... params)
@@ -114,10 +126,15 @@ namespace ut
 
         template <typename... Params>
         inline static size_type tieWS(stringview_type const& sv, Params&... params)
-        {
-            static_assert (SkipEmpty, "SkipEmpty should be true when delim is white space ('  x  x  ' should only split once).");
-            return tie(sv, &std::iswspace, params...);
-        }
+        { return tie(sv, &std::iswspace, params...); }
+
+        template <typename... Params>
+        inline static size_type tieLn(stringview_type const& sv, Params&... params)
+        { return tie(sv, delimUnary<Char, '\n'>, params...); }
+
+        template <typename... Params>
+        inline static size_type tieComma(stringview_type const& sv, Params&... params)
+        { return tie(sv, delimUnary<Char, ','>, params...); }
 
     private:
 
@@ -132,7 +149,7 @@ namespace ut
                 {
                     if constexpr(SkipEmpty)
                     {
-                        stringview_type tok = sv.sub(token_begin, i);
+                        stringview_type tok = sv.with(token_begin, i);
                         if (!tok.empty())
                         {
                             out = tok;
@@ -143,7 +160,7 @@ namespace ut
                     }
                     else
                     {
-                        out = sv.sub(token_begin, i);
+                        out = sv.with(token_begin, i);
                         return I;
                     }
                 }
@@ -151,7 +168,7 @@ namespace ut
 
             if constexpr(SkipEmpty)
             {
-                stringview_type tok = sv.subEnd(token_begin);
+                stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
                 {
                     out = tok;
@@ -161,7 +178,7 @@ namespace ut
             }
             else
             {
-                out = sv.subEnd(token_begin);
+                out = sv.withBegin(token_begin);
                 return I;
             }
         }
@@ -177,7 +194,7 @@ namespace ut
                 {
                     if constexpr(SkipEmpty)
                     {
-                        stringview_type tok = sv.sub(token_begin, i);
+                        stringview_type tok = sv.with(token_begin, i);
                         if (!tok.empty())
                         {
                             out = tok;
@@ -188,7 +205,7 @@ namespace ut
                     }
                     else
                     {
-                        out = sv.sub(token_begin, i);
+                        out = sv.with(token_begin, i);
                         return tie_impl<I+1,U>(sv, i+1, unary_delim, tt...);
                     }
                 }
@@ -196,7 +213,7 @@ namespace ut
 
             if constexpr(SkipEmpty)
             {
-                stringview_type tok = sv.subEnd(token_begin);
+                stringview_type tok = sv.withBegin(token_begin);
                 if (!tok.empty())
                 {
                     out = tok;
@@ -206,19 +223,11 @@ namespace ut
             }
             else
             {
-                out = sv.subEnd(token_begin);
+                out = sv.withBegin(token_begin);
                 return I;
             }
         }
     };
 
-
-    template <bool SkipEmpty = true>
-    using split = basic_strview_split<SkipEmpty, char, std::char_traits<char>>;
-
-    template <char C>
-    inline static constexpr bool delim(char c)
-    { return C == c; }
-
-    static const auto& DELIM_NEWLINE = &delim<'\n'>;
+    using split = basic_strview_split<true, char, std::char_traits<char>>;
 }

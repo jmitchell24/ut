@@ -92,14 +92,18 @@ template <typename T, float LF> struct hash_table
 
 int main(int argc, char** argv)
 {
-    string string1 = "string1";
-    string string2 = "string1";
 
-    auto view = strview(string1).takeEnd(1);
-    auto mirror = view.mirror(string1, string2);
 
-    cout << (size_t)view.begin() << endl;
-    cout << (size_t)mirror.end() << endl;
+
+
+    strview a,b,c;
+
+    split::tieComma("1, 2, 3"_str, a,b,c);
+
+    cout << a.trim() << endl;
+    cout << b.trim() << endl;
+    cout << c.trim() << endl;
+
     return EXIT_SUCCESS;
 //    doctest::Context context;
 //    context.applyCommandLine(argc, argv);
