@@ -26,8 +26,8 @@ namespace ut
     template struct basic_strview_split<true, char, std::char_traits<char>>;
     template struct basic_strview_split<false, char, std::char_traits<char>>;
 
-    template struct basic_strview_buf<char>;
-    template struct basic_strview_stream<char>;
+    template struct basic_strview_buf<char, std::char_traits<char>>;
+    template struct basic_strview_stream<char, std::char_traits<char>>;
 }
 
 template <typename T, float LF> struct hash_table

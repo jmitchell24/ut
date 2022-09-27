@@ -22,15 +22,6 @@
 
 namespace ut
 {
-    template <typename Char, typename Traits = std::char_traits<Char>>
-    struct basic_strview_buf;
-
-    template <typename Char, typename Traits = std::char_traits<Char>>
-    struct basic_strview_stream;
-
-    template <bool SkipEmpty, typename Char, typename Traits = std::char_traits<Char>>
-    struct basic_strview_split;
-
     struct basic_strview_cstr_tag {};
 
 #define ENABLE_IF_NULL_TERMINATED  template <bool N_ = NullTerminated, typename = std::enable_if_t<N_ == true>>
@@ -52,11 +43,6 @@ namespace ut
         using strview_nstr_type     = basic_strview         <char_type,traits_type, false>;
         using strview_cstr_type     = basic_strview         <char_type,traits_type, true>;
         using strview_type          = basic_strview         <char_type,traits_type, NullTerminated>;
-        using buf_type              = basic_strview_buf     <char_type,traits_type>;
-        using stream_type           = basic_strview_stream  <char_type,traits_type>;
-
-        template <bool SkipEmpty>
-        using split_type = basic_strview_split<SkipEmpty, char_type, traits_type>;
 
         struct unique_copy { unique_pointer_type ptr; strview_cstr_type view; };
         struct shared_copy { shared_pointer_type ptr; strview_cstr_type view; };
@@ -76,21 +62,29 @@ namespace ut
         /// Construct with an STL basic_string
         M_DECL basic_strview(string_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
-        {}
+        {
+            assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
+        }
 
         /// Construct with an STL basic_string_view
         M_DECL basic_strview(string_view_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
-        {}
+        {
+            assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
+        }
 
         /// Construct with a begin and end pointer
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(pointer_type begin, pointer_type end)
             : m_begin{begin}, m_end{end}
         {
-            assert(begin != nullptr);
-            assert(end   != nullptr);
-            assert(begin <= end);
+            assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
         }
 
         /// Construct with a begin pointer and length
@@ -104,6 +98,8 @@ namespace ut
                 : m_begin{begin}, m_end{m_begin+sz}
         {
             assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
             assert(*m_end == '\0');
         }
 
@@ -111,13 +107,21 @@ namespace ut
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(strview_cstr_type const& s)
             : m_begin{s.begin()}, m_end{s.end()}
-        {}
+        {
+            assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
+        }
 
         /// Construct with a null-terminated string
         ENABLE_IF_NULL_TERMINATED
         M_DECL basic_strview(pointer_type p)
             : m_begin{p}, m_end{p+traits_type::length(p)}
-        {}
+        {
+            assert(m_begin != nullptr);
+            assert(m_end   != nullptr);
+            assert(m_begin <= m_end);
+        }
 
         /// Returns a pointer to the first char of the string. Equivalent to \a begin()
         /// \return     Pointer to the beginning of the string.
@@ -375,24 +379,13 @@ namespace ut
             return equals(with(m_end - s.size(), m_end), s);
         }
 
-        M_DECL_PURE pointer_type trimBegin() const
-        {
-            pointer_type i = m_begin;
-            while (i != m_end && std::isspace(*i)) ++i;
-            return i;
-        }
+        M_DECL_PURE strview_nstr_type trimLeft  () const { return with(trimBegin(), m_end); }
+        M_DECL_PURE strview_nstr_type trimRight () const { return with(m_begin, trimEnd()); }
+        M_DECL_PURE strview_nstr_type trim      () const { return with(trimBegin(), trimEnd()); }
 
-        M_DECL_PURE pointer_type trimEnd() const
-        {
-            pointer_type i = m_end-1;
-            pointer_type end = m_begin-1;
-            while (i!=end && std::isspace(*i)) --i;
-            return (i==end) ? m_end : i+1;
-        }
-
-        M_DECL_PURE strview_nstr_type trimLeft()  const { return with(trimBegin(), m_end); }
-        M_DECL_PURE strview_nstr_type trimRight() const { return with(m_begin, trimEnd()); }
-        M_DECL_PURE strview_nstr_type trim()      const { return with(trimBegin(), trimEnd()); }
+        M_DECL_PURE strview_nstr_type trimLeft  (size_t n) const { return with(m_begin+n, m_end  ); }
+        M_DECL_PURE strview_nstr_type trimRight (size_t n) const { return with(m_begin  , m_end-n); }
+        M_DECL_PURE strview_nstr_type trim      (size_t n) const { return with(m_begin+n, m_end-n); }
 
         M_DECL_PURE bool trimmed     () const { return empty() || ( !std::isspace(first()) && !std::isspace(last()) ); }
         M_DECL_PURE bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
@@ -442,6 +435,21 @@ namespace ut
     private:
         char_type const* m_begin;
         char_type const* m_end;
+
+        M_DECL_PURE pointer_type trimBegin() const
+        {
+            pointer_type i = m_begin;
+            while (i != m_end && std::isspace(*i)) ++i;
+            return i;
+        }
+
+        M_DECL_PURE pointer_type trimEnd() const
+        {
+            pointer_type i = m_end-1;
+            pointer_type end = m_begin-1;
+            while (i!=end && std::isspace(*i)) --i;
+            return (i==end) ? m_end : i+1;
+        }
     };
 
 #undef ENABLE_IF_NULL_TERMINATED

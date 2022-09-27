@@ -164,7 +164,7 @@ namespace ut
         streambuf_type m_buf;
     };
 
-    using strview_buf       = basic_strview_buf<char>;
-    using strview_stream    = basic_strview_stream<char>;
+    using strview_buf       = basic_strview_buf<char, std::char_traits<char>>;
+    using strview_stream    = basic_strview_stream<char, std::char_traits<char>>;
 }
 
