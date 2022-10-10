@@ -40,6 +40,7 @@ namespace ut
     using b8  = std::uint_fast8_t;
     using b16 = std::uint_fast16_t;
     using b32 = std::uint_fast32_t;
+    using b64 = std::uint_fast64_t;
 
     inline constexpr b8 u32_byte0(b32 x) { return (x >> (0 * 8)) & 0xFF; }
     inline constexpr b8 u32_byte1(b32 x) { return (x >> (1 * 8)) & 0xFF; }
@@ -63,9 +64,15 @@ namespace ut
     inline constexpr b16 lo16(b32 x) { return x & 0xffff;         }
     inline constexpr b16 hi16(b32 x) { return (x >> 16) & 0xffff; }
 
+    inline constexpr b16 lo32(b64 x) { return x & 0xffffffff;         }
+    inline constexpr b16 hi32(b64 x) { return (x >> 32) & 0xffffffff; }
+
     inline constexpr b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
     inline constexpr b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
 
+    inline constexpr b8  fold8 (b16 x) { return lo8(x) ^ hi8(x); }
+    inline constexpr b16 fold16(b32 x) { return lo16(x) ^ hi16(x); }
+    inline constexpr b32 fold32(b64 x) { return lo32(x) ^ hi32(x); }
 
 namespace bit
 {
