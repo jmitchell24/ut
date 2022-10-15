@@ -10,62 +10,68 @@
 
 namespace ut
 {
+namespace chrono_wrapper
+{
+    using cnt_t                 = float;
+    using time_t                = decltype(std::chrono::high_resolution_clock::now());
+
+    using sec_t                 = std::chrono::duration<cnt_t>;
+    using sec_ns_t              = std::chrono::duration<cnt_t, std::nano>;
+    using sec_us_t              = std::chrono::duration<cnt_t, std::micro>;
+    using sec_ms_t              = std::chrono::duration<cnt_t, std::milli>;
+
+    M_DECL static time_t getnow()
+    { return std::chrono::high_resolution_clock::now(); }
+
+    struct duration
+    {
+        sec_t value;
+
+        M_DECL constexpr static duration seconds       (cnt_t cnt) { return {sec_t     {cnt}   }; }
+        M_DECL constexpr static duration milliseconds  (cnt_t cnt) { return {sec_ms_t  {cnt}   }; }
+        M_DECL constexpr static duration microseconds  (cnt_t cnt) { return {sec_us_t  {cnt}   }; }
+        M_DECL constexpr static duration nanoseconds   (cnt_t cnt) { return {sec_ns_t  {cnt}   }; }
+
+        M_DECL_PURE constexpr cnt_t seconds       () const { return value.count(); }
+        M_DECL_PURE constexpr cnt_t milliseconds  () const { return sec_ms_t{value}.count(); }
+        M_DECL_PURE constexpr cnt_t microseconds  () const { return sec_us_t{value}.count(); }
+        M_DECL_PURE constexpr cnt_t nanoseconds   () const { return sec_ns_t{value}.count(); }
+
+        M_DECL_PURE constexpr duration operator + (duration const& d) const { return duration{value + d.value}; }
+        M_DECL_PURE constexpr duration operator - (duration const& d) const { return duration{value - d.value}; }
+
+        M_DECL_PURE constexpr bool operator <  (duration const& d) const { return bool{value <  d.value}; }
+        M_DECL_PURE constexpr bool operator >  (duration const& d) const { return bool{value >  d.value}; }
+        M_DECL_PURE constexpr bool operator <= (duration const& d) const { return bool{value <= d.value}; }
+        M_DECL_PURE constexpr bool operator >= (duration const& d) const { return bool{value >= d.value}; }
+
+        M_DECL constexpr duration& operator += (duration const& d) { value += d.value; return *this; }
+        M_DECL constexpr duration& operator -= (duration const& d) { value -= d.value; return *this; }
+    };
+
     /// convenience class for tracking time for profiling and real-time applications (e.g. games)
     class timer
     {
     public:
-        using count_type                = float;
-        using time_point_type           = decltype(std::chrono::high_resolution_clock::now());
-        using nanoseconds_type          = std::chrono::duration<count_type, std::nano>;
-        using microseconds_type         = std::chrono::duration<count_type, std::micro>;
-        using milliseconds_type         = std::chrono::duration<count_type, std::milli>;
-        using seconds_type              = std::chrono::duration<count_type>;
-
-        struct duration
-        {
-            seconds_type value;
-
-            M_DECL constexpr static duration seconds       (count_type cnt) { return {seconds_type       {cnt}   }; }
-            M_DECL constexpr static duration milliseconds  (count_type cnt) { return {milliseconds_type  {cnt}   }; }
-            M_DECL constexpr static duration microseconds  (count_type cnt) { return {microseconds_type  {cnt}   }; }
-            M_DECL constexpr static duration nanoseconds   (count_type cnt) { return {nanoseconds_type   {cnt}   }; }
-
-            M_DECL_PURE constexpr count_type seconds       () const { return value.count(); }
-            M_DECL_PURE constexpr count_type milliseconds  () const { return milliseconds_type{value}.count(); }
-            M_DECL_PURE constexpr count_type microseconds  () const { return microseconds_type{value}.count(); }
-            M_DECL_PURE constexpr count_type nanoseconds   () const { return nanoseconds_type {value}.count(); }
-
-            M_DECL_PURE constexpr duration operator + (duration const& d) const { return duration{value + d.value}; }
-            M_DECL_PURE constexpr duration operator - (duration const& d) const { return duration{value - d.value}; }
-
-            M_DECL_PURE constexpr bool operator <  (duration const& d) const { return bool{value <  d.value}; }
-            M_DECL_PURE constexpr bool operator >  (duration const& d) const { return bool{value >  d.value}; }
-            M_DECL_PURE constexpr bool operator <= (duration const& d) const { return bool{value <= d.value}; }
-            M_DECL_PURE constexpr bool operator >= (duration const& d) const { return bool{value >= d.value}; }
-
-            M_DECL constexpr duration& operator += (duration const& d) { value += d.value; return *this; }
-            M_DECL constexpr duration& operator -= (duration const& d) { value -= d.value; return *this; }
-        };
-
         struct scope_guard
         {
             scope_guard(scope_guard const&)=delete;
             scope_guard(scope_guard&&)=delete;
             scope_guard& operator= (scope_guard const&)=delete;
             scope_guard& operator= (scope_guard&&)=delete;
-            inline explicit scope_guard(duration& dur): m_dur{dur}, m_now{getNow()} {}
-            inline ~scope_guard() { m_dur.value = getNow() - m_now; }
+            inline explicit scope_guard(duration& dur): m_dur{dur}, m_now{getnow()} {}
+            inline ~scope_guard() { m_dur.value = getnow() - m_now; }
         private:
             duration&       m_dur;
-            time_point_type m_now;
+            time_t m_now;
         };
 
         M_DECL void reset()
-        { m_now = getNow(); }
+        { m_now = getnow(); }
 
         M_DECL duration next()
         {
-            auto now = getNow();
+            auto now = getnow();
             auto next = peek();
             m_now = now;
             return next;
@@ -92,7 +98,7 @@ namespace ut
         }
 
         M_DECL_PURE duration peek() const
-        { return {getNow() - m_now}; }
+        { return {getnow() - m_now}; }
 
         //
         // Scope
@@ -109,21 +115,26 @@ namespace ut
         { std::this_thread::sleep_for(duration.value); }
 
     private:
-        time_point_type m_now{getNow()};
+        time_t m_now{getnow()};
 
-        M_DECL static time_point_type getNow()
-        { return std::chrono::high_resolution_clock::now(); }
+
     };
+}
 
-    inline constexpr timer::duration operator ""_nanoseconds (long double cnt) { return timer::duration::nanoseconds (cnt); }
-    inline constexpr timer::duration operator ""_microseconds(long double cnt) { return timer::duration::microseconds(cnt); }
-    inline constexpr timer::duration operator ""_milliseconds(long double cnt) { return timer::duration::milliseconds(cnt); }
-    inline constexpr timer::duration operator ""_seconds     (long double cnt) { return timer::duration::seconds     (cnt); }
+    using timer         = chrono_wrapper::timer;
+    using duration      = chrono_wrapper::duration;
 
-    inline constexpr timer::duration operator ""_nanoseconds (unsigned long long int cnt) { return timer::duration::nanoseconds (cnt); }
-    inline constexpr timer::duration operator ""_microseconds(unsigned long long int cnt) { return timer::duration::microseconds(cnt); }
-    inline constexpr timer::duration operator ""_milliseconds(unsigned long long int cnt) { return timer::duration::milliseconds(cnt); }
-    inline constexpr timer::duration operator ""_seconds     (unsigned long long int cnt) { return timer::duration::seconds     (cnt); }
+
+
+    inline constexpr duration operator ""_nanoseconds (long double cnt) { return duration::nanoseconds (cnt); }
+    inline constexpr duration operator ""_microseconds(long double cnt) { return duration::microseconds(cnt); }
+    inline constexpr duration operator ""_milliseconds(long double cnt) { return duration::milliseconds(cnt); }
+    inline constexpr duration operator ""_seconds     (long double cnt) { return duration::seconds     (cnt); }
+
+    inline constexpr duration operator ""_nanoseconds (unsigned long long int cnt) { return duration::nanoseconds (cnt); }
+    inline constexpr duration operator ""_microseconds(unsigned long long int cnt) { return duration::microseconds(cnt); }
+    inline constexpr duration operator ""_milliseconds(unsigned long long int cnt) { return duration::milliseconds(cnt); }
+    inline constexpr duration operator ""_seconds     (unsigned long long int cnt) { return duration::seconds     (cnt); }
 
 
 }
