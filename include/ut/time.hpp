@@ -25,15 +25,26 @@ namespace ut
         {
             seconds_type value;
 
-            M_DECL_PURE count_type seconds       () const { return value.count(); }
-            M_DECL_PURE count_type milliseconds  () const { return milliseconds_type{value}.count(); }
-            M_DECL_PURE count_type microseconds  () const { return microseconds_type{value}.count(); }
-            M_DECL_PURE count_type nanoseconds   () const { return nanoseconds_type {value}.count(); }
+            M_DECL constexpr static duration seconds       (count_type cnt) { return {seconds_type       {cnt}   }; }
+            M_DECL constexpr static duration milliseconds  (count_type cnt) { return {milliseconds_type  {cnt}   }; }
+            M_DECL constexpr static duration microseconds  (count_type cnt) { return {microseconds_type  {cnt}   }; }
+            M_DECL constexpr static duration nanoseconds   (count_type cnt) { return {nanoseconds_type   {cnt}   }; }
 
-            M_DECL static duration seconds       (count_type cnt) { return { seconds_type       {cnt}   }; }
-            M_DECL static duration milliseconds  (count_type cnt) { return { milliseconds_type  {cnt}   }; }
-            M_DECL static duration microseconds  (count_type cnt) { return { microseconds_type  {cnt}   }; }
-            M_DECL static duration nanoseconds   (count_type cnt) { return { nanoseconds_type   {cnt}   }; }
+            M_DECL_PURE constexpr count_type seconds       () const { return value.count(); }
+            M_DECL_PURE constexpr count_type milliseconds  () const { return milliseconds_type{value}.count(); }
+            M_DECL_PURE constexpr count_type microseconds  () const { return microseconds_type{value}.count(); }
+            M_DECL_PURE constexpr count_type nanoseconds   () const { return nanoseconds_type {value}.count(); }
+
+            M_DECL_PURE constexpr duration operator + (duration const& d) const { return duration{value + d.value}; }
+            M_DECL_PURE constexpr duration operator - (duration const& d) const { return duration{value - d.value}; }
+
+            M_DECL_PURE constexpr bool operator <  (duration const& d) const { return bool{value <  d.value}; }
+            M_DECL_PURE constexpr bool operator >  (duration const& d) const { return bool{value >  d.value}; }
+            M_DECL_PURE constexpr bool operator <= (duration const& d) const { return bool{value <= d.value}; }
+            M_DECL_PURE constexpr bool operator >= (duration const& d) const { return bool{value >= d.value}; }
+
+            M_DECL constexpr duration& operator += (duration const& d) { value += d.value; return *this; }
+            M_DECL constexpr duration& operator -= (duration const& d) { value -= d.value; return *this; }
         };
 
         struct scope_guard
@@ -42,112 +53,79 @@ namespace ut
             scope_guard(scope_guard&&)=delete;
             scope_guard& operator= (scope_guard const&)=delete;
             scope_guard& operator= (scope_guard&&)=delete;
-            inline explicit scope_guard(timer& timer): m_timer{timer} { m_timer.reset(); }
-            inline ~scope_guard() { m_timer.next(); }
+            inline explicit scope_guard(duration& dur): m_dur{dur}, m_now{getNow()} {}
+            inline ~scope_guard() { m_dur.value = getNow() - m_now; }
         private:
-            timer& m_timer;
+            duration&       m_dur;
+            time_point_type m_now;
         };
 
-        M_DECL timer()
-            : m_now{getNow()}, m_previous{}
-        { }
-
         M_DECL void reset()
-        {
-            m_now = getNow();
-        }
+        { m_now = getNow(); }
 
         M_DECL duration next()
         {
-            time_point_type now = getNow();
-            m_previous.value = now - m_now;
+            auto now = getNow();
+            auto next = peek();
             m_now = now;
-            return m_previous;
+            return next;
         }
 
-        M_DECL scope_guard scoped() { return scope_guard{*this}; }
+        M_DECL bool nextIf(duration max_duration)
+        {
+            if (peek() > max_duration)
+            {
+                next();
+                return true;
+            }
+            return false;
+        }
 
-        M_DECL_PURE duration   previous              () const { return m_previous; }
-        M_DECL_PURE count_type previousSeconds       () const { return m_previous.seconds(); }
-        M_DECL_PURE count_type previousMilliseconds  () const { return m_previous.milliseconds(); }
-        M_DECL_PURE count_type previousMicroseconds  () const { return m_previous.microseconds(); }
-        M_DECL_PURE count_type previousNanoseconds   () const { return m_previous.nanoseconds(); }
+        M_DECL bool nextIf(duration max_duration, duration& next)
+        {
+            if (peek() > max_duration)
+            {
+                next = this->next();
+                return true;
+            }
+            return false;
+        }
 
-        M_DECL count_type nextSeconds       () { return next().seconds(); }
-        M_DECL count_type nextMilliseconds  () { return next().milliseconds(); }
-        M_DECL count_type nextMicroseconds  () { return next().microseconds(); }
-        M_DECL count_type nextNanoseconds   () { return next().nanoseconds(); }
+        M_DECL_PURE duration peek() const
+        { return {getNow() - m_now}; }
 
         //
-        // return elapsed time between now and member timepoint
+        // Scope
         //
 
-        M_DECL_PURE count_type seconds       () const { return seconds_type     {getNow() - m_now}.count(); }
-        M_DECL_PURE count_type milliseconds  () const { return milliseconds_type{getNow() - m_now}.count(); }
-        M_DECL_PURE count_type microseconds  () const { return microseconds_type{getNow() - m_now}.count(); }
-        M_DECL_PURE count_type nanoseconds   () const { return nanoseconds_type {getNow() - m_now}.count(); }
-
-        //
-        // invoke 'callback' and reset if elapsed time exceeds 'interval'
-        //
-
-        template <typename Callable>
-        M_DECL void callbackSeconds(count_type interval, Callable&& callback)
-        {
-            count_type elapsed = seconds();
-            if (elapsed > interval)
-                reset(), callback(elapsed);
-        }
-
-        template <typename Callable>
-        M_DECL void callbackMilliseconds(count_type interval, Callable&& callback)
-        {
-            count_type elapsed = milliseconds();
-            if (elapsed > interval)
-                reset(), callback(elapsed);
-        }
-
-        template <typename Callable>
-        M_DECL void callbackMicroseconds(count_type interval, Callable&& callback)
-        {
-            count_type elapsed = microseconds();
-            if (elapsed > interval)
-                reset(), callback(elapsed);
-        }
-
-        template <typename Callable>
-        M_DECL void callbackNanoseconds(count_type interval, Callable&& callback)
-        {
-            count_type elapsed = nanoseconds();
-            if (elapsed > interval)
-                reset(), callback(elapsed);
-        }
+        M_DECL static scope_guard scope(duration& duration)
+        { return scope_guard{duration}; }
 
         //
         // Sleep
         //
 
-        M_DECL static void sleepSeconds(count_type interval)
-        { std::this_thread::sleep_for(seconds_type{interval}); }
-
-        M_DECL static void sleepMilliseconds(count_type interval)
-        { std::this_thread::sleep_for(milliseconds_type{interval}); }
-
-        M_DECL static void sleepMicroseconds(count_type interval)
-        { std::this_thread::sleep_for(microseconds_type{interval}); }
-
-        M_DECL static void sleepNanoseconds(count_type interval)
-        { std::this_thread::sleep_for(nanoseconds_type{interval}); }
+        M_DECL static void sleep(duration const& duration)
+        { std::this_thread::sleep_for(duration.value); }
 
     private:
-        time_point_type m_now;
-        duration        m_previous;
+        time_point_type m_now{getNow()};
 
         M_DECL static time_point_type getNow()
-        {
-            return std::chrono::high_resolution_clock::now();
-        }
+        { return std::chrono::high_resolution_clock::now(); }
     };
+
+    inline constexpr timer::duration operator ""_nanoseconds (long double cnt) { return timer::duration::nanoseconds (cnt); }
+    inline constexpr timer::duration operator ""_microseconds(long double cnt) { return timer::duration::microseconds(cnt); }
+    inline constexpr timer::duration operator ""_milliseconds(long double cnt) { return timer::duration::milliseconds(cnt); }
+    inline constexpr timer::duration operator ""_seconds     (long double cnt) { return timer::duration::seconds     (cnt); }
+
+    inline constexpr timer::duration operator ""_nanoseconds (unsigned long long int cnt) { return timer::duration::nanoseconds (cnt); }
+    inline constexpr timer::duration operator ""_microseconds(unsigned long long int cnt) { return timer::duration::microseconds(cnt); }
+    inline constexpr timer::duration operator ""_milliseconds(unsigned long long int cnt) { return timer::duration::milliseconds(cnt); }
+    inline constexpr timer::duration operator ""_seconds     (unsigned long long int cnt) { return timer::duration::seconds     (cnt); }
+
+
 }
 
 #undef M_DECL_PURE
