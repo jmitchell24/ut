@@ -7,19 +7,49 @@ using namespace ut;
 #include <type_traits>
 #include <iostream>
 #include <iomanip>
+#include <set>
+#include <new>
 using namespace std;
+
+struct A
+{
+    int val=0;
+    explicit A(int i=0) : val{i}  { printf("A::ctor (%d)\n", val); }
+    ~A() { printf("A::dtor (%d)\n", val); }
+};
+
+namespace ut
+{
+    template struct stack_array<A,100>;
+}
+
 
 
 int main()
 {
-    timer t;
+    stack_array<A,100> arr;
 
-    size_t cnt = 0;
+    cout << "--> emplace" << endl;
+    for (int i = 0; i < 5; ++i)
+    {
+        arr.emplace(i);
+    }
 
-    while (!t.nextIf(1_seconds)) ++cnt;
+    cout << "--> for loop : " << arr.size() << endl;
+    for (auto&& it : arr)
+    {
+        cout << it.val << endl;
+    }
 
-    cout << "cnt: " << cnt << endl;
+    cout << "--> pop" << endl;
+//    arr.pop();
+//    arr.pop();
+    arr.pop(2);
 
+    cout << "--> clear" << endl;
+    arr.clear();
+
+    cout << "--> exit" << endl;
     return EXIT_SUCCESS;
 }
 
