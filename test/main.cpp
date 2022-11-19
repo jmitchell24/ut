@@ -11,45 +11,22 @@ using namespace ut;
 #include <new>
 using namespace std;
 
-struct A
-{
-    int val=0;
-    explicit A(int i=0) : val{i}  { printf("A::ctor (%d)\n", val); }
-    ~A() { printf("A::dtor (%d)\n", val); }
-};
-
-namespace ut
-{
-    template struct stack_array<A,100>;
-}
 
 
 
 int main()
 {
-    stack_array<A,100> arr;
 
-    cout << "--> emplace" << endl;
-    for (int i = 0; i < 5; ++i)
+    strbuilder sb;
+
+    srand(timer::epoch());
+    for (int i = 0; i < 10; ++i)
+        sb.appendf("%02d %02d %02d\n", rand() % 100,rand() % 100,rand() % 100);
+
+    for (auto&& it : sb.lines())
     {
-        arr.emplace(i);
+        cout << '\'' << sb.lineView(it) << '\'' << endl;
     }
-
-    cout << "--> for loop : " << arr.size() << endl;
-    for (auto&& it : arr)
-    {
-        cout << it.val << endl;
-    }
-
-    cout << "--> pop" << endl;
-//    arr.pop();
-//    arr.pop();
-    arr.pop(2);
-
-    cout << "--> clear" << endl;
-    arr.clear();
-
-    cout << "--> exit" << endl;
     return EXIT_SUCCESS;
 }
 

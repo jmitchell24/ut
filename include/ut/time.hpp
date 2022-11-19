@@ -63,7 +63,7 @@ namespace chrono_wrapper
             inline ~scope_guard() { m_dur.value = getnow() - m_now; }
         private:
             duration&       m_dur;
-            time_t m_now;
+            time_t          m_now;
         };
 
         M_DECL void reset()
@@ -113,6 +113,13 @@ namespace chrono_wrapper
 
         M_DECL static void sleep(duration const& duration)
         { std::this_thread::sleep_for(duration.value); }
+
+        //
+        // Unix Time
+        //
+
+        M_DECL_PURE static size_t epoch()
+        { return static_cast<size_t>(std::time(nullptr)); }
 
     private:
         time_t m_now{getnow()};

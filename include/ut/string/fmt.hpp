@@ -99,6 +99,12 @@ namespace ut
             return string();
         }
 
+        M_DECL string_type stringv(char const* fmt, va_list args)
+        {
+            next(fmt, args);
+            return string();
+        }
+
         M_DECL view_type view(char const* fmt, ...)
         {
             va_list args;
@@ -106,6 +112,12 @@ namespace ut
             next(fmt, args);
             va_end(args);
 
+            return view();
+        }
+
+        M_DECL view_type viewv(char const* fmt, va_list args)
+        {
+            next(fmt, args);
             return view();
         }
 
