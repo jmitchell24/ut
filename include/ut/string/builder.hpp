@@ -32,7 +32,16 @@ namespace ut
         }
 
         M_DECL_PURE linelist_type const& lines() const
-        { return m_lines; }
+        {
+            return m_lines;
+        }
+
+        M_DECL void clear()
+        {
+            m_str.clear();
+            m_lines.clear();
+            m_lines.push_back({0,0});
+        }
 
         M_DECL void append(cstrparam view)
         {
