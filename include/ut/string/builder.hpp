@@ -34,17 +34,8 @@ namespace ut
         M_DECL_PURE linelist_type const& lines() const
         { return m_lines; }
 
-        M_DECL void appendf(char const* fmt, ...)
+        M_DECL void append(cstrparam view)
         {
-            va_list args;
-            va_start(args, fmt);
-            appendfv(fmt, args);
-            va_end(args);
-        }
-
-        M_DECL void appendfv(char const* fmt, va_list args)
-        {
-            auto view = m_fmtbuf.viewv(fmt, args);
             m_str.append(view.c_str());
 
             char const* beg = m_str.data() + m_str.size() - view.size();
@@ -61,6 +52,20 @@ namespace ut
             }
 
             m_lines.back().end = m_str.size();
+        }
+
+        M_DECL void appendf(char const* fmt, ...)
+        {
+            va_list args;
+            va_start(args, fmt);
+            appendfv(fmt, args);
+            va_end(args);
+        }
+
+        M_DECL void appendfv(char const* fmt, va_list args)
+        {
+            auto view = m_fmtbuf.viewv(fmt, args);
+            append(view);
         }
 
         M_DECL_PURE std::string const& string() const

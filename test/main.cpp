@@ -23,10 +23,17 @@ int main()
     for (int i = 0; i < 10; ++i)
         sb.appendf("%02d %02d %02d\n", rand() % 100,rand() % 100,rand() % 100);
 
+    sb.append("adsf\n");
+    sb.append("adsf\n");
+    sb.append("adsf\n");
+    sb.append("adsf");
+
     for (auto&& it : sb.lines())
     {
         cout << '\'' << sb.lineView(it) << '\'' << endl;
     }
+
+
     return EXIT_SUCCESS;
 }
 
