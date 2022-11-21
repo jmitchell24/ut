@@ -252,8 +252,6 @@ namespace chrono_wrapper
             return std::string{};
         }
 
-        M_DECL static datetime now() { return datetime{nowtm()}; }
-
     private:
         static ::tm nowtm()
         {
