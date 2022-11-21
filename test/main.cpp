@@ -16,22 +16,9 @@ using namespace std;
 
 int main()
 {
+    datetime dt;
 
-    strbuilder sb;
-
-    srand(timer::epoch());
-    for (int i = 0; i < 10; ++i)
-        sb.appendf("%02d %02d %02d\n", rand() % 100,rand() % 100,rand() % 100);
-
-    sb.append("adsf\n");
-    sb.append("adsf\n");
-    sb.append("adsf\n");
-    sb.append("adsf");
-
-    for (auto&& it : sb.lines())
-    {
-        cout << '\'' << sb.lineView(it) << '\'' << endl;
-    }
+    cout << dt.str("%m/%d/%Y, %H:%M:%S") << endl;
 
 
     return EXIT_SUCCESS;
