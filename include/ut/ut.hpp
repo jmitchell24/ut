@@ -8,7 +8,7 @@
 #include <ut/func/delegate.hpp>
 
 
-#include <ut/Bit.hpp>
+#include <ut/bit.hpp>
 #include <ut/Rect.hpp>
 #include <ut/Region.hpp>
 

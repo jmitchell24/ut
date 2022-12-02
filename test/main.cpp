@@ -16,9 +16,11 @@ using namespace std;
 
 int main()
 {
-    datetime dt;
 
-    cout << dt.str("%m/%d/%Y, %H:%M:%S") << endl;
+
+    size_t x = INT_MAX;
+
+    cout << datetime::ofEpoch(x).str("%m/%d/%Y, %H:%M:%S") << endl;
 
 
     return EXIT_SUCCESS;

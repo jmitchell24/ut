@@ -14,14 +14,15 @@ namespace ut
 namespace chrono_wrapper
 {
     using cnt_t                 = float;
-    using time_t                = decltype(std::chrono::high_resolution_clock::now());
+    using now_t                 = decltype(std::chrono::high_resolution_clock::now());
+    using epoch_t               = std::size_t;
 
     using sec_t                 = std::chrono::duration<cnt_t>;
     using sec_ns_t              = std::chrono::duration<cnt_t, std::nano>;
     using sec_us_t              = std::chrono::duration<cnt_t, std::micro>;
     using sec_ms_t              = std::chrono::duration<cnt_t, std::milli>;
 
-    M_DECL static time_t getnow()
+    M_DECL static now_t getnow()
     { return std::chrono::high_resolution_clock::now(); }
 
     template <bool IsUTC>
@@ -252,12 +253,25 @@ namespace chrono_wrapper
             return std::string{};
         }
 
+        M_DECL static datetime ofEpoch(epoch_t epoch)
+        {
+            return datetime{epoch};
+        }
+
     private:
+        datetime(epoch_t epoch)
+            : tm{nowtm(epoch)}
+        {}
+
         static ::tm nowtm()
         {
             std::time_t t;
             std::time(&t);
+            return nowtm(t);
+        }
 
+        static ::tm nowtm(std::time_t t)
+        {
             if constexpr (IsUTC)
                 return *gmtime(&t);
             else
@@ -305,7 +319,7 @@ namespace chrono_wrapper
             inline ~scope_guard() { m_dur.value = getnow() - m_now; }
         private:
             duration&       m_dur;
-            time_t          m_now;
+            now_t           m_now;
         };
 
         M_DECL void reset()
@@ -360,16 +374,17 @@ namespace chrono_wrapper
         // Unix Time
         //
 
-        M_DECL_PURE static size_t epoch()
-        { return static_cast<size_t>(std::time(nullptr)); }
+        M_DECL_PURE static epoch_t epoch()
+        { return static_cast<epoch_t>(std::time(nullptr)); }
 
     private:
-        time_t m_now{getnow()};
+        now_t m_now{getnow()};
 
 
     };
 }
 
+    using epoch_t           = chrono_wrapper::epoch_t;
     using timer             = chrono_wrapper::timer;
     using duration          = chrono_wrapper::duration;
     using utc_datetime      = chrono_wrapper::datetime<true>;
