@@ -290,6 +290,8 @@ namespace chrono_wrapper
 
         M_DECL constexpr void reset() { value = sec_t{0}; }
 
+        M_DECL constexpr bool zero() const { return value == sec_t{0}; }
+
         M_DECL_PURE constexpr cnt_t seconds       () const { return value.count(); }
         M_DECL_PURE constexpr cnt_t milliseconds  () const { return sec_ms_t{value}.count(); }
         M_DECL_PURE constexpr cnt_t microseconds  () const { return sec_us_t{value}.count(); }
