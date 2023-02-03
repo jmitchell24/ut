@@ -281,12 +281,14 @@ namespace chrono_wrapper
 
     struct duration
     {
-        sec_t value;
+        sec_t value{0};
 
         M_DECL constexpr static duration seconds       (cnt_t cnt) { return {sec_t     {cnt}   }; }
         M_DECL constexpr static duration milliseconds  (cnt_t cnt) { return {sec_ms_t  {cnt}   }; }
         M_DECL constexpr static duration microseconds  (cnt_t cnt) { return {sec_us_t  {cnt}   }; }
         M_DECL constexpr static duration nanoseconds   (cnt_t cnt) { return {sec_ns_t  {cnt}   }; }
+
+        M_DECL constexpr void reset() { value = sec_t{0}; }
 
         M_DECL_PURE constexpr cnt_t seconds       () const { return value.count(); }
         M_DECL_PURE constexpr cnt_t milliseconds  () const { return sec_ms_t{value}.count(); }
@@ -296,6 +298,9 @@ namespace chrono_wrapper
         M_DECL_PURE constexpr duration operator + (duration const& d) const { return duration{value + d.value}; }
         M_DECL_PURE constexpr duration operator - (duration const& d) const { return duration{value - d.value}; }
 
+        M_DECL_PURE constexpr duration operator * (cnt_t cnt) { return duration{value * cnt}; }
+        M_DECL_PURE constexpr duration operator / (cnt_t cnt) { return duration{value / cnt}; }
+
         M_DECL_PURE constexpr bool operator <  (duration const& d) const { return bool{value <  d.value}; }
         M_DECL_PURE constexpr bool operator >  (duration const& d) const { return bool{value >  d.value}; }
         M_DECL_PURE constexpr bool operator <= (duration const& d) const { return bool{value <= d.value}; }
@@ -303,6 +308,8 @@ namespace chrono_wrapper
 
         M_DECL constexpr duration& operator += (duration const& d) { value += d.value; return *this; }
         M_DECL constexpr duration& operator -= (duration const& d) { value -= d.value; return *this; }
+        M_DECL constexpr duration& operator *= (cnt_t cnt) { value *= cnt; return *this; }
+        M_DECL constexpr duration& operator /= (cnt_t cnt) { value /= cnt; return *this; }
     };
 
     /// convenience class for tracking time for profiling and real-time applications (e.g. games)

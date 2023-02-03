@@ -9,9 +9,7 @@
 #include <ut/math/Vector4D.hpp>
 #include <ut/bit.hpp>
 
-#if defined(UT_STL_INTEROP)
-#include <ut/Fmt.hpp>
-#endif
+#include <cstdio>
 
 #define UT_COLORS \
     COLOR(black,                0x000000ff) \
@@ -441,12 +439,28 @@ namespace ut
     constexpr bool less(color const& a, color const& b) { return a.i <  b.i; }
     constexpr bool same(color const& a, color const& b) { return a.i == b.i; }
 
-#if defined(UT_STL_INTEROP)
     inline std::ostream& operator<<(std::ostream& os, color const& c)
     {
-        return os << FMT("#%.8x", c.i);
+        std::array<char, 128> buffer;
+
+        if (int res = snprintf(buffer.data(), buffer.size(), "#%.8lx", c.i); res > 0)
+        {
+            int cnt = buffer.size()-1;
+            os.write(buffer.data(), res > cnt ? cnt : res);
+        }
+        else
+        {
+            os << "???";
+        }
+        return os;
     }
-#endif
+
+    inline std::string to_string(color const& v)
+    {
+        std::ostringstream ss;
+        ss << v;
+        return ss.str();
+    }
 
 namespace colors
 {
