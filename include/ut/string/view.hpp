@@ -227,7 +227,7 @@ namespace ut
         }
 
 
-        /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().
+        /// Returns a view of substring [begin, end], where begin >= begin() and end <= end().
         /// \param begin    Pointer to the first char of the substring.
         /// \param end      Pointer to the char following following the last char of the view.
         /// \return         View of the substring [begin, end].
@@ -260,7 +260,15 @@ namespace ut
         { return takeBegin(size); }
 
 
-        /// Returns a view of substring [begin(), begin()+size]
+        /// Returns a view of substring [begin()+begin_idx, begin()+end_idx].
+        /// \param beg_idx  index of the first char of the substring.
+        /// \param end_idx  Pointer to the char following following the last char of the view.
+        /// \return         View of the substring [begin, end].
+        M_DECL_PURE strview_nstr_type withIndices(size_t beg_idx, size_t end_idx) const
+        { return with(m_begin+beg_idx, m_begin+end_idx); }
+
+
+        /// Returns a view of substring [begin(), begin()+size].
         /// \param size     Requested view size
         /// \return         View of the substring [begin(), begin()+size]
         M_DECL_PURE strview_nstr_type takeBegin(size_type size) const
