@@ -16,22 +16,17 @@ using namespace std;
 
 int main()
 {
+    auto sb = strbuilder{};
+
+    sb.appendln("asdf"_str);
+    sb.appendln("asdf"_str);
+    sb.appendln("asdf"_str);
+    sb.appendfln("%d %d", 1,2);
 
 
-    size_t x = INT_MAX;
+    cout << sb.view();
 
 
-
-
-    cout << datetime::ofEpoch(x).str("%m/%d/%Y, %H:%M:%S") << endl;
-
-    auto h = hasher::args(1,2,3);
-
-    cout << hex;
-    cout << hasher::args(1,2,3) << endl;
-    cout << hasher::args(1,2,4) << endl;
-
-    cout << colors::burlywood << endl;
 
 
     return EXIT_SUCCESS;

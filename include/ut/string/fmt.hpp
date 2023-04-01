@@ -43,7 +43,7 @@
 namespace ut
 {
     template <size_t BufferSize, size_t BufferCount>
-    class basic_format_buffer
+    class format_ring_buffer
     {
         static_assert(BufferSize > 1, "invalid BufferSize");
         static_assert(BufferCount > 0, "invalid BufferCount");
@@ -63,7 +63,7 @@ namespace ut
         struct buf { std::array<char, BUFFER_SIZE> arr; size_t sz; };
         using buffer_container_type = std::array<buf, BUFFER_COUNT>;
 
-        basic_format_buffer()
+        format_ring_buffer()
         {
             for (auto&& it : m_buffer)
             {
@@ -72,7 +72,7 @@ namespace ut
             }
         }
 
-        static basic_format_buffer& instance() noexcept;
+        static format_ring_buffer& instance() noexcept;
 
         M_DECL_PURE char const* data() const { return M_ARR.data(); }
         M_DECL_PURE int         sz  () const { return M_SZ; }
@@ -195,7 +195,7 @@ namespace ut
         {
             incrementIndex();
 
-            if (int res = vsnprintf(M_ARR.data(), M_ARR.size(), fmt, args); res >= 0)
+            if (int res = vsnprintf(M_ARR.data(), M_ARR.size(), fmt, args); res >= 0 && res < BUFFER_SIZE)
                 M_SZ = res;
             else
                 reset();
@@ -247,15 +247,22 @@ namespace ut
     };
 
     template <size_t BufferSize, size_t BufferCount>
-    basic_format_buffer<BufferSize, BufferCount>& basic_format_buffer<BufferSize, BufferCount>::instance() noexcept
+    format_ring_buffer<BufferSize, BufferCount>& format_ring_buffer<BufferSize, BufferCount>::instance() noexcept
     {
-        static thread_local basic_format_buffer<BufferSize, BufferCount> x;
+        static thread_local format_ring_buffer<BufferSize, BufferCount> x;
         return x;
     }
 
-    using fmtbuf = basic_format_buffer<UT_FMT_BUFFER_SIZE, UT_FMT_BUFFER_COUNT>;
+    template<size_t Size>
+    using format_buffer = format_ring_buffer<Size, 1>;
 
-    [[maybe_unused]] static fmtbuf& FMTBUF = fmtbuf::instance();
+    using  fbuf_t = format_ring_buffer<UT_FMT_BUFFER_SIZE, 1>;
+    using rfbuf_t = format_ring_buffer<UT_FMT_BUFFER_SIZE, UT_FMT_BUFFER_COUNT>;
+
+    /// Default instance of format_ring_buffer.
+    /// Stores previously formatted strings in a ring buffer so that subsequent
+    /// format results remain available through the returned view objects.
+    [[maybe_unused]] static rfbuf_t& FRB = rfbuf_t::instance();
 }
 
 #undef M_DECL_PURE
