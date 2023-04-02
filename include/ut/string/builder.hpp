@@ -1,10 +1,6 @@
 #pragma once
 
-#if !defined(UT_BUILDER_BUFFER_SIZE)
-#define UT_BUILDER_BUFFER_SIZE 256
-#endif
-
-#include "fmt.hpp"
+#include "view.hpp"
 
 #define M_DECL_PURE             [[nodiscard]] inline
 #define M_DECL                  inline
@@ -14,59 +10,70 @@ namespace ut
     class strbuilder
     {
     public:
-        M_DECL void clear()
-        {
-            m_str.clear();
-        }
+        strbuilder()=default;
+        strbuilder(strbuilder const&)=default;
+        strbuilder(strbuilder&&)=default;
+        strbuilder& operator=(strbuilder const&)=default;
+        strbuilder& operator=(strbuilder&&)=default;
 
-        M_DECL void append(strparam view)
-        {
-            m_str.append(view.begin(), view.size());
-        }
-
-        M_DECL void appendln(strparam view)
-        {
-            append(view);
-            append("\n"_str);
-        }
-
-        M_DECL void appendf(char const* fmt, ...)
-        {
-            va_list args;
-            va_start(args, fmt);
-            appendfv(fmt, args);
-            va_end(args);
-        }
-
-        M_DECL void appendfln(char const* fmt, ...)
-        {
-            va_list args;
-            va_start(args, fmt);
-            appendfvln(fmt, args);
-            va_end(args);
-        }
-
-        M_DECL void appendfv(char const* fmt, va_list args)
-        {
-            auto view = m_fmtbuf.viewv(fmt, args);
-            append(view);
-        }
-
-        M_DECL void appendfvln(char const* fmt, va_list args)
-        {
-            appendfv(fmt, args);
-            append("\n"_str);
-        }
-
-        M_DECL_PURE std::string const& string() const
+        M_DECL_PURE std::string const& str() const
         { return m_str; }
 
         M_DECL_PURE strview view() const
-        { return m_str; }
+        { return strview(m_str.data(), m_str.data()+m_str.size()); }
+
+        M_DECL_PURE size_t size() const
+        { return m_str.size()-1; }
+
+        M_DECL void clear()
+        { m_str.clear(); }
+
+        M_DECL void put(strparam view)
+        {
+            size_t n = view.size();
+            char* s = grow(n);
+            view.strncpy(s,n);
+        }
+
+        M_DECL void putln(strparam view)
+        {
+            put(view);
+            put("\n"_str);
+        }
+
+        M_DECL void printf(char const* fmt, ...)
+        {
+            size_t n;
+            {
+                va_list args;
+                va_start(args, fmt);
+                int res = vsnprintf(nullptr, 0, fmt, args);
+                va_end(args);
+
+                assert(res >= 0);
+                if (res <= 0)
+                    return;
+                n = res;
+            }
+
+            {
+                va_list args;
+                va_start(args, fmt);
+                char* s = grow(n);
+                int res = vsnprintf(s, n+1, fmt, args);
+                assert(res == n);
+                va_end(args);
+            }
+        }
 
     private:
-        std::string     m_str;
-        fbuf_t          m_fmtbuf;
+        std::string m_str;
+
+        M_DECL char* grow(size_t n)
+        {
+            m_str.resize(m_str.size() + n);
+            return m_str.data() + m_str.size() - n;
+        }
     };
 }
 

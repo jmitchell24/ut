@@ -18,10 +18,8 @@ int main()
 {
     auto sb = strbuilder{};
 
-    sb.appendln("asdf"_str);
-    sb.appendln("asdf"_str);
-    sb.appendln("asdf"_str);
-    sb.appendfln("%d %d", 1,2);
+    sb.putln("asdf"_str);
+    sb.printf("--%d %d--\n", 1,2);
 
 
     cout << sb.view();
