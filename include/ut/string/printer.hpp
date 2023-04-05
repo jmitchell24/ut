@@ -40,6 +40,7 @@
 
 #if defined(UT_PRINTER_USE_FMT)
 #include <fmt/core.h>
+#include <fmt/ostream.h>
 #endif
 
 #define M_DECL_PURE             [[nodiscard]] inline

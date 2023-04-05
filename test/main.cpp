@@ -16,7 +16,9 @@ using namespace std;
 
 int main()
 {
-    cout << PRINTER.fmt("{:x<30}\n", "sadf");
+    auto sv = "asdf"_str;
+
+    fmt::print("{}", sv);
 
 
 
