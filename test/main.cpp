@@ -1,24 +1,16 @@
-#define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest.h"
+//#define DOCTEST_CONFIG_IMPLEMENT
+//#include "doctest.h"
+
 
 
 #define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
 using namespace ut;
 
-#include <type_traits>
-#include <iostream>
-#include <iomanip>
-#include <set>
-#include <new>
-using namespace std;
-
-
 int main()
 {
-    auto sv = "asdf"_str;
 
-    fmt::print("{}", sv);
+    fmt::print("{}\n", "asdf"_str);
 
 
 

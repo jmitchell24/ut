@@ -15,6 +15,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cassert>
+#include <ostream>
 #include <istream>
 
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
