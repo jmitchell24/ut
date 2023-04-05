@@ -16,13 +16,15 @@ using namespace std;
 
 int main()
 {
-    auto sb = strbuilder{};
+    auto s = "Hello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, World"_str;
 
-    sb.putln("asdf"_str);
-    sb.printf("--%d %d--\n", 1,2);
+    auto sv = PRINTER.copy(s);
+
+    cout << PRINTER("[%d] %s", sv.size(), sv.c_str()) << endl;
 
 
-    cout << sb.view();
+
+
 
 
 
