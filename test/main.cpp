@@ -1,6 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
+
+#define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
 using namespace ut;
 
@@ -12,20 +14,9 @@ using namespace ut;
 using namespace std;
 
 
-
-
 int main()
 {
-    auto s = "Hello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, WorldHello, World"_str;
-
-    auto sv = PRINTER.copy(s);
-
-    cout << PRINTER("[%d] %s", sv.size(), sv.c_str()) << endl;
-
-
-
-
-
+    cout << PRINTER.fmt("{:x<30}\n", "sadf");
 
 
 

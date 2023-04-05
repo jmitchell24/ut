@@ -6,7 +6,10 @@
 //
 
 //---- Use std::string_view if enabled, otherwise use ut::cstrview
-//#define UT_FMT_USE_STL_STRINGVIEW
+//#define UT_PRINTER_USE_STL_STRINGVIEW
+
+//---- Enable {fmt} support ( https://fmt.dev/ )
+//#define UT_PRINTER_USE_FMT
 
 //---- Specify string buffer size
 //#define UT_PRINTER_BUFFER_SIZE 256
@@ -33,6 +36,10 @@
 #include <string_view>
 #else
 #include "ut/string/view.hpp"
+#endif
+
+#if defined(UT_PRINTER_USE_FMT)
+#include <fmt/core.h>
 #endif
 
 #define M_DECL_PURE             [[nodiscard]] inline
@@ -77,55 +84,37 @@ namespace ut
         M_DECL_PURE char const* data() const { return M_ARR.data(); }
         M_DECL_PURE int         sz  () const { return M_SZ; }
 
-#if defined(UT_FMT_USE_STL_STRINGVIEW)
-        M_DECL_PURE view_type view() const
+#if defined(UT_PRINTER_USE_STL_STRINGVIEW)
+        M_DECL_PURE view_type lastView() const
         { return {M_ARR.data(), M_SZ}; }
+
+        M_DECL view_type copy(std::string_view const& s)
+        {
+            nextCopy(s.data(), s.size());
+            return view();
+        }
 #else
 
-        M_DECL_PURE view_type view() const
+        M_DECL_PURE view_type lastView() const
         { return cstrview::make_cstrview(M_ARR.data(), M_SZ); }
 
         M_DECL view_type copy(ut::strparam s)
         {
             nextCopy(s.data(), s.size());
-            return view();
+            return lastView();
         }
 #endif
 
-        M_DECL_PURE string_type string() const
-        { return string_type{M_ARR.data(), M_ARR.data() + M_SZ}; }
-
-        M_DECL string_type string(char const* fmt, ...)
+#if defined(UT_PRINTER_USE_FMT)
+        template <typename... T>
+        M_DECL view_type fmt(fmt::string_view format_str, T&&... args)
         {
-            va_list args;
-            va_start(args, fmt);
-            next(fmt, args);
-            va_end(args);
-
-            return string();
+            incrementIndex();
+            M_SZ = ::fmt::vformat_to_n(M_ARR.data(), BUFFER_SIZE-1,
+                format_str, fmt::make_format_args(std::forward<T>(args)...)).size;
+            return lastView();
         }
-
-        M_DECL string_type stringv(char const* fmt, va_list args)
-        {
-            next(fmt, args);
-            return string();
-        }
-
-        M_DECL view_type view(char const* fmt, ...)
-        {
-            va_list args;
-            va_start(args, fmt);
-            next(fmt, args);
-            va_end(args);
-
-            return view();
-        }
-
-        M_DECL view_type viewv(char const* fmt, va_list args)
-        {
-            next(fmt, args);
-            return view();
-        }
+#endif
 
         M_DECL view_type operator() (char const* fmt, ...)
         {
@@ -134,52 +123,34 @@ namespace ut
             next(fmt, args);
             va_end(args);
 
-            return view();
+            return lastView();
         }
 
         //
         // integer format
         //
 
-        M_DECL view_type intView(short     x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(int       x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(long      x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(long long x, int base = 10) { nextInt(x, base); return view(); }
+        M_DECL view_type intView(short     x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(int       x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(long      x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(long long x, int base = 10) { nextInt(x, base); return lastView(); }
 
-        M_DECL view_type intView(unsigned short     x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(unsigned int       x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(unsigned long      x, int base = 10) { nextInt(x, base); return view(); }
-        M_DECL view_type intView(unsigned long long x, int base = 10) { nextInt(x, base); return view(); }
-
-        M_DECL string_type intString(short     x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(int       x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(long      x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(long long x, int base = 10) { nextInt(x, base); return string(); }
-
-        M_DECL string_type intString(unsigned short     x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(unsigned int       x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(unsigned long      x, int base = 10) { nextInt(x, base); return string(); }
-        M_DECL string_type intString(unsigned long long x, int base = 10) { nextInt(x, base); return string(); }
+        M_DECL view_type intView(unsigned short     x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(unsigned int       x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(unsigned long      x, int base = 10) { nextInt(x, base); return lastView(); }
+        M_DECL view_type intView(unsigned long long x, int base = 10) { nextInt(x, base); return lastView(); }
 
         //
         // float format
         //
 
-        M_DECL view_type floatView(float        x, int precision) { nextFloat(x, precision); return view(); }
-        M_DECL view_type floatView(double       x, int precision) { nextFloat(x, precision); return view(); }
-        M_DECL view_type floatView(long double  x, int precision) { nextFloat(x, precision); return view(); }
+        M_DECL view_type floatView(float        x, int precision) { nextFloat(x, precision); return lastView(); }
+        M_DECL view_type floatView(double       x, int precision) { nextFloat(x, precision); return lastView(); }
+        M_DECL view_type floatView(long double  x, int precision) { nextFloat(x, precision); return lastView(); }
 
-        M_DECL view_type floatView(float        x) { nextFloat(x); return view(); }
-        M_DECL view_type floatView(double       x) { nextFloat(x); return view(); }
-        M_DECL view_type floatView(long double  x) { nextFloat(x); return view(); }
-
-        M_DECL string_type floatString(float        x, int precision) { nextFloat(x, precision); return string(); }
-        M_DECL string_type floatString(double       x, int precision) { nextFloat(x, precision); return string(); }
-        M_DECL string_type floatString(long double  x, int precision) { nextFloat(x, precision); return string(); }
-
-        M_DECL string_type floatString(float        x) { nextFloat(x); return string(); }
-        M_DECL string_type floatString(double       x) { nextFloat(x); return string(); }
-        M_DECL string_type floatString(long double  x) { nextFloat(x); return string(); }
+        M_DECL view_type floatView(float        x) { nextFloat(x); return lastView(); }
+        M_DECL view_type floatView(double       x) { nextFloat(x); return lastView(); }
+        M_DECL view_type floatView(long double  x) { nextFloat(x); return lastView(); }
 
     private:
         buffer_container_type   m_buffer    { };
