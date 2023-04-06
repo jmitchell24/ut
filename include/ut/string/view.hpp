@@ -473,12 +473,6 @@ namespace ut
 
     M_DECL_PURE cstrview operator "" _sv(char const* str, size_t sz) noexcept
     { return cstrview::make_cstrview(str, sz); }
-
-    M_DECL_PURE cstrview operator "" _str(char const* str, size_t sz) noexcept
-    { return cstrview::make_cstrview(str, sz); }
-
-    M_DECL_PURE cstrview operator "" _view(char const* str, size_t sz) noexcept
-    { return cstrview::make_cstrview(str, sz); }
 }
 
 namespace std

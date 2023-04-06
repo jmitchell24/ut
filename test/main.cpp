@@ -1,5 +1,5 @@
-//#define DOCTEST_CONFIG_IMPLEMENT
-//#include "doctest.h"
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.h"
 
 
 
@@ -10,7 +10,7 @@ using namespace ut;
 int main()
 {
 
-    fmt::print("{}\n", "asdf"_str);
+    fmt::print("{}\n", "asdf"_sv);
 
 
 

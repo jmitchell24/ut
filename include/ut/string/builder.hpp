@@ -38,7 +38,7 @@ namespace ut
         M_DECL void putln(strparam view)
         {
             put(view);
-            put("\n"_str);
+            put("\n"_sv);
         }
 
         M_DECL void printf(char const* fmt, ...)
