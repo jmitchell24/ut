@@ -39,15 +39,17 @@ namespace chrono_wrapper
 
         ::tm tm;
 
-        datetime()
+        M_DECL datetime()
             : tm{nowtm()}
         { }
 
         datetime(datetime const&)=default;
 
+        M_DECL void reset() { tm = nowtm(); }
+
 #define TM_GET(_mem, _min, _max) (  \
         assert( (_mem) >= (_min) ), \
-        assert( (_mem) >= (_max) ), \
+        assert( (_mem) <= (_max) ), \
         (_mem) )                    \
 
         M_DECL_PURE int     seconds     () const { return TM_GET(tm.tm_sec  , 0, 61 ); }
@@ -256,6 +258,11 @@ namespace chrono_wrapper
         M_DECL static datetime ofEpoch(epoch_t epoch)
         {
             return datetime{epoch};
+        }
+
+        M_DECL static datetime now()
+        {
+            return datetime{};
         }
 
     private:

@@ -7,12 +7,21 @@
 #include <ut/ut.hpp>
 using namespace ut;
 
+#include <iostream>
+using namespace std;
+
 int main()
 {
 
-    fmt::print("{}\n", "asdf"_sv);
 
+    datetime dt;
 
+    while (true)
+    {
+        dt.reset();
+        cout << PRINTER("%d %d %d\n", dt.hours(), dt.minutes(), dt.seconds());
+        timer::sleep(1_seconds);
+    }
 
     return EXIT_SUCCESS;
 }
