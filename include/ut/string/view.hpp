@@ -1,6 +1,9 @@
 #ifndef STRINGVIEW_HPP
 #define STRINGVIEW_HPP
 
+//---- Enable implicit conversion to c string (char const*)
+#define UT_VIEW_CSTR_CONVERSION
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -407,6 +410,11 @@ namespace ut
         { return find(c) != m_end; }
 
         M_DECL_PURE char_type operator[] (size_type i) const { return *(m_begin+i); }
+
+#if defined(UT_VIEW_CSTR_CONVERSION)
+        ENABLE_IF_NULL_TERMINATED
+        M_DECL_PURE operator pointer_type() const { return m_begin; }
+#endif
 
         M_DECL_PURE bool operator<  (strview_type const& s) const { return compare(*this, s) <  0; }
         M_DECL_PURE bool operator>  (strview_type const& s) const { return compare(*this, s) >  0; }

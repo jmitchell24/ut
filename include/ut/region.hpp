@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rect.hpp"
+#include "rect.hpp"
 
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr

@@ -2,7 +2,7 @@
 #include <ut/math/Vector3D.hpp>
 #include <ut/math/Vector4D.hpp>
 
-#include <ut/Region.hpp>
+#include <ut/region.hpp>
 
 namespace ut
 {

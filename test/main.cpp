@@ -10,18 +10,18 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
+void foo(char const* s)
+{
+    printf("%s, World\n", s);
+}
+
 int main()
 {
 
 
-    datetime dt;
+    auto txt = "Hello"_sv;
 
-    while (true)
-    {
-        dt.reset();
-        cout << PRINTER("%d %d %d\n", dt.hours(), dt.minutes(), dt.seconds());
-        timer::sleep(1_seconds);
-    }
+    foo(txt);
 
     return EXIT_SUCCESS;
 }
