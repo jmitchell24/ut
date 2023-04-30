@@ -218,14 +218,19 @@ namespace ut
             M_DECL normal& operator=(normal const&)=default;
             M_DECL normal& operator=(normal&&) noexcept =default;
 
-            M_DECL_PURE normal inverted()    const {                   return {real_t(1)-r,real_t(1)-g,real_t(1)-b, real_t(1)-a}; }
-            M_DECL_PURE normal invertedRGB() const { ASSERT_NORMAL(a); return {real_t(1)-r,real_t(1)-g,real_t(1)-b, a}; }
-
             M_DECL_PURE normal withR(real_t x) const { ASSERT_NORMAL(x); return {x, g, b, a}; }
             M_DECL_PURE normal withG(real_t x) const { ASSERT_NORMAL(x); return {r, x, b, a}; }
             M_DECL_PURE normal withB(real_t x) const { ASSERT_NORMAL(x); return {r, g, x, a}; }
             M_DECL_PURE normal withA(real_t x) const { ASSERT_NORMAL(x); return {r, g, b, x}; }
 
+            M_DECL_PURE normal withInvertedR() const { return {1.0f-r, g, b, a}; }
+            M_DECL_PURE normal withInvertedG() const { return {r, 1.0f-g, b, a}; }
+            M_DECL_PURE normal withInvertedB() const { return {r, g, 1.0f-b, a}; }
+            M_DECL_PURE normal withInvertedA() const { return {r, g, b, 1.0f-a}; }
+
+            M_DECL_PURE normal withInvertedRGB() const { ASSERT_NORMAL(a); return {1.0f-r,1.0f-g,1.0f-b, a}; }
+
+            M_DECL_PURE normal inverted() const { return {1.0f-r,1.0f-g,1.0f-b, 1.0f-a}; }
             M_DECL_PURE normal opaque() const { return { r, g, b, 1.0f }; }
 
             M_DECL_PURE explicit operator vec4() const { return toVec4(); }
@@ -282,6 +287,14 @@ namespace ut
             M_DECL_PURE hsv withV(real_t x) const { ASSERT_NORMAL(x); return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {h, s, v, x}; }
 
+            M_DECL_PURE hsv withInvertedH() const { return {1.0f-h, s, v, a}; }
+            M_DECL_PURE hsv withInvertedS() const { return {h, 1.0f-s, v, a}; }
+            M_DECL_PURE hsv withInvertedV() const { return {h, s, 1.0f-v, a}; }
+            M_DECL_PURE hsv withInvertedA() const { return {h, s, v, 1.0f-a}; }
+
+            M_DECL_PURE hsv withInvertedHSV() const { return {1.0f-h, 1.0f-s, 1.0f-v, a }; }
+
+            M_DECL_PURE hsv inverted() const { return {1.0f-h, 1.0f-s, 1.0f-v, 1.0f-a }; }
             M_DECL_PURE hsv opaque() const { return { h, s, v, 1.0f }; }
 
             M_DECL_PURE color toColor()         const {                   return NORMALtoRGB(HSVtoNORMAL(*this)); }
