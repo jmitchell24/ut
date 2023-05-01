@@ -15,13 +15,25 @@ void foo(char const* s)
     printf("%s, World\n", s);
 }
 
+consteval cstrview parsePrettyFunctionGCC(cstrparam s)
+{
+    return s;
+}
+
+struct Foo
+{
+    enum Baz { BZ1, BZ2, BZ3 };
+
+    void bar()
+    {
+        printf("%s", parsePrettyFunctionGCC(__PRETTY_FUNCTION__));
+    }
+};
+
 int main()
 {
-
-
-    auto txt = "Hello"_sv;
-
-    foo(txt);
+    Foo f;
+    f.bar();
 
     return EXIT_SUCCESS;
 }

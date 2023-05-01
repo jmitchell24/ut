@@ -12,6 +12,7 @@
 #include <cstdio>
 
 #define UT_COLORS \
+    COLOR(transparent,          0x00000000) \
     COLOR(black,                0x000000ff) \
     COLOR(silver,               0xc0c0c0ff) \
     COLOR(gray,                 0x808080ff) \
