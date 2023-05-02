@@ -60,7 +60,6 @@ namespace chrono_wrapper
         M_DECL_PURE int     dayOfYear   () const { return TM_GET(tm.tm_yday , 0, 365); }
         M_DECL_PURE Month   month       () const { return TM_GET(tm.tm_mon  , 0, 11 ); }
         M_DECL_PURE int     year        () const { return tm.tm_year + 1900; }
-
 #undef TM_GET
 
         /**
@@ -255,6 +254,19 @@ namespace chrono_wrapper
             return std::string{};
         }
 
+        M_DECL_PURE epoch_t epoch() const
+        {
+            auto tmp = tm;
+            return epoch_t{ static_cast<epoch_t>(mktime(&tmp)) };
+        }
+
+        M_DECL_PURE constexpr bool operator != (datetime const& d) const { return bool{epoch() != d.epoch()}; }
+        M_DECL_PURE constexpr bool operator == (datetime const& d) const { return bool{epoch() == d.epoch()}; }
+        M_DECL_PURE constexpr bool operator <  (datetime const& d) const { return bool{epoch() <  d.epoch()}; }
+        M_DECL_PURE constexpr bool operator >  (datetime const& d) const { return bool{epoch() >  d.epoch()}; }
+        M_DECL_PURE constexpr bool operator <= (datetime const& d) const { return bool{epoch() <= d.epoch()}; }
+        M_DECL_PURE constexpr bool operator >= (datetime const& d) const { return bool{epoch() >= d.epoch()}; }
+
         M_DECL static datetime ofEpoch(epoch_t epoch)
         {
             return datetime{epoch};
@@ -310,6 +322,8 @@ namespace chrono_wrapper
         M_DECL_PURE constexpr duration operator * (cnt_t cnt) { return duration{value * cnt}; }
         M_DECL_PURE constexpr duration operator / (cnt_t cnt) { return duration{value / cnt}; }
 
+        M_DECL_PURE constexpr bool operator != (duration const& d) const { return bool{value != d.value}; }
+        M_DECL_PURE constexpr bool operator == (duration const& d) const { return bool{value == d.value}; }
         M_DECL_PURE constexpr bool operator <  (duration const& d) const { return bool{value <  d.value}; }
         M_DECL_PURE constexpr bool operator >  (duration const& d) const { return bool{value >  d.value}; }
         M_DECL_PURE constexpr bool operator <= (duration const& d) const { return bool{value <= d.value}; }
@@ -386,17 +400,10 @@ namespace chrono_wrapper
         M_DECL static void sleep(duration const& duration)
         { std::this_thread::sleep_for(duration.value); }
 
-        //
-        // Unix Time
-        //
 
-        M_DECL_PURE static epoch_t epoch()
-        { return static_cast<epoch_t>(std::time(nullptr)); }
 
     private:
         now_t m_now{getnow()};
-
-
     };
 }
 
@@ -418,7 +425,11 @@ namespace chrono_wrapper
     inline constexpr duration operator ""_milliseconds(unsigned long long int cnt) { return duration::milliseconds(cnt); }
     inline constexpr duration operator ""_seconds     (unsigned long long int cnt) { return duration::seconds     (cnt); }
 
+    //
+    // Unix Time
+    //
 
+    inline static epoch_t epoch() { return static_cast<epoch_t>(std::time(nullptr)); }
 }
 
 #undef M_DECL_PURE

@@ -10,30 +10,19 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
-void foo(char const* s)
-{
-    printf("%s, World\n", s);
-}
-
-consteval cstrview parsePrettyFunctionGCC(cstrparam s)
-{
-    return s;
-}
-
-struct Foo
-{
-    enum Baz { BZ1, BZ2, BZ3 };
-
-    void bar()
-    {
-        printf("%s", parsePrettyFunctionGCC(__PRETTY_FUNCTION__));
-    }
-};
-
 int main()
 {
-    Foo f;
-    f.bar();
+    auto now = ut::local_datetime::now();
+
+    timer::sleep(1_seconds);
+
+    auto now1s = ut::local_datetime::now();
+
+
+    if (now < now1s)
+        printf("now -> %02d:%02d:%02d\n", now.hours(), now.minutes(), now.seconds());
+    else
+        printf("now1s -> %02d:%02d:%02d\n", now1s.hours(), now1s.minutes(), now1s.seconds());
 
     return EXIT_SUCCESS;
 }
