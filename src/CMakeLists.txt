@@ -2,8 +2,8 @@ file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/u
 
 # Make an automatic library - will be static or dynamic based on user setting
 add_library(ut
-        "Vector.cpp"
-        "Color.cpp"
+        "math.cpp"
+        "color.cpp"
         ${HEADER_LIST}
 )
 

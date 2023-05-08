@@ -5,8 +5,8 @@
 #ifndef UT_COLOR_HPP
 #define UT_COLOR_HPP
 
-#include <ut/math/Vector3D.hpp>
-#include <ut/math/Vector4D.hpp>
+#include <ut/math/vector3D.hpp>
+#include <ut/math/vector4D.hpp>
 #include <ut/bit.hpp>
 
 #include <cstdio>

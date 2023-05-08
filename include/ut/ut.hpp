@@ -9,9 +9,6 @@
 
 
 #include <ut/bit.hpp>
-#include <ut/rect.hpp>
-#include <ut/region.hpp>
-
 #include <ut/time.hpp>
 #include <ut/color.hpp>
 

@@ -1,7 +1,7 @@
 #include "doctest.h"
 using doctest::Approx;
 
-#include <ut/math/Vector2D.hpp>
+#include <ut/math/vector2D.hpp>
 using namespace ut;
 
 // Use vec2i for tests (except for float vector algebra).

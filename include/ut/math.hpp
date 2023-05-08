@@ -1,7 +1,10 @@
 #pragma once
 
 
-#include <ut/math/Vector2D.hpp>
-#include <ut/math/Vector3D.hpp>
-#include <ut/math/Vector4D.hpp>
-#include <ut/math/VectorND.hpp>
+#include <ut/math/vector2D.hpp>
+#include <ut/math/vector3D.hpp>
+#include <ut/math/vector4D.hpp>
+#include <ut/math/vectorND.hpp>
+
+#include <ut/math/psize.hpp>
+#include <ut/math/rect.hpp>

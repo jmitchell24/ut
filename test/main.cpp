@@ -10,20 +10,17 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
+#define PRINT(x_) cout << #x_ << ": " << (x_) << endl
+
 int main()
 {
-    auto now = ut::local_datetime::now();
 
-    timer::sleep(1_seconds);
+    auto x = rect(psize(100,200));
 
-    auto now1s = ut::local_datetime::now();
+    x.offset(-19, 12);
 
-
-    if (now < now1s)
-        printf("now -> %02d:%02d:%02d\n", now.hours(), now.minutes(), now.seconds());
-    else
-        printf("now1s -> %02d:%02d:%02d\n", now1s.hours(), now1s.minutes(), now1s.seconds());
-
+    PRINT(x);
+    PRINT(x.psize());
     return EXIT_SUCCESS;
 }
 
