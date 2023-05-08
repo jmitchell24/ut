@@ -1,0 +1,8 @@
+*.txt.user*
+*build*
+*out*
+*test*
+*.idea*
+*.vs*
+*scripts*
+*ob-vault*
