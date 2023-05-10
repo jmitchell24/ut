@@ -359,12 +359,12 @@ namespace ut
             M_DECL hsluv& operator=(hsluv const&)=default;
             M_DECL hsluv& operator=(hsluv&&) noexcept =default;
 
-            M_DECL_PURE hsv withH(real_t x) const { ASSERT_RANGE(x, 0, 360); return {x, s, l, a}; }
-            M_DECL_PURE hsv withS(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, x, l, a}; }
-            M_DECL_PURE hsv withL(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, s, x, a}; }
-            M_DECL_PURE hsv withA(real_t x) const { ASSERT_RANGE(x, 0, 1  ); return {h, s, l, x}; }
+            M_DECL_PURE hsluv withH(real_t x) const { ASSERT_RANGE(x, 0, 360); return {x, s, l, a}; }
+            M_DECL_PURE hsluv withS(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, x, l, a}; }
+            M_DECL_PURE hsluv withL(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, s, x, a}; }
+            M_DECL_PURE hsluv withA(real_t x) const { ASSERT_RANGE(x, 0, 1  ); return {h, s, l, x}; }
 
-            M_DECL_PURE hsv opaque() const { return { h, s, l, 1.0f }; }
+            M_DECL_PURE hsluv opaque() const { return { h, s, l, 1.0f }; }
 
             [[nodiscard]] inline color toColor()         const {                   return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
             [[nodiscard]] inline color toColor(real_t a) const { ASSERT_NORMAL(a); return withA(a).toColor(); }
