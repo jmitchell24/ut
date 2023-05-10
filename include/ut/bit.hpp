@@ -37,10 +37,10 @@
 
 namespace ut
 {
-    using b8  = std::uint_fast8_t;
-    using b16 = std::uint_fast16_t;
-    using b32 = std::uint_fast32_t;
-    using b64 = std::uint_fast64_t;
+    using b8  = std::uint8_t;
+    using b16 = std::uint16_t;
+    using b32 = std::uint32_t;
+    using b64 = std::uint64_t;
 
     inline constexpr b8 u32_byte0(b32 x) { return (x >> (0 * 8)) & 0xFF; }
     inline constexpr b8 u32_byte1(b32 x) { return (x >> (1 * 8)) & 0xFF; }

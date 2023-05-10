@@ -14,8 +14,12 @@ using namespace std;
 
 int main()
 {
+    auto x = colors::lime;
+    auto y = x.toHSLUV().toColor();
 
-    auto x = colors::lime.toYUV().toColor().toHSV().toColor().toYUV();
+    cout << x << endl;
+    cout << y << endl;
+    cout << (x == y ? "true" : "false") << endl;
     return EXIT_SUCCESS;
 }
 

@@ -4,12 +4,24 @@
 
 #include "ut/color.hpp"
 
+extern "C"
+{
+#include "hsluv.c"
+}
+
+//
+// std
+//
+
 #include <cmath>
 using namespace std;
 
+//
+// ut
+//
 using namespace ut;
 
-inline bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3, uint8_t& x4)
+bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3, uint8_t& x4)
 {
     if (s == nullptr)
         return false;
@@ -25,7 +37,7 @@ inline bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3, uint
     return false;
 }
 
-inline bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3)
+bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3)
 {
     if (s == nullptr)
         return false;
@@ -44,6 +56,30 @@ inline bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3)
 //
 // color
 //
+
+color::normal color::HSLUVtoNORMAL(hsluv const& c)
+{
+    Triplet tmp = { (double)c.h, (double)c.s, (double)c.l };
+
+    hsluv2lch(&tmp);
+    lch2luv(&tmp);
+    luv2xyz(&tmp);
+    xyz2rgb(&tmp);
+
+    return { (float)tmp.a, (float)tmp.b, (float)tmp.c };
+}
+
+color::hsluv color::NORMALtoHSLUV(normal const& c)
+{
+    Triplet tmp = { (double)c.r, (double)c.g, (double)c.b };
+
+    rgb2xyz(&tmp);
+    xyz2luv(&tmp);
+    luv2lch(&tmp);
+    lch2hsluv(&tmp);
+
+    return { (float)tmp.a, (float)tmp.b, (float)tmp.c };
+}
 
 color color::parseRGBA(char const* s) { color c; try_parse(s, c.r, c.g, c.b, c.a); return c; }
 bool color::tryParseRGBA(char const* s, color& c) { return try_parse(s, c.r, c.g, c.b, c.a); }
