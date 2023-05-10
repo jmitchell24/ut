@@ -525,6 +525,14 @@ namespace ut
             }
         }
 
+        M_DECL static real_t clamp(real_t x, real_t min, real_t max)
+        {
+
+            x = x < min ? min : x;
+            x = x > max ? max : x;
+            return x;
+        }
+
         static color::normal HSLUVtoNORMAL(hsluv const& c);
         static color::hsluv  NORMALtoHSLUV(normal const& c);
     };

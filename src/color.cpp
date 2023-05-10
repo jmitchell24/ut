@@ -61,24 +61,34 @@ color::normal color::HSLUVtoNORMAL(hsluv const& c)
 {
     Triplet tmp = { (double)c.h, (double)c.s, (double)c.l };
 
-    hsluv2lch(&tmp);
-    lch2luv(&tmp);
-    luv2xyz(&tmp);
-    xyz2rgb(&tmp);
+    hsluv2lch   (&tmp);
+    lch2luv     (&tmp);
+    luv2xyz     (&tmp);
+    xyz2rgb     (&tmp);
 
-    return { (float)tmp.a, (float)tmp.b, (float)tmp.c };
+    return
+    {
+        clamp(tmp.a, 0.f, 1.f),
+        clamp(tmp.b, 0.f, 1.f),
+        clamp(tmp.c, 0.f, 1.f)
+    };
 }
 
 color::hsluv color::NORMALtoHSLUV(normal const& c)
 {
     Triplet tmp = { (double)c.r, (double)c.g, (double)c.b };
 
-    rgb2xyz(&tmp);
-    xyz2luv(&tmp);
-    luv2lch(&tmp);
-    lch2hsluv(&tmp);
+    rgb2xyz     (&tmp);
+    xyz2luv     (&tmp);
+    luv2lch     (&tmp);
+    lch2hsluv   (&tmp);
 
-    return { (float)tmp.a, (float)tmp.b, (float)tmp.c };
+    return
+    {
+        clamp(tmp.a, 0.f, 360.f),
+        clamp(tmp.b, 0.f, 100.f),
+        clamp(tmp.c, 0.f, 100.f)
+    };
 }
 
 color color::parseRGBA(char const* s) { color c; try_parse(s, c.r, c.g, c.b, c.a); return c; }
