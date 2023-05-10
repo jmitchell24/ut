@@ -184,6 +184,7 @@ namespace ut
     {
         struct normal;
         struct hsv;
+        struct yuv;
 
         struct normal
         {
@@ -308,6 +309,65 @@ namespace ut
             { return { h,s,v,a }; }
         };
 
+        struct yuv
+        {
+            real_t y,u,v,a;
+
+            M_DECL yuv()
+                : y{ 0 }, u{ 0 }, v{ 0 }, a{ 0 }
+            {}
+
+            M_DECL yuv(real_t y, real_t u, real_t v, real_t a = 1.0f)
+                : y{ y }, u{ u }, v{ v }, a{ a }
+            { ASSERT_NORMAL4(y,u,v,a); }
+
+            M_DECL explicit yuv(vec4 const& v)
+                : yuv(v.x, v.y, v.z, v.w)
+            {}
+
+            M_DECL explicit yuv(vec3 const& v, real_t a = 1.0f)
+                : yuv(v.x, v.y, v.z, a)
+            {}
+
+            M_DECL explicit yuv(normal const& n)
+                : yuv(NORMALtoYUV(n))
+            {}
+
+            M_DECL explicit yuv(color const& c)
+                : yuv(NORMALtoYUV(RGBtoNORMAL(c)))
+            {}
+
+            M_DECL yuv(yuv const&)=default;
+            M_DECL yuv(yuv&&) noexcept =default;
+
+            M_DECL yuv& operator=(yuv const&)=default;
+            M_DECL yuv& operator=(yuv&&) noexcept =default;
+
+            M_DECL_PURE hsv withY(real_t x) const { ASSERT_NORMAL(x); return {x, u, v, a}; }
+            M_DECL_PURE hsv withU(real_t x) const { ASSERT_NORMAL(x); return {y, x, v, a}; }
+            M_DECL_PURE hsv withV(real_t x) const { ASSERT_NORMAL(x); return {y, u, x, a}; }
+            M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {y, u, v, x}; }
+
+            M_DECL_PURE hsv withInvertedY() const { return {1.0f-y, u, v, a}; }
+            M_DECL_PURE hsv withInvertedU() const { return {y, 1.0f-u, v, a}; }
+            M_DECL_PURE hsv withInvertedV() const { return {y, u, 1.0f-v, a}; }
+            M_DECL_PURE hsv withInvertedA() const { return {y, u, v, 1.0f-a}; }
+
+            M_DECL_PURE hsv withInvertedYUV() const { return {1.0f-y, 1.0f-u, 1.0f-v, a }; }
+
+            M_DECL_PURE hsv inverted() const { return {1.0f-y, 1.0f-u, 1.0f-v, 1.0f-a }; }
+            M_DECL_PURE hsv opaque() const { return { y, u, v, 1.0f }; }
+
+            M_DECL_PURE color toColor()         const {                   return NORMALtoRGB(YUVtoNORMAL(*this)); }
+            M_DECL_PURE color toColor(real_t a) const { ASSERT_NORMAL(a); return withA(a).toColor(); }
+
+            M_DECL_PURE normal toNormal()         const {                   return YUVtoNORMAL(*this); }
+            M_DECL_PURE normal toNormal(real_t a) const { ASSERT_NORMAL(a); return withA(a).toNormal(); }
+
+            M_DECL_PURE explicit operator vec4() const
+            { return { y,u,v,a }; }
+        };
+
         b32 i;
         struct { b8 a,b,g,r; };
 
@@ -335,11 +395,18 @@ namespace ut
             : color{NORMALtoRGB(HSVtoNORMAL(h))}
         {}
 
+        M_DECL explicit color(yuv const& h)
+            : color{NORMALtoRGB(YUVtoNORMAL(h))}
+        {}
+
         M_DECL_PURE normal toNormal()     const { return RGBtoNORMAL(*this); }
         M_DECL_PURE normal toNormal(b8 a) const { return withA(a).toNormal(); }
 
         M_DECL_PURE hsv    toHSV   ()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
         M_DECL_PURE hsv    toHSV   (b8 a) const { return withA(a).toHSV(); }
+
+        M_DECL_PURE yuv    toYUV   ()     const { return NORMALtoYUV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE yuv    toYUV   (b8 a) const { return withA(a).toYUV(); }
 
         M_DECL_PURE color inverted()    const { return color(255-r,255-g,255-b,255-a); }
         M_DECL_PURE color invertedRGB() const { return color(255-r,255-g,255-b, a); }
@@ -359,6 +426,7 @@ namespace ut
         M_DECL_PURE explicit operator vec4b () const { return {r,g,b,a}; }
         M_DECL_PURE explicit operator normal() const { return RGBtoNORMAL(*this); }
         M_DECL_PURE explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE explicit operator yuv   () const { return NORMALtoYUV(RGBtoNORMAL(*this)); }
 
         M_DECL_PURE bool operator== (color const& c) const { return same(*this, c); }
         M_DECL_PURE bool operator!= (color const& c) const { return !(*this == c);  }
@@ -424,7 +492,7 @@ namespace ut
 
         // Convert hsv floats ([0-1],[0-1],[0-1]) to color3 floats ([0-1],[0-1],[0-1]), from Foley & van Dam p593
         // also http://en.wikipedia.org/wiki/HSL_and_HSV
-        M_DECL static normal HSVtoNORMAL(hsv c)
+        M_DECL static color::normal HSVtoNORMAL(hsv c)
         {
             if (c.s == real_t(0.0))
             {
@@ -447,6 +515,36 @@ namespace ut
                 case 4: return { t  , p  , c.v, c.a };
                 case 5: default: return { c.v, p, q, c.a };
             }
+        }
+
+        // http://web.archive.org/web/20110613100755/https://www.nreynolds.co.uk/blog/hsv-is-dead/
+        M_DECL static color::normal YUVtoNORMAL(yuv const& c)
+        {
+            return
+            {
+                c.y +                     ( 1.28033f * c.v),
+                c.y + (-0.21482f * c.u) + (-0.38059f * c.v),
+                c.y + ( 2.12798f * c.u)                    ,
+                c.a
+            };
+        }
+
+        M_DECL static color::yuv NORMALtoYUV(normal const& c)
+        {
+            return
+            {
+               clamp( ( 0.21260f * c.r) + ( 0.71520f * c.g) + ( 0.07220f * c.b) ),
+               clamp( (-0.09991f * c.r) + (-0.33609f * c.g) + ( 0.43600f * c.b) ),
+               clamp( ( 0.61500f * c.r) + (-0.55861f * c.g) + (-0.05639f * c.b) ),
+               clamp( c.a                                                       )
+            };
+        }
+
+    private:
+        M_DECL static real_t clamp(real_t x)
+        {
+            real_t floor_x = x < 0 ? 0 : x;
+            return floor_x > 1 ? 1 : floor_x;
         }
     };
 

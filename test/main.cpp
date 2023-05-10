@@ -15,12 +15,7 @@ using namespace std;
 int main()
 {
 
-    auto x = rect(psize(100,200));
-
-    x.offset(-19, 12);
-
-    PRINT(x);
-    PRINT(x.psize());
+    auto x = colors::lime.toYUV().toColor().toHSV().toColor().toYUV();
     return EXIT_SUCCESS;
 }
 
