@@ -544,7 +544,7 @@ namespace ut
     {
         std::array<char, 128> buffer;
 
-        if (int res = snprintf(buffer.data(), buffer.size(), "#%.8lx", c.i); res > 0)
+        if (int res = snprintf(buffer.data(), buffer.size(), "#%.8x", c.i); res > 0)
         {
             int cnt = buffer.size()-1;
             os.write(buffer.data(), res > cnt ? cnt : res);

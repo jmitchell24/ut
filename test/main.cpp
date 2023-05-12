@@ -5,6 +5,7 @@
 
 #define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
+#include <ut/random.hpp>
 using namespace ut;
 
 #include <iostream>
@@ -14,12 +15,12 @@ using namespace std;
 
 int main()
 {
-    auto x = colors::lime;
-    auto y = x.toHSLUV().toColor();
+    rangen r;
 
-    cout << x << endl;
-    cout << y << endl;
-    cout << (x == y ? "true" : "false") << endl;
+
+    for (int i = 0; i < 100; ++i)
+        cout << r.nextf(0,1) << endl;
+
     return EXIT_SUCCESS;
 }
 
