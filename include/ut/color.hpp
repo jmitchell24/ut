@@ -226,14 +226,6 @@ namespace ut
             M_DECL_PURE normal withB(real_t x) const { ASSERT_NORMAL(x); return {r, g, x, a}; }
             M_DECL_PURE normal withA(real_t x) const { ASSERT_NORMAL(x); return {r, g, b, x}; }
 
-            M_DECL_PURE normal withInvertedR() const { return {1.0f-r, g, b, a}; }
-            M_DECL_PURE normal withInvertedG() const { return {r, 1.0f-g, b, a}; }
-            M_DECL_PURE normal withInvertedB() const { return {r, g, 1.0f-b, a}; }
-            M_DECL_PURE normal withInvertedA() const { return {r, g, b, 1.0f-a}; }
-
-            M_DECL_PURE normal withInvertedRGB() const { ASSERT_NORMAL(a); return {1.0f-r,1.0f-g,1.0f-b, a}; }
-
-            M_DECL_PURE normal inverted() const { return {1.0f-r,1.0f-g,1.0f-b, 1.0f-a}; }
             M_DECL_PURE normal opaque() const { return { r, g, b, 1.0f }; }
 
             M_DECL_PURE explicit operator vec4() const { return toVec4(); }
@@ -241,14 +233,7 @@ namespace ut
             M_DECL_PURE vec4 toVec4() const { return { r,g,b,a }; }
             M_DECL_PURE vec3 toVec3() const { return { r,g,b }; }
 
-            M_DECL_PURE color toColor()         const {                   return NORMALtoRGB(*this); }
-            M_DECL_PURE color toColor(real_t a) const { ASSERT_NORMAL(a); return NORMALtoRGB(withA(a)); }
-
-            M_DECL_PURE hsv toHSV()         const {                   return NORMALtoHSV(*this); }
-            M_DECL_PURE hsv toHSV(real_t a) const { ASSERT_NORMAL(a); return NORMALtoHSV(withA(a)); }
-
-            M_DECL static normal grayscale(real_t x)           { ASSERT_NORMAL(x);    return { x,x,x,x }; }
-            M_DECL static normal grayscale(real_t x, real_t a) { ASSERT_NORMAL2(x,a); return { x,x,x,a }; }
+            M_DECL_PURE color toColor() const { return NORMALtoRGB(*this); }
         };
 
         struct hsv
@@ -290,21 +275,17 @@ namespace ut
             M_DECL_PURE hsv withV(real_t x) const { ASSERT_NORMAL(x); return {h, s, x, a}; }
             M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {h, s, v, x}; }
 
-            M_DECL_PURE hsv withInvertedH() const { return {1.0f-h, s, v, a}; }
-            M_DECL_PURE hsv withInvertedS() const { return {h, 1.0f-s, v, a}; }
-            M_DECL_PURE hsv withInvertedV() const { return {h, s, 1.0f-v, a}; }
-            M_DECL_PURE hsv withInvertedA() const { return {h, s, v, 1.0f-a}; }
+            M_DECL_PURE hsv invH() const { return {1.0f-h, s, v, a}; }
+            M_DECL_PURE hsv invS() const { return {h, 1.0f-s, v, a}; }
+            M_DECL_PURE hsv invV() const { return {h, s, 1.0f-v, a}; }
+            M_DECL_PURE hsv invA() const { return {h, s, v, 1.0f-a}; }
 
-            M_DECL_PURE hsv withInvertedHSV() const { return {1.0f-h, 1.0f-s, 1.0f-v, a }; }
-
-            M_DECL_PURE hsv inverted() const { return {1.0f-h, 1.0f-s, 1.0f-v, 1.0f-a }; }
+            M_DECL_PURE hsv inv   () const { return {1.0f-h, 1.0f-s, 1.0f-v, 1.0f-a }; }
+            M_DECL_PURE hsv invHSV() const { return {1.0f-h, 1.0f-s, 1.0f-v, a }; }
             M_DECL_PURE hsv opaque() const { return { h, s, v, 1.0f }; }
 
-            M_DECL_PURE color toColor()         const {                   return NORMALtoRGB(HSVtoNORMAL(*this)); }
-            M_DECL_PURE color toColor(real_t a) const { ASSERT_NORMAL(a); return withA(a).toColor(); }
-
-            M_DECL_PURE normal toNormal()         const {                   return HSVtoNORMAL(*this); }
-            M_DECL_PURE normal toNormal(real_t a) const { ASSERT_NORMAL(a); return withA(a).toNormal(); }
+            M_DECL_PURE color  toColor () const { return NORMALtoRGB(HSVtoNORMAL(*this)); }
+            M_DECL_PURE normal toNormal() const { return HSVtoNORMAL(*this); }
 
             M_DECL_PURE explicit operator vec4() const
             { return { h,s,v,a }; }
@@ -359,18 +340,25 @@ namespace ut
             M_DECL hsluv& operator=(hsluv const&)=default;
             M_DECL hsluv& operator=(hsluv&&) noexcept =default;
 
-            M_DECL_PURE hsluv withH(real_t x) const { ASSERT_RANGE(x, 0, 360); return {x, s, l, a}; }
-            M_DECL_PURE hsluv withS(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, x, l, a}; }
-            M_DECL_PURE hsluv withL(real_t x) const { ASSERT_RANGE(x, 0, 100); return {h, s, x, a}; }
-            M_DECL_PURE hsluv withA(real_t x) const { ASSERT_RANGE(x, 0, 1  ); return {h, s, l, x}; }
+            M_DECL_PURE hsv withH(real_t x) const { ASSERT_NORMAL(x); return {x, s, l, a}; }
+            M_DECL_PURE hsv withS(real_t x) const { ASSERT_NORMAL(x); return {h, x, l, a}; }
+            M_DECL_PURE hsv withL(real_t x) const { ASSERT_NORMAL(x); return {h, s, x, a}; }
+            M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {h, s, l, x}; }
 
+            M_DECL_PURE hsluv invH() const { return {1.0f-h, s, l, a}; }
+            M_DECL_PURE hsluv invS() const { return {h, 1.0f-s, l, a}; }
+            M_DECL_PURE hsluv invL() const { return {h, s, 1.0f-l, a}; }
+            M_DECL_PURE hsluv invA() const { return {h, s, l, 1.0f-a}; }
+
+            M_DECL_PURE hsluv inv   () const { return {1.0f-h, 1.0f-s, 1.0f-l, 1.0f-a }; }
+            M_DECL_PURE hsluv invHSL() const { return {1.0f-h, 1.0f-s, 1.0f-l, a }; }
             M_DECL_PURE hsluv opaque() const { return { h, s, l, 1.0f }; }
 
-            [[nodiscard]] inline color toColor()         const {                   return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
-            [[nodiscard]] inline color toColor(real_t a) const { ASSERT_NORMAL(a); return withA(a).toColor(); }
+            M_DECL_PURE hsluv rotate(real_t x) const
+            { return { std::fmod(x < 0.0f ? 360.0f + x : x, 360.0f), s, l, a }; }
 
-            [[nodiscard]] inline normal toNormal()         const {                   return HSLUVtoNORMAL(*this); }
-            [[nodiscard]] inline normal toNormal(real_t a) const { ASSERT_NORMAL(a); return withA(a).toNormal(); }
+            [[nodiscard]] inline color  toColor () const { return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
+            [[nodiscard]] inline normal toNormal() const { return HSLUVtoNORMAL(*this); }
 
             M_DECL_PURE explicit operator vec4() const
             { return { h,s,l,a }; }
@@ -410,19 +398,24 @@ namespace ut
         M_DECL_PURE normal toNormal()     const { return RGBtoNORMAL(*this); }
         M_DECL_PURE normal toNormal(b8 a) const { return withA(a).toNormal(); }
 
-        M_DECL_PURE hsv    toHSV   ()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
-        M_DECL_PURE hsv    toHSV   (b8 a) const { return withA(a).toHSV(); }
+        M_DECL_PURE hsv    toHSV()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
+        M_DECL_PURE hsv    toHSV(b8 a) const { return withA(a).toHSV(); }
 
-        inline hsluv  toHSLUV ()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
-        inline hsluv  toHSLUV (b8 a) const { return withA(a).toHSLUV(); }
+        inline hsluv  toHSLUV()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
+        inline hsluv  toHSLUV(b8 a) const { return withA(a).toHSLUV(); }
 
-        M_DECL_PURE color inverted()    const { return color(255-r,255-g,255-b,255-a); }
-        M_DECL_PURE color invertedRGB() const { return color(255-r,255-g,255-b, a); }
+        M_DECL_PURE color inv()    const { return color(255-r,255-g,255-b,255-a); }
+        M_DECL_PURE color invRGB() const { return color(255-r,255-g,255-b, a); }
 
-        M_DECL_PURE color withR(b8 x) const { return {x, g, b, a}; }
-        M_DECL_PURE color withG(b8 x) const { return {r, x, b, a}; }
-        M_DECL_PURE color withB(b8 x) const { return {r, g, x, a}; }
-        M_DECL_PURE color withA(b8 x) const { return {r, g, b, x}; }
+        M_DECL_PURE color withR(b8 x) const { return color( x, g, b, a ); }
+        M_DECL_PURE color withG(b8 x) const { return color( r, x, b, a ); }
+        M_DECL_PURE color withB(b8 x) const { return color( r, g, x, a ); }
+        M_DECL_PURE color withA(b8 x) const { return color( r, g, b, x ); }
+
+        M_DECL_PURE color channelR() const { return color( r,r,r, 255 ); };
+        M_DECL_PURE color channelG() const { return color( g,g,g, 255 ); };
+        M_DECL_PURE color channelB() const { return color( b,b,b, 255 ); };
+        M_DECL_PURE color channelA() const { return color( a,a,a, 255 ); };
 
         M_DECL_PURE color withNormalR(real_t x) const { ASSERT_NORMAL(x); b8 y = b8(x*255); return color(y, g, b, a); }
         M_DECL_PURE color withNormalG(real_t x) const { ASSERT_NORMAL(x); b8 y = b8(x*255); return color(r, y, b, a); }
@@ -434,7 +427,7 @@ namespace ut
         M_DECL_PURE explicit operator vec4b () const { return {r,g,b,a}; }
         M_DECL_PURE explicit operator normal() const { return RGBtoNORMAL(*this); }
         M_DECL_PURE explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
-        inline      explicit operator hsluv   () const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
+        inline      explicit operator hsluv () const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
 
         M_DECL_PURE bool operator== (color const& c) const { return same(*this, c); }
         M_DECL_PURE bool operator!= (color const& c) const { return !(*this == c);  }
