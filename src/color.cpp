@@ -70,7 +70,8 @@ color::normal color::HSLUVtoNORMAL(hsluv const& c)
     {
         clamp(tmp.a, 0.f, 1.f),
         clamp(tmp.b, 0.f, 1.f),
-        clamp(tmp.c, 0.f, 1.f)
+        clamp(tmp.c, 0.f, 1.f),
+        c.a
     };
 }
 
@@ -87,7 +88,8 @@ color::hsluv color::NORMALtoHSLUV(normal const& c)
     {
         clamp(tmp.a, 0.f, 360.f),
         clamp(tmp.b, 0.f, 100.f),
-        clamp(tmp.c, 0.f, 100.f)
+        clamp(tmp.c, 0.f, 100.f),
+        c.a
     };
 }
 
