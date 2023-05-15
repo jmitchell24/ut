@@ -233,7 +233,9 @@ namespace ut
             M_DECL_PURE vec4 toVec4() const { return { r,g,b,a }; }
             M_DECL_PURE vec3 toVec3() const { return { r,g,b }; }
 
-            M_DECL_PURE color toColor() const { return NORMALtoRGB(*this); }
+            M_DECL_PURE hsv   toHSV  () const { return NORMALtoHSV  (*this); }
+            M_DECL_PURE hsluv toHSLUV() const { return NORMALtoHSLUV(*this); }
+            M_DECL_PURE color toColor() const { return NORMALtoRGB  (*this); }
         };
 
         struct hsv

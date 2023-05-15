@@ -18,18 +18,6 @@ float rotate(float f)
     return fmod(f < 0.0f ? 360.0f + f : f, 360.0f);
 }
 
-template <typename Storage, size_t OFF_X, size_t OFF_Y, size_t OFF_Z, size_t OFF_A>
-struct Color : public Storage
-{
-
-};
-
-struct MinMax { float min, max; };
-
-struct XYZ { float x,y,z,a; };
-
-using ColorXYZ = Color<XYZ, offsetof(XYZ,x), 0, 0, 0>;
-
 int main()
 {
     float f = 50;
