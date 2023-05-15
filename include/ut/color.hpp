@@ -342,10 +342,10 @@ namespace ut
             M_DECL hsluv& operator=(hsluv const&)=default;
             M_DECL hsluv& operator=(hsluv&&) noexcept =default;
 
-            M_DECL_PURE hsv withH(real_t x) const { ASSERT_RANGE(x, 0, 360.0f); return {x, s, l, a}; }
-            M_DECL_PURE hsv withS(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, x, l, a}; }
-            M_DECL_PURE hsv withL(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, s, x, a}; }
-            M_DECL_PURE hsv withA(real_t x) const { ASSERT_RANGE(x, 0, 1.0f);   return {h, s, l, x}; }
+            M_DECL_PURE hsluv withH(real_t x) const { ASSERT_RANGE(x, 0, 360.0f); return {x, s, l, a}; }
+            M_DECL_PURE hsluv withS(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, x, l, a}; }
+            M_DECL_PURE hsluv withL(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, s, x, a}; }
+            M_DECL_PURE hsluv withA(real_t x) const { ASSERT_RANGE(x, 0, 1.0f);   return {h, s, l, x}; }
 
             M_DECL_PURE hsluv invH() const { return {360.0f-h, s, l, a}; }
             M_DECL_PURE hsluv invS() const { return {h, 100.0f-s, l, a}; }
