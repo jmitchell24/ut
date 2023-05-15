@@ -314,10 +314,10 @@ namespace ut
             M_DECL hsluv(real_t h, real_t s, real_t l, real_t a = 1.0f)
                 : h{ h }, s{ s }, l{ l }, a{ a }
             {
-                ASSERT_RANGE(h, 0, 360);
-                ASSERT_RANGE(s, 0, 100);
-                ASSERT_RANGE(l, 0, 100);
-                ASSERT_RANGE(a, 0, 1);
+                ASSERT_RANGE(h, 0, 360.0f);
+                ASSERT_RANGE(s, 0, 100.0f);
+                ASSERT_RANGE(l, 0, 100.0f);
+                ASSERT_RANGE(a, 0, 1.0f);
             }
 
             M_DECL explicit hsluv(vec4 const& v)
@@ -342,18 +342,18 @@ namespace ut
             M_DECL hsluv& operator=(hsluv const&)=default;
             M_DECL hsluv& operator=(hsluv&&) noexcept =default;
 
-            M_DECL_PURE hsv withH(real_t x) const { ASSERT_NORMAL(x); return {x, s, l, a}; }
-            M_DECL_PURE hsv withS(real_t x) const { ASSERT_NORMAL(x); return {h, x, l, a}; }
-            M_DECL_PURE hsv withL(real_t x) const { ASSERT_NORMAL(x); return {h, s, x, a}; }
-            M_DECL_PURE hsv withA(real_t x) const { ASSERT_NORMAL(x); return {h, s, l, x}; }
+            M_DECL_PURE hsv withH(real_t x) const { ASSERT_RANGE(x, 0, 360.0f); return {x, s, l, a}; }
+            M_DECL_PURE hsv withS(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, x, l, a}; }
+            M_DECL_PURE hsv withL(real_t x) const { ASSERT_RANGE(x, 0, 100.0f); return {h, s, x, a}; }
+            M_DECL_PURE hsv withA(real_t x) const { ASSERT_RANGE(x, 0, 1.0f);   return {h, s, l, x}; }
 
-            M_DECL_PURE hsluv invH() const { return {1.0f-h, s, l, a}; }
-            M_DECL_PURE hsluv invS() const { return {h, 1.0f-s, l, a}; }
-            M_DECL_PURE hsluv invL() const { return {h, s, 1.0f-l, a}; }
+            M_DECL_PURE hsluv invH() const { return {360.0f-h, s, l, a}; }
+            M_DECL_PURE hsluv invS() const { return {h, 100.0f-s, l, a}; }
+            M_DECL_PURE hsluv invL() const { return {h, s, 100.0f-l, a}; }
             M_DECL_PURE hsluv invA() const { return {h, s, l, 1.0f-a}; }
 
-            M_DECL_PURE hsluv inv   () const { return {1.0f-h, 1.0f-s, 1.0f-l, 1.0f-a }; }
-            M_DECL_PURE hsluv invHSL() const { return {1.0f-h, 1.0f-s, 1.0f-l, a }; }
+            M_DECL_PURE hsluv inv   () const { return {360.0f-h, 100.0f-s, 100.0f-l, 1.0f-a }; }
+            M_DECL_PURE hsluv invHSL() const { return {360.0f-h, 100.0f-s, 100.0f-l, a }; }
             M_DECL_PURE hsluv opaque() const { return { h, s, l, 1.0f }; }
 
             M_DECL_PURE hsluv rotate(real_t x) const
