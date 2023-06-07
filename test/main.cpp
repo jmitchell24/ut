@@ -5,25 +5,27 @@
 
 #define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
-#include <ut/random.hpp>
 using namespace ut;
 
 #include <iostream>
 using namespace std;
 
-#define PRINT(x_) cout << #x_ << ": " << (x_) << endl
-
-float rotate(float f)
-{
-    return fmod(f < 0.0f ? 360.0f + f : f, 360.0f);
-}
-
 int main()
 {
-    float f = 50;
 
-    cout << rotate(f - 360);
+    hasher h;
 
+    h.putArgs(1,2);
+
+    auto x = h.digest();
+
+    hasher h2(x);
+
+    h.putArgs(3);
+    cout << h.digest() << endl;
+
+    h2.putArgs(3);
+    cout << h2.digest() << endl;
 
 
     return EXIT_SUCCESS;

@@ -37,6 +37,8 @@ namespace ut
 
         M_DECL basic_hasher() : m_state {OffsetBasis} {}
 
+        M_DECL explicit basic_hasher(ResultT state) : m_state{state} {}
+
         M_DECL basic_hasher(basic_hasher const&)=default;
         M_DECL basic_hasher(basic_hasher&&) noexcept =default;
 
