@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <cassert>
+#include <sstream>
 #include <type_traits>
 
 #define M_DECL_PURE         [[nodiscard]] inline constexpr
@@ -26,38 +27,63 @@
 
 namespace ut
 {
-    template <typename ResultT, ResultT OffsetBasis, ResultT Prime>
-    struct basic_hasher
+    template <typename N, N O, N P>
+    struct basic_digest
     {
-        static_assert(std::is_unsigned<ResultT>::value, "need unsigned integer");
+        static_assert(std::is_unsigned<N>::value, "need unsigned integer");
 
         using size_type     = std::size_t;
-        using result_type   = ResultT;
-        using hasher_type   = basic_hasher<ResultT, OffsetBasis, Prime>;
+        using value_type    = N;
+        using digest_type   = basic_digest<N, O, P>;
+        using digest_param  = digest_type const&;
 
-        M_DECL basic_hasher() : m_state {OffsetBasis} {}
+        N static constexpr OFFSET_BASIS     = O;
+        N static constexpr PRIME            = P;
 
-        M_DECL explicit basic_hasher(ResultT state) : m_state{state} {}
+        M_DECL basic_digest() : m_state {OFFSET_BASIS} {}
 
-        M_DECL basic_hasher(basic_hasher const&)=default;
-        M_DECL basic_hasher(basic_hasher&&) noexcept =default;
+        M_DECL explicit basic_digest(value_type state) : m_state{state} {}
 
-        M_DECL basic_hasher& operator=(basic_hasher const&)=default;
-        M_DECL basic_hasher& operator=(basic_hasher&&) noexcept =default;
+        M_DECL explicit operator value_type() const { return value(); }
 
-        M_DECL_PURE result_type digest() const { return m_state; }
+        M_DECL basic_digest(basic_digest const&)=default;
+        M_DECL basic_digest(basic_digest&&) noexcept =default;
 
-        M_DECL void reset() { m_state = OffsetBasis; }
+        M_DECL basic_digest& operator=(basic_digest const&)=default;
+        M_DECL basic_digest& operator=(basic_digest&&) noexcept =default;
+
+        M_DECL_PURE value_type value() const { return m_state; }
+
+        M_DECL void reset() { m_state = OFFSET_BASIS; }
+
+        //
+        // addition operators
+        //
+
+        M_DECL_PURE digest_type operator+ (digest_param d) const { return withDigest(d); }
+        M_DECL digest_type& operator+= (digest_param d) { putDigest(d); return *this; }
+
+        //
+        // comparison operators
+        //
+
+        M_DECL_PURE bool operator== (digest_param d) const { return m_state == d.m_state; }
+        M_DECL_PURE bool operator!= (digest_param d) const { return !(*this == d); }
+        M_DECL_PURE bool operator<  (digest_param d) const { return m_state < d.m_state; }
+        M_DECL_PURE bool operator>  (digest_param d) const { return *this < d; }
+        M_DECL_PURE bool operator<= (digest_param d) const { return !(*this < d); }
+        M_DECL_PURE bool operator>= (digest_param d) const { return !(d < *this); }
 
         //
         // copy with hash
         //
 
-        TM_DECL_PURE(...Ts)  hasher_type withArgs (Ts&&... ts)                  const { hasher_type h=*this; h.template putArgs(ts...);         return h; }
-        TM_DECL_PURE(T)      hasher_type withRange(T&& t)                       const { hasher_type h=*this; h.template putRange(t);            return h; }
-        TM_DECL_PURE(It)     hasher_type withRange(It&& first, It&& last)       const { hasher_type h=*this; h.template putRange(first, last);  return h; }
-        TM_DECL_PURE(T)      hasher_type withValue(T&& t)                       const { hasher_type h=*this; h.template putValue(t);            return h; }
-        M_DECL_PURE          hasher_type withBytes(void* data, size_type size)  const { hasher_type h=*this; h.putBytes(data, size);            return h; }
+        TM_DECL_PURE(...Ts)  digest_type withArgs (Ts&&... ts)                  const { digest_type tmp=*this; tmp.template putArgs(ts...);         return tmp; }
+        TM_DECL_PURE(T)      digest_type withRange(T&& t)                       const { digest_type tmp=*this; tmp.template putRange(t);            return tmp; }
+        TM_DECL_PURE(It)     digest_type withRange(It&& first, It&& last)       const { digest_type tmp=*this; tmp.template putRange(first, last);  return tmp; }
+        TM_DECL_PURE(T)      digest_type withValue(T&& t)                       const { digest_type tmp=*this; tmp.template putValue(t);            return tmp; }
+        M_DECL_PURE          digest_type withDigest (digest_type d)             const { digest_type tmp=*this; tmp.putDigest(d);                      return tmp; }
+        M_DECL_PURE          digest_type withBytes(void* data, size_type size)  const { digest_type tmp=*this; tmp.putBytes(data, size);            return tmp; }
 
         //
         // incremental hash
@@ -67,6 +93,11 @@ namespace ut
         TM_DECL(T)      void putRange(T&& t)                { for (auto&& x: t) putValue(x); }
         TM_DECL(It)     void putRange(It first, It last)    { for (; first != last; ++first) putValue(*first); }
         TM_DECL(T)      void putValue(T const& t)           { putBytes(&t, sizeof(t)); }
+
+        M_DECL void putDigest(digest_type x)
+        {
+            putValue(x.m_state);
+        }
 
         M_DECL void putBytes(void const* data, size_type size) noexcept
         {
@@ -78,8 +109,8 @@ namespace ut
 
             for (size_type i = 0; i < size; ++i)
             {
-                auto next = (size_type)cdata[i];
-                acc = (acc ^ next) * Prime;
+                auto next = (size_type) *(cdata+i);
+                acc = (acc ^ next) * PRIME;
             }
 
             m_state = acc;
@@ -89,23 +120,62 @@ namespace ut
         // single-put convenience methods
         //
 
-        TM_DECL(...Ts)  static result_type args (Ts&&... ts)                { hasher_type h; h.template putArgs(ts...);         return h.digest(); }
-        TM_DECL(T)      static result_type range(T&& t)                     { hasher_type h; h.template putRange(t);            return h.digest(); }
-        TM_DECL(It)     static result_type range(It&& first, It&& last)     { hasher_type h; h.template putRange(first, last);  return h.digest(); }
-        TM_DECL(T)      static result_type value(T&& t)                     { hasher_type h; h.template putValue(t);            return h.digest(); }
-        M_DECL          static result_type bytes(void* data, size_type size){ hasher_type h; h.putBytes(data, size);            return h.digest(); }
+        TM_DECL(...Ts)  static digest_type args  (Ts&&... ts)                  { digest_type tmp; tmp.template putArgs(ts...);         return tmp; }
+        TM_DECL(T)      static digest_type range (T&& t)                       { digest_type tmp; tmp.template putRange(t);            return tmp; }
+        TM_DECL(It)     static digest_type range (It&& first, It&& last)       { digest_type tmp; tmp.template putRange(first, last);  return tmp; }
+        TM_DECL(T)      static digest_type value (T&& t)                       { digest_type tmp; tmp.template putValue(t);            return tmp; }
+        M_DECL          static digest_type digest(digest_type d)               { digest_type tmp; tmp.putDigest(d);                    return tmp; }
+        M_DECL          static digest_type bytes (void* data, size_type size)  { digest_type tmp; tmp.putBytes(data, size);            return tmp; }
+
+        TM_DECL(...Ts)  static digest_type nextArgs  (digest_param d, Ts&&... ts)                { digest_type tmp(d); tmp.template putArgs(ts...);         return tmp; }
+        TM_DECL(T)      static digest_type nextRange (digest_param d, T&& t)                     { digest_type tmp(d); tmp.template putRange(t);            return tmp; }
+        TM_DECL(It)     static digest_type nextRange (digest_param d, It&& first, It&& last)     { digest_type tmp(d); tmp.template putRange(first, last);  return tmp; }
+        TM_DECL(T)      static digest_type nextValue (digest_param d, T&& t)                     { digest_type tmp(d); tmp.template putValue(t);            return tmp; }
+        M_DECL          static digest_type nextDigest(digest_param d, digest_type y)             { digest_type tmp(d); tmp.putDigest(y);                    return tmp; }
+        M_DECL          static digest_type nextBytes (digest_param d, void* data, size_type size){ digest_type tmp(d); tmp.putBytes(data, size);            return tmp; }
+
+
 
     private:
-        result_type m_state;
+        value_type m_state;
     };
 
-    using hash32_t = std::uint32_t;
-    using hash64_t = std::uint64_t;
-    using hash_t   = hash64_t;
+    using digest32_t = std::uint32_t;
+    using digest64_t = std::uint64_t;
+    using digest_t   = digest64_t;
 
-    using hasher32  = basic_hasher<hash32_t, 2166136261u, 16777619u>;
-    using hasher64  = basic_hasher<hash64_t, 14695981039346656037u, 1099511628211u>;
-    using hasher    = hasher64;
+    using digest32  = basic_digest<std::uint32_t, 2166136261u, 16777619u>;
+    using digest64  = basic_digest<std::uint64_t, 14695981039346656037u, 1099511628211u>;
+    using digest    = digest64;
+
+    template <typename N, N O, N P>
+    inline constexpr std::ostream& operator<<(std::ostream& os, basic_digest<N,O,P> const& d)
+    {
+        static_assert(sizeof(N) <= 8, "your int is too big");
+        static_assert(std::is_integral_v<N>, "your int isn't an int");
+
+        char buf[100];
+
+        if constexpr(sizeof(N)==1)
+            snprintf(buf, 100, "%02x", d.value());
+        if constexpr(sizeof(N)==2)
+            snprintf(buf, 100, "%04x", d.value());
+        if constexpr(sizeof(N)==4)
+            snprintf(buf, 100, "%08x", d.value());
+        if constexpr(sizeof(N)==8)
+            snprintf(buf, 100, "%016lx", d.value());
+
+        os << buf;
+        return os;
+    }
+
+    template <typename N, N O, N P>
+    inline std::string to_string(basic_digest<N,O,P> const& d)
+    {
+        std::ostringstream ss;
+        ss << d;
+        return ss.str();
+    }
 }
 
 #undef M_DECL_PURE

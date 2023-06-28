@@ -3,30 +3,27 @@
 
 
 
-#define UT_PRINTER_USE_FMT
+//#define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
 using namespace ut;
 
+#include <iomanip>
 #include <iostream>
 using namespace std;
 
 int main()
 {
+    auto s1 = "foo"_sv;
+    auto s2 = "bar"_sv;
 
-    hasher h;
+    auto d1 = digest32::range(s1);
+    auto d2 = digest32::range(s2);
 
-    h.putArgs(1,2);
-
-    auto x = h.digest();
-
-    hasher h2(x);
-
-    h.putArgs(3);
-    cout << h.digest() << endl;
-
-    h2.putArgs(3);
-    cout << h2.digest() << endl;
-
+    cout << d1 << endl;
+    cout << d2 << endl;
+    cout << (d2+d1) << endl;
+    cout << (d1+d2) << endl;
+    cout << (digest32::range("bar"_sv) + d1) << endl;
 
     return EXIT_SUCCESS;
 }
