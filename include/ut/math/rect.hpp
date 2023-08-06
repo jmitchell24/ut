@@ -43,9 +43,6 @@
 
 namespace ut
 {
-    /// Similar to Rect. Represented by min and max coordinates instead of position and size.
-    /// Makes some calculations more efficient.
-    ///
     /// 'I' indicates the use of Inclusive Maximum for all size (width/height) calculations. (e.g. "(1,1), (2,2)" will
     /// have size "(2,2)", instead of "(1,1)". It is disallowed for non-integer types.
     template <typename N, bool I = false>
@@ -544,7 +541,7 @@ namespace ut
         static_assert(offsetof(rect_t, bottom) == offsetof(rect_t, pack) + sizeof(N) * 3, "wrong 'bottom' layout in pack");
     }
 
-    using rect = rectx<int>;
+    using rect = rectx<real_t>;
 
     typedef rectx<float>        rectf;
     typedef rectx<double>       rectd;

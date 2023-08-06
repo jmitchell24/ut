@@ -142,7 +142,6 @@ namespace ut
     typedef psizex<unsigned>     psizeu;
     typedef psizex<std::uint8_t> psizeb;
 
-#if !defined(UT_NO_STL_INTEROP)
     template <typename N>
     inline std::ostream& operator<<(std::ostream& os, psizex<N> const& r)
     {
@@ -156,7 +155,6 @@ namespace ut
         ss << v;
         return ss.str();
     }
-#endif
 }
 
 #undef ASSERT_SIZE
