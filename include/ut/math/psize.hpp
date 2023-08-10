@@ -134,7 +134,7 @@ namespace ut
         static_assert(offsetof(psize_t, y)      == offsetof(psize_t, pack) + sizeof(N) * 3, "wrong 'y' layout in pack");
     }
 
-    using psize = psizex<int>;
+    using psize = psizex<float>;
 
     typedef psizex<float>        psizef;
     typedef psizex<double>       psized;
