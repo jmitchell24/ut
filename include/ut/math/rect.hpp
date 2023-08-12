@@ -7,38 +7,49 @@
 
 #define ENABLE_IF_INCLUSIVE template <bool I_ = I, typename = std::enable_if_t<I>>
 
-#define UT_REGION_ALIGNMENTS \
-    REGION_ALIGN(TLtoTL) \
-    REGION_ALIGN(TLtoTR) \
-    REGION_ALIGN(TLtoBL) \
-    REGION_ALIGN(TLtoBR) \
+#define UT_ENUM_RECT_ANCHORS      \
+    CASE(TL, tl) \
+    CASE(TR, tr) \
+    CASE(BL, bl) \
+    CASE(BR, br) \
+    CASE(TC, tc) \
+    CASE(BC, bc) \
+    CASE(LC, lc) \
+    CASE(RC, rc) \
+    CASE(CC, cc)
+
+#define UT_ENUM_RECT_ALIGNMENTS \
+    CASE(TLtoTL) \
+    CASE(TLtoTR) \
+    CASE(TLtoBL) \
+    CASE(TLtoBR) \
     \
-    REGION_ALIGN(TRtoTL) \
-    REGION_ALIGN(TRtoTR) \
-    REGION_ALIGN(TRtoBL) \
-    REGION_ALIGN(TRtoBR) \
+    CASE(TRtoTL) \
+    CASE(TRtoTR) \
+    CASE(TRtoBL) \
+    CASE(TRtoBR) \
     \
-    REGION_ALIGN(BLtoTL) \
-    REGION_ALIGN(BLtoTR) \
-    REGION_ALIGN(BLtoBL) \
-    REGION_ALIGN(BLtoBR) \
+    CASE(BLtoTL) \
+    CASE(BLtoTR) \
+    CASE(BLtoBL) \
+    CASE(BLtoBR) \
     \
-    REGION_ALIGN(BRtoTL) \
-    REGION_ALIGN(BRtoTR) \
-    REGION_ALIGN(BRtoBL) \
-    REGION_ALIGN(BRtoBR) \
+    CASE(BRtoTL) \
+    CASE(BRtoTR) \
+    CASE(BRtoBL) \
+    CASE(BRtoBR) \
     \
-    REGION_ALIGN(TCtoTC) \
-    REGION_ALIGN(TCtoBC) \
-    REGION_ALIGN(BCtoTC) \
-    REGION_ALIGN(BCtoBC) \
+    CASE(TCtoTC) \
+    CASE(TCtoBC) \
+    CASE(BCtoTC) \
+    CASE(BCtoBC) \
     \
-    REGION_ALIGN(LCtoLC) \
-    REGION_ALIGN(LCtoRC) \
-    REGION_ALIGN(RCtoLC) \
-    REGION_ALIGN(RCtoRC) \
+    CASE(LCtoLC) \
+    CASE(LCtoRC) \
+    CASE(RCtoLC) \
+    CASE(RCtoRC) \
     \
-    REGION_ALIGN(CCtoCC)
+    CASE(CCtoCC)
 
 
 namespace ut
@@ -267,43 +278,45 @@ namespace ut
         //
 
 #define DECL_ALIGN(__name__) \
-    M_DECL_PURE region_type __name__(point_type const& s) const { return __name__(s.x, s.y); } \
-    M_DECL_PURE region_type __name__
+    M_DECL_PURE region_type alignedWidth##__name__ (scalar_type w) const { auto s = width()/height(); return aligned##__name__(s.x * s, s.y * s); } \
+    M_DECL_PURE region_type alignedHeight##__name__(scalar_type h) const { auto s = height()/width(); return aligned##__name__(s.x * s, s.y * s); } \
+    M_DECL_PURE region_type aligned##__name__(point_type const& s) const { return aligned##__name__(s.x, s.y); } \
+    M_DECL_PURE region_type aligned##__name__
 
-        DECL_ALIGN(alignedTLtoTL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , min.y    ), point_type(min.x + w, min.y + h) }; }
-        DECL_ALIGN(alignedTLtoTR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, min.y    ), point_type(min.x    , min.y + h) }; }
-        DECL_ALIGN(alignedTLtoBL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , min.y - h), point_type(min.x + w, min.y    ) }; }
-        DECL_ALIGN(alignedTLtoBR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, min.y - h), point_type(min.x    , min.y    ) }; }
+        DECL_ALIGN(TLtoTL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , min.y    ), point_type(min.x + w, min.y + h) }; }
+        DECL_ALIGN(TLtoTR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, min.y    ), point_type(min.x    , min.y + h) }; }
+        DECL_ALIGN(TLtoBL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , min.y - h), point_type(min.x + w, min.y    ) }; }
+        DECL_ALIGN(TLtoBR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, min.y - h), point_type(min.x    , min.y    ) }; }
 
-        DECL_ALIGN(alignedTRtoTL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , min.y    ), point_type(max.x + w, min.y + h) }; }
-        DECL_ALIGN(alignedTRtoTR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, min.y    ), point_type(max.x    , min.y + h) }; }
-        DECL_ALIGN(alignedTRtoBL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , min.y - h), point_type(max.x + w, min.y    ) }; }
-        DECL_ALIGN(alignedTRtoBR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, min.y - h), point_type(max.x    , min.y    ) }; }
+        DECL_ALIGN(TRtoTL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , min.y    ), point_type(max.x + w, min.y + h) }; }
+        DECL_ALIGN(TRtoTR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, min.y    ), point_type(max.x    , min.y + h) }; }
+        DECL_ALIGN(TRtoBL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , min.y - h), point_type(max.x + w, min.y    ) }; }
+        DECL_ALIGN(TRtoBR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, min.y - h), point_type(max.x    , min.y    ) }; }
 
-        DECL_ALIGN(alignedBLtoTL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , max.y    ), point_type(min.x + w, max.y + h) }; }
-        DECL_ALIGN(alignedBLtoTR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, max.y    ), point_type(min.x    , max.y + h) }; }
-        DECL_ALIGN(alignedBLtoBL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , max.y - h), point_type(min.x + w, max.y    ) }; }
-        DECL_ALIGN(alignedBLtoBR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, max.y - h), point_type(min.x    , max.y    ) }; }
+        DECL_ALIGN(BLtoTL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , max.y    ), point_type(min.x + w, max.y + h) }; }
+        DECL_ALIGN(BLtoTR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, max.y    ), point_type(min.x    , max.y + h) }; }
+        DECL_ALIGN(BLtoBL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , max.y - h), point_type(min.x + w, max.y    ) }; }
+        DECL_ALIGN(BLtoBR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, max.y - h), point_type(min.x    , max.y    ) }; }
 
-        DECL_ALIGN(alignedBRtoTL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , max.y    ), point_type(max.x + w, max.y + h) }; }
-        DECL_ALIGN(alignedBRtoTR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, max.y    ), point_type(max.x    , max.y + h) }; }
-        DECL_ALIGN(alignedBRtoBL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , max.y - h), point_type(max.x + w, max.y    ) }; }
-        DECL_ALIGN(alignedBRtoBR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, max.y - h), point_type(max.x    , max.y    ) }; }
+        DECL_ALIGN(BRtoTL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , max.y    ), point_type(max.x + w, max.y + h) }; }
+        DECL_ALIGN(BRtoTR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, max.y    ), point_type(max.x    , max.y + h) }; }
+        DECL_ALIGN(BRtoBL) (scalar_type w, scalar_type h) const { return { point_type(max.x    , max.y - h), point_type(max.x + w, max.y    ) }; }
+        DECL_ALIGN(BRtoBR) (scalar_type w, scalar_type h) const { return { point_type(max.x - w, max.y - h), point_type(max.x    , max.y    ) }; }
 
 #define PADX  w=(width()-w)/2;
 #define PADY  h=(height()-h)/2;
 #define HALFX w=w/2;
 #define HALFY h=h/2;
 
-        DECL_ALIGN(alignedTCtoTC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y    ), point_type(max.x - w, min.y + h) }; }
-        DECL_ALIGN(alignedTCtoBC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y - h), point_type(max.x - w, min.y    ) }; }
-        DECL_ALIGN(alignedBCtoTC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, max.y    ), point_type(max.x - w, max.y + h) }; }
-        DECL_ALIGN(alignedBCtoBC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, max.y - h), point_type(max.x - w, max.y    ) }; }
+        DECL_ALIGN(TCtoTC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y    ), point_type(max.x - w, min.y + h) }; }
+        DECL_ALIGN(TCtoBC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y - h), point_type(max.x - w, min.y    ) }; }
+        DECL_ALIGN(BCtoTC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, max.y    ), point_type(max.x - w, max.y + h) }; }
+        DECL_ALIGN(BCtoBC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, max.y - h), point_type(max.x - w, max.y    ) }; }
 
-        DECL_ALIGN(alignedLCtoLC) (scalar_type w, scalar_type h) const { PADY return { point_type(min.x    , min.y + h), point_type(min.x + w, max.y - h) }; }
-        DECL_ALIGN(alignedLCtoRC) (scalar_type w, scalar_type h) const { PADY return { point_type(min.x - w, min.y + h), point_type(min.x    , max.y - h) }; }
-        DECL_ALIGN(alignedRCtoLC) (scalar_type w, scalar_type h) const { PADY return { point_type(max.x    , min.y + h), point_type(max.x + w, max.y - h) }; }
-        DECL_ALIGN(alignedRCtoRC) (scalar_type w, scalar_type h) const { PADY return { point_type(max.x - w, min.y + h), point_type(max.x    , max.y - h) }; }
+        DECL_ALIGN(LCtoLC) (scalar_type w, scalar_type h) const { PADY return { point_type(min.x    , min.y + h), point_type(min.x + w, max.y - h) }; }
+        DECL_ALIGN(LCtoRC) (scalar_type w, scalar_type h) const { PADY return { point_type(min.x - w, min.y + h), point_type(min.x    , max.y - h) }; }
+        DECL_ALIGN(RCtoLC) (scalar_type w, scalar_type h) const { PADY return { point_type(max.x    , min.y + h), point_type(max.x + w, max.y - h) }; }
+        DECL_ALIGN(RCtoRC) (scalar_type w, scalar_type h) const { PADY return { point_type(max.x - w, min.y + h), point_type(max.x    , max.y - h) }; }
 
         DECL_ALIGN(alignedCCtoCC) (scalar_type w, scalar_type h) const { PADY PADX return { point_type(min.x + w, min.y + h), point_type(max.x - w, max.y - h) }; }
 
