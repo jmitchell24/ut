@@ -13,17 +13,10 @@ using namespace std;
 
 int main()
 {
-    auto s1 = "foo"_sv;
-    auto s2 = "bar"_sv;
+    auto r = rect(psize(100,125));
 
-    auto d1 = digest32::range(s1);
-    auto d2 = digest32::range(s2);
-
-    cout << d1 << endl;
-    cout << d2 << endl;
-    cout << (d2+d1) << endl;
-    cout << (d1+d2) << endl;
-    cout << (digest32::range("bar"_sv) + d1) << endl;
+    cout << r << endl;
+    cout << r.anchorCCtoCC_W(125_pc).psize() << endl;
 
     return EXIT_SUCCESS;
 }
