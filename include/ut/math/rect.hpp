@@ -475,7 +475,8 @@ namespace ut
             assert(step > 0 && "total inner margin must be less than height");
 
             std::array<region_type, Count> tmp;
-            tmp[0] = {{ min.x, hmin }, { max.x, hmax }};
+            //tmp[0] = {{ min.x, hmin }, { max.x, hmax }};
+            tmp[0] = {{ hmin, min.y }, { hmax, max.y }};
 
             step += inner_margin;
 
@@ -483,7 +484,8 @@ namespace ut
             {
                 hmin += step;
                 hmax += step;
-                tmp[i] = {{ min.x, hmin }, { max.x, hmax }};
+                //tmp[i] = {{ min.x, hmin }, { max.x, hmax }};
+                tmp[i] = {{ hmin, min.y }, { hmax, max.y }};
             }
             return tmp;
         }
