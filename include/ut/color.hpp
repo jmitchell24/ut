@@ -11,156 +11,156 @@
 
 #include <cstdio>
 
-#define UT_COLORS \
-    COLOR(transparent,          0x00000000) \
-    COLOR(black,                0x000000ff) \
-    COLOR(silver,               0xc0c0c0ff) \
-    COLOR(gray,                 0x808080ff) \
-    COLOR(white,                0xffffffff) \
-    COLOR(maroon,               0x800000ff) \
-    COLOR(red,                  0xff0000ff) \
-    COLOR(purple,               0x800080ff) \
-    COLOR(green,                0x008000ff) \
-    COLOR(lime,                 0x00ff00ff) \
-    COLOR(olive,                0x808000ff) \
-    COLOR(yellow,               0xffff00ff) \
-    COLOR(navy,                 0x000080ff) \
-    COLOR(blue,                 0x0000ffff) \
-    COLOR(teal,                 0x008080ff) \
-    COLOR(aqua,                 0x00ffffff) \
-    COLOR(orange,               0xffa500ff) \
-    COLOR(aliceblue,            0xf0f8ffff) \
-    COLOR(antiquewhite,         0xfaebd7ff) \
-    COLOR(aquamarine,           0x7fffd4ff) \
-    COLOR(azure,                0xf0ffffff) \
-    COLOR(beige,                0xf5f5dcff) \
-    COLOR(bisque,               0xffe4c4ff) \
-    COLOR(blanchedalmond,       0xffebcdff) \
-    COLOR(blueviolet,           0x8a2be2ff) \
-    COLOR(brown,                0xa52a2aff) \
-    COLOR(burlywood,            0xdeb887ff) \
-    COLOR(cadetblue,            0x5f9ea0ff) \
-    COLOR(chartreuse,           0x7fff00ff) \
-    COLOR(chocolate,            0xd2691eff) \
-    COLOR(coral,                0xff7f50ff) \
-    COLOR(cornflowerblue,       0x6495edff) \
-    COLOR(cornsilk,             0xfff8dcff) \
-    COLOR(crimson,              0xdc143cff) \
-    COLOR(cyan,                 0x00ffffff) \
-    COLOR(darkblue,             0x00008bff) \
-    COLOR(darkcyan,             0x008b8bff) \
-    COLOR(darkgoldenrod,        0xb8860bff) \
-    COLOR(darkgray,             0xa9a9a9ff) \
-    COLOR(darkgreen,            0x006400ff) \
-    COLOR(darkgrey,             0xa9a9a9ff) \
-    COLOR(darkkhaki,            0xbdb76bff) \
-    COLOR(darkmagenta,          0x8b008bff) \
-    COLOR(darkolivegreen,       0x556b2fff) \
-    COLOR(darkorange,           0xff8c00ff) \
-    COLOR(darkorchid,           0x9932ccff) \
-    COLOR(darkred,              0x8b0000ff) \
-    COLOR(darksalmon,           0xe9967aff) \
-    COLOR(darkseagreen,         0x8fbc8fff) \
-    COLOR(darkslateblue,        0x483d8bff) \
-    COLOR(darkslategray,        0x2f4f4fff) \
-    COLOR(darkslategrey,        0x2f4f4fff) \
-    COLOR(darkturquoise,        0x00ced1ff) \
-    COLOR(darkviolet,           0x9400d3ff) \
-    COLOR(deeppink,             0xff1493ff) \
-    COLOR(deepskyblue,          0x00bfffff) \
-    COLOR(dimgray,              0x696969ff) \
-    COLOR(dimgrey,              0x696969ff) \
-    COLOR(dodgerblue,           0x1e90ffff) \
-    COLOR(firebrick,            0xb22222ff) \
-    COLOR(floralwhite,          0xfffaf0ff) \
-    COLOR(forestgreen,          0x228b22ff) \
-    COLOR(gainsboro,            0xdcdcdcff) \
-    COLOR(ghostwhite,           0xf8f8ffff) \
-    COLOR(gold,                 0xffd700ff) \
-    COLOR(goldenrod,            0xdaa520ff) \
-    COLOR(greenyellow,          0xadff2fff) \
-    COLOR(grey,                 0x808080ff) \
-    COLOR(honeydew,             0xf0fff0ff) \
-    COLOR(hotpink,              0xff69b4ff) \
-    COLOR(indianred,            0xcd5c5cff) \
-    COLOR(indigo,               0x4b0082ff) \
-    COLOR(ivory,                0xfffff0ff) \
-    COLOR(khaki,                0xf0e68cff) \
-    COLOR(lavender,             0xe6e6faff) \
-    COLOR(lavenderblush,        0xfff0f5ff) \
-    COLOR(lawngreen,            0x7cfc00ff) \
-    COLOR(lemonchiffon,         0xfffacdff) \
-    COLOR(lightblue,            0xadd8e6ff) \
-    COLOR(lightcoral,           0xf08080ff) \
-    COLOR(lightcyan,            0xe0ffffff) \
-    COLOR(lightgoldenrodyellow, 0xfafad2ff) \
-    COLOR(lightgray,            0xd3d3d3ff) \
-    COLOR(lightgreen,           0x90ee90ff) \
-    COLOR(lightgrey,            0xd3d3d3ff) \
-    COLOR(lightpink,            0xffb6c1ff) \
-    COLOR(lightsalmon,          0xffa07aff) \
-    COLOR(lightseagreen,        0x20b2aaff) \
-    COLOR(lightskyblue,         0x87cefaff) \
-    COLOR(lightslategray,       0x778899ff) \
-    COLOR(lightslategrey,       0x778899ff) \
-    COLOR(lightsteelblue,       0xb0c4deff) \
-    COLOR(lightyellow,          0xffffe0ff) \
-    COLOR(limegreen,            0x32cd32ff) \
-    COLOR(linen,                0xfaf0e6ff) \
-    COLOR(magenta,              0xff00ffff) \
-    COLOR(fuchsia,              0xff00ffff) \
-    COLOR(mediumaquamarine,     0x66cdaaff) \
-    COLOR(mediumblue,           0x0000cdff) \
-    COLOR(mediumorchid,         0xba55d3ff) \
-    COLOR(mediumpurple,         0x9370dbff) \
-    COLOR(mediumseagreen,       0x3cb371ff) \
-    COLOR(mediumslateblue,      0x7b68eeff) \
-    COLOR(mediumspringgreen,    0x00fa9aff) \
-    COLOR(mediumturquoise,      0x48d1ccff) \
-    COLOR(mediumvioletred,      0xc71585ff) \
-    COLOR(midnightblue,         0x191970ff) \
-    COLOR(mintcream,            0xf5fffaff) \
-    COLOR(mistyrose,            0xffe4e1ff) \
-    COLOR(moccasin,             0xffe4b5ff) \
-    COLOR(navajowhite,          0xffdeadff) \
-    COLOR(oldlace,              0xfdf5e6ff) \
-    COLOR(olivedrab,            0x6b8e23ff) \
-    COLOR(orangered,            0xff4500ff) \
-    COLOR(orchid,               0xda70d6ff) \
-    COLOR(palegoldenrod,        0xeee8aaff) \
-    COLOR(palegreen,            0x98fb98ff) \
-    COLOR(paleturquoise,        0xafeeeeff) \
-    COLOR(palevioletred,        0xdb7093ff) \
-    COLOR(papayawhip,           0xffefd5ff) \
-    COLOR(peachpuff,            0xffdab9ff) \
-    COLOR(peru,                 0xcd853fff) \
-    COLOR(pink,                 0xffc0cbff) \
-    COLOR(plum,                 0xdda0ddff) \
-    COLOR(powderblue,           0xb0e0e6ff) \
-    COLOR(rosybrown,            0xbc8f8fff) \
-    COLOR(royalblue,            0x4169e1ff) \
-    COLOR(saddlebrown,          0x8b4513ff) \
-    COLOR(salmon,               0xfa8072ff) \
-    COLOR(sandybrown,           0xf4a460ff) \
-    COLOR(seagreen,             0x2e8b57ff) \
-    COLOR(seashell,             0xfff5eeff) \
-    COLOR(sienna,               0xa0522dff) \
-    COLOR(skyblue,              0x87ceebff) \
-    COLOR(slateblue,            0x6a5acdff) \
-    COLOR(slategray,            0x708090ff) \
-    COLOR(slategrey,            0x708090ff) \
-    COLOR(snow,                 0xfffafaff) \
-    COLOR(springgreen,          0x00ff7fff) \
-    COLOR(steelblue,            0x4682b4ff) \
-    COLOR(tan,                  0xd2b48cff) \
-    COLOR(thistle,              0xd8bfd8ff) \
-    COLOR(tomato,               0xff6347ff) \
-    COLOR(turquoise,            0x40e0d0ff) \
-    COLOR(violet,               0xee82eeff) \
-    COLOR(wheat,                0xf5deb3ff) \
-    COLOR(whitesmoke,           0xf5f5f5ff) \
-    COLOR(yellowgreen,          0x9acd32ff) \
-    COLOR(rebeccapurple,        0x663399ff)
+#define UT_ENUM_COLORS \
+    CASE(transparent,          0x00000000) \
+    CASE(black,                0x000000ff) \
+    CASE(silver,               0xc0c0c0ff) \
+    CASE(gray,                 0x808080ff) \
+    CASE(white,                0xffffffff) \
+    CASE(maroon,               0x800000ff) \
+    CASE(red,                  0xff0000ff) \
+    CASE(purple,               0x800080ff) \
+    CASE(green,                0x008000ff) \
+    CASE(lime,                 0x00ff00ff) \
+    CASE(olive,                0x808000ff) \
+    CASE(yellow,               0xffff00ff) \
+    CASE(navy,                 0x000080ff) \
+    CASE(blue,                 0x0000ffff) \
+    CASE(teal,                 0x008080ff) \
+    CASE(aqua,                 0x00ffffff) \
+    CASE(orange,               0xffa500ff) \
+    CASE(aliceblue,            0xf0f8ffff) \
+    CASE(antiquewhite,         0xfaebd7ff) \
+    CASE(aquamarine,           0x7fffd4ff) \
+    CASE(azure,                0xf0ffffff) \
+    CASE(beige,                0xf5f5dcff) \
+    CASE(bisque,               0xffe4c4ff) \
+    CASE(blanchedalmond,       0xffebcdff) \
+    CASE(blueviolet,           0x8a2be2ff) \
+    CASE(brown,                0xa52a2aff) \
+    CASE(burlywood,            0xdeb887ff) \
+    CASE(cadetblue,            0x5f9ea0ff) \
+    CASE(chartreuse,           0x7fff00ff) \
+    CASE(chocolate,            0xd2691eff) \
+    CASE(coral,                0xff7f50ff) \
+    CASE(cornflowerblue,       0x6495edff) \
+    CASE(cornsilk,             0xfff8dcff) \
+    CASE(crimson,              0xdc143cff) \
+    CASE(cyan,                 0x00ffffff) \
+    CASE(darkblue,             0x00008bff) \
+    CASE(darkcyan,             0x008b8bff) \
+    CASE(darkgoldenrod,        0xb8860bff) \
+    CASE(darkgray,             0xa9a9a9ff) \
+    CASE(darkgreen,            0x006400ff) \
+    CASE(darkgrey,             0xa9a9a9ff) \
+    CASE(darkkhaki,            0xbdb76bff) \
+    CASE(darkmagenta,          0x8b008bff) \
+    CASE(darkolivegreen,       0x556b2fff) \
+    CASE(darkorange,           0xff8c00ff) \
+    CASE(darkorchid,           0x9932ccff) \
+    CASE(darkred,              0x8b0000ff) \
+    CASE(darksalmon,           0xe9967aff) \
+    CASE(darkseagreen,         0x8fbc8fff) \
+    CASE(darkslateblue,        0x483d8bff) \
+    CASE(darkslategray,        0x2f4f4fff) \
+    CASE(darkslategrey,        0x2f4f4fff) \
+    CASE(darkturquoise,        0x00ced1ff) \
+    CASE(darkviolet,           0x9400d3ff) \
+    CASE(deeppink,             0xff1493ff) \
+    CASE(deepskyblue,          0x00bfffff) \
+    CASE(dimgray,              0x696969ff) \
+    CASE(dimgrey,              0x696969ff) \
+    CASE(dodgerblue,           0x1e90ffff) \
+    CASE(firebrick,            0xb22222ff) \
+    CASE(floralwhite,          0xfffaf0ff) \
+    CASE(forestgreen,          0x228b22ff) \
+    CASE(gainsboro,            0xdcdcdcff) \
+    CASE(ghostwhite,           0xf8f8ffff) \
+    CASE(gold,                 0xffd700ff) \
+    CASE(goldenrod,            0xdaa520ff) \
+    CASE(greenyellow,          0xadff2fff) \
+    CASE(grey,                 0x808080ff) \
+    CASE(honeydew,             0xf0fff0ff) \
+    CASE(hotpink,              0xff69b4ff) \
+    CASE(indianred,            0xcd5c5cff) \
+    CASE(indigo,               0x4b0082ff) \
+    CASE(ivory,                0xfffff0ff) \
+    CASE(khaki,                0xf0e68cff) \
+    CASE(lavender,             0xe6e6faff) \
+    CASE(lavenderblush,        0xfff0f5ff) \
+    CASE(lawngreen,            0x7cfc00ff) \
+    CASE(lemonchiffon,         0xfffacdff) \
+    CASE(lightblue,            0xadd8e6ff) \
+    CASE(lightcoral,           0xf08080ff) \
+    CASE(lightcyan,            0xe0ffffff) \
+    CASE(lightgoldenrodyellow, 0xfafad2ff) \
+    CASE(lightgray,            0xd3d3d3ff) \
+    CASE(lightgreen,           0x90ee90ff) \
+    CASE(lightgrey,            0xd3d3d3ff) \
+    CASE(lightpink,            0xffb6c1ff) \
+    CASE(lightsalmon,          0xffa07aff) \
+    CASE(lightseagreen,        0x20b2aaff) \
+    CASE(lightskyblue,         0x87cefaff) \
+    CASE(lightslategray,       0x778899ff) \
+    CASE(lightslategrey,       0x778899ff) \
+    CASE(lightsteelblue,       0xb0c4deff) \
+    CASE(lightyellow,          0xffffe0ff) \
+    CASE(limegreen,            0x32cd32ff) \
+    CASE(linen,                0xfaf0e6ff) \
+    CASE(magenta,              0xff00ffff) \
+    CASE(fuchsia,              0xff00ffff) \
+    CASE(mediumaquamarine,     0x66cdaaff) \
+    CASE(mediumblue,           0x0000cdff) \
+    CASE(mediumorchid,         0xba55d3ff) \
+    CASE(mediumpurple,         0x9370dbff) \
+    CASE(mediumseagreen,       0x3cb371ff) \
+    CASE(mediumslateblue,      0x7b68eeff) \
+    CASE(mediumspringgreen,    0x00fa9aff) \
+    CASE(mediumturquoise,      0x48d1ccff) \
+    CASE(mediumvioletred,      0xc71585ff) \
+    CASE(midnightblue,         0x191970ff) \
+    CASE(mintcream,            0xf5fffaff) \
+    CASE(mistyrose,            0xffe4e1ff) \
+    CASE(moccasin,             0xffe4b5ff) \
+    CASE(navajowhite,          0xffdeadff) \
+    CASE(oldlace,              0xfdf5e6ff) \
+    CASE(olivedrab,            0x6b8e23ff) \
+    CASE(orangered,            0xff4500ff) \
+    CASE(orchid,               0xda70d6ff) \
+    CASE(palegoldenrod,        0xeee8aaff) \
+    CASE(palegreen,            0x98fb98ff) \
+    CASE(paleturquoise,        0xafeeeeff) \
+    CASE(palevioletred,        0xdb7093ff) \
+    CASE(papayawhip,           0xffefd5ff) \
+    CASE(peachpuff,            0xffdab9ff) \
+    CASE(peru,                 0xcd853fff) \
+    CASE(pink,                 0xffc0cbff) \
+    CASE(plum,                 0xdda0ddff) \
+    CASE(powderblue,           0xb0e0e6ff) \
+    CASE(rosybrown,            0xbc8f8fff) \
+    CASE(royalblue,            0x4169e1ff) \
+    CASE(saddlebrown,          0x8b4513ff) \
+    CASE(salmon,               0xfa8072ff) \
+    CASE(sandybrown,           0xf4a460ff) \
+    CASE(seagreen,             0x2e8b57ff) \
+    CASE(seashell,             0xfff5eeff) \
+    CASE(sienna,               0xa0522dff) \
+    CASE(skyblue,              0x87ceebff) \
+    CASE(slateblue,            0x6a5acdff) \
+    CASE(slategray,            0x708090ff) \
+    CASE(slategrey,            0x708090ff) \
+    CASE(snow,                 0xfffafaff) \
+    CASE(springgreen,          0x00ff7fff) \
+    CASE(steelblue,            0x4682b4ff) \
+    CASE(tan,                  0xd2b48cff) \
+    CASE(thistle,              0xd8bfd8ff) \
+    CASE(tomato,               0xff6347ff) \
+    CASE(turquoise,            0x40e0d0ff) \
+    CASE(violet,               0xee82eeff) \
+    CASE(wheat,                0xf5deb3ff) \
+    CASE(whitesmoke,           0xf5f5f5ff) \
+    CASE(yellowgreen,          0x9acd32ff) \
+    CASE(rebeccapurple,        0x663399ff)
 
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
@@ -357,7 +357,40 @@ namespace ut
             M_DECL_PURE hsluv opaque() const { return { h, s, l, 1.0f }; }
 
             M_DECL_PURE hsluv rotate(real_t x) const
-            { return { std::fmod(x < 0.0f ? 360.0f + x : x, 360.0f), s, l, a }; }
+            { return { std::fmod(h + (x < 0.0f ? 360.0f + x : x), 360.0f), s, l, a }; }
+
+            template <size_t Count>
+            M_DECL_PURE std::array<hsluv, Count> swatch() const
+            {
+                static_assert(Count > 0);
+
+                auto step = 100.0f / Count;
+
+                std::array<hsluv, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                    tmp[i] = withL(step * (i+1));
+
+                return tmp;
+            }
+
+            template <size_t Count>
+            M_DECL_PURE std::array<hsluv, Count> scheme() const
+            {
+                static_assert(Count > 0);
+
+                auto step = 360.0f / Count;
+                hsluv c = *this;
+
+                std::array<hsluv, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                {
+                    tmp[i] = c;
+                    c = c.rotate(step);
+                }
+
+                return tmp;
+
+            }
 
             [[nodiscard]] inline color  toColor () const { return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
             [[nodiscard]] inline normal toNormal() const { return HSLUVtoNORMAL(*this); }
@@ -551,6 +584,23 @@ namespace ut
         return os;
     }
 
+    inline std::ostream& operator<<(std::ostream& os, color::hsluv const& c)
+    {
+        std::array<char, 128> buffer;
+
+        if (int res = snprintf(buffer.data(), buffer.size(), "hsluv(%.0fdeg %.0f%% %.0f%% / %.0f%%)",
+                               roundf(c.h), roundf(c.s), roundf(c.l), roundf(c.a*100)); res > 0)
+        {
+            int cnt = buffer.size()-1;
+            os.write(buffer.data(), res > cnt ? cnt : res);
+        }
+        else
+        {
+            os << "???";
+        }
+        return os;
+    }
+
     inline std::string to_string(color const& v)
     {
         std::ostringstream ss;
@@ -560,9 +610,16 @@ namespace ut
 
 namespace colors
 {
-#define COLOR(_name, _i) static constexpr color _name{_i};
-    UT_COLORS
-#undef COLOR
+#define CASE(name_, i_) static constexpr color name_{i_};
+    UT_ENUM_COLORS
+#undef CASE
+
+namespace hsluv
+{
+#define CASE(name_, i_) inline static color::hsluv name_() { return color{i_}.toHSLUV(); }
+    UT_ENUM_COLORS
+#undef CASE
+}
 }
 }
 

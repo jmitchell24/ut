@@ -13,10 +13,17 @@ using namespace std;
 
 int main()
 {
-    auto r = rect(psize(100,125));
+    auto c = colors::hsluv::aliceblue();
 
-    cout << r << endl;
-    cout << r.anchorCCtoCC_W(125_pc).psize() << endl;
+    cout << "aliceblue: " << c << endl;
+
+    cout << "scheme: " << endl;
+    for (auto&& it: c.scheme<10>())
+        cout << it << endl;
+
+    cout << "swatch: " << endl;
+    for (auto&& it: c.swatch<10>())
+        cout << it << endl;
 
     return EXIT_SUCCESS;
 }
