@@ -61,13 +61,13 @@ namespace ut
     {
         static_assert(std::is_integral_v<N> || !I, "Inclusive Maximum only supported for integral types");
 
-        using scalar_type       = N;
-        using real_type         = real_t;
-        using region_type       = rectx<N,I>;
-        using psize_type        = psizex<N>;
-        using point_type        = vec2x<N>;
-        using split_type        = std::tuple<region_type,region_type>;
-        //using fit_type          = std::tuple<scalar_type,scalar_type>;
+        using scalar_type   = N;
+        using real_type     = real_t;
+        using rect_type     = rectx<N,I>;
+        using psize_type    = psizex<N>;
+        using point_type    = vec2x<N>;
+        using split_type    = std::tuple<rect_type,rect_type>;
+        //using fit_type    = std::tuple<scalar_type,scalar_type>;
 
         using pack_type = N[4];
 
@@ -165,7 +165,7 @@ namespace ut
 //        M_DECL void set(rect_type const& r)
 //        { min.set(r.x, r.y); max.set(r.x + r.w, r.y + r.h); }
 
-        M_DECL void set(region_type const& r)
+        M_DECL void set(rect_type const& r)
         { min = r.min; max = r.max; }
 
         M_DECL void pos(scalar_type x, scalar_type y) { pos({x,y}); }
@@ -194,36 +194,36 @@ namespace ut
         // copy mutators
         //
 
-        M_DECL_PURE region_type withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
-        M_DECL_PURE region_type withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
+        M_DECL_PURE rect_type withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
+        M_DECL_PURE rect_type withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
 
 #define MUT(op_) auto tmp = *this; tmp.op_; return tmp;
-        M_DECL_PURE region_type withPos(scalar_type x, scalar_type y) const { MUT(pos({x,y})); }
-        M_DECL_PURE region_type withPos(point_type const& p)          const { MUT(pos(p)) }
+        M_DECL_PURE rect_type withPos(scalar_type x, scalar_type y) const { MUT(pos({x,y})); }
+        M_DECL_PURE rect_type withPos(point_type const& p)          const { MUT(pos(p)) }
 
-        M_DECL_PURE region_type withPosX(scalar_type s) const { MUT(posX(s)) }
-        M_DECL_PURE region_type withPosY(scalar_type s) const { MUT(posY(s)) }
+        M_DECL_PURE rect_type withPosX(scalar_type s) const { MUT(posX(s)) }
+        M_DECL_PURE rect_type withPosY(scalar_type s) const { MUT(posY(s)) }
 
-        M_DECL_PURE region_type withOffsetX(scalar_type s)       const { MUT(offsetX(s)) }
-        M_DECL_PURE region_type withOffsetY(scalar_type s)       const { MUT(offsetY(s)); }
-        M_DECL_PURE region_type withOffset (point_type const& p) const { MUT(offset(p)) }
+        M_DECL_PURE rect_type withOffsetX(scalar_type s)       const { MUT(offsetX(s)) }
+        M_DECL_PURE rect_type withOffsetY(scalar_type s)       const { MUT(offsetY(s)); }
+        M_DECL_PURE rect_type withOffset (point_type const& p) const { MUT(offset(p)) }
 
-        M_DECL_PURE region_type withWidth (scaler sc)     const { MUT(width(sc)) }
-        M_DECL_PURE region_type withWidth (scalar_type s) const { MUT(width(s)); }
+        M_DECL_PURE rect_type withWidth (scaler sc)     const { MUT(width(sc)) }
+        M_DECL_PURE rect_type withWidth (scalar_type s) const { MUT(width(s)); }
 
-        M_DECL_PURE region_type withHeight(scaler sc)     const { MUT(height(sc)) }
-        M_DECL_PURE region_type withHeight(scalar_type s) const { MUT(height(s)); }
+        M_DECL_PURE rect_type withHeight(scaler sc)     const { MUT(height(sc)) }
+        M_DECL_PURE rect_type withHeight(scalar_type s) const { MUT(height(s)); }
 
-        M_DECL_PURE region_type withSize(scaler scw, scaler sch)       const { MUT(size(scw, sch)) }
-        M_DECL_PURE region_type withSize(scalar_type w, scalar_type h) const { MUT(size(w,h)) }
-        M_DECL_PURE region_type withSize(point_type const& p)          const { MUT(size(p)) }
+        M_DECL_PURE rect_type withSize(scaler scw, scaler sch)       const { MUT(size(scw, sch)) }
+        M_DECL_PURE rect_type withSize(scalar_type w, scalar_type h) const { MUT(size(w,h)) }
+        M_DECL_PURE rect_type withSize(point_type const& p)          const { MUT(size(p)) }
 #undef MUT
 
         //
         // set ops
         //
 
-        M_DECL void add(region_type const& r)
+        M_DECL void add(rect_type const& r)
         {
             if ((r.min.x < r.max.x) && (r.min.y < r.max.y))
             {
@@ -261,29 +261,29 @@ namespace ut
         // utility
         //
 
-        ENABLE_IF_FLOAT M_DECL_PURE region_type round() const { return region_type(min.round(), max.round()); }
-        ENABLE_IF_FLOAT M_DECL_PURE region_type floor() const { return region_type(min.floor(), max.floor()); }
-        ENABLE_IF_FLOAT M_DECL_PURE region_type ceil () const { return region_type(min.ceil (), max.ceil ()); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type round() const { return rect_type(min.round(), max.round()); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type floor() const { return rect_type(min.floor(), max.floor()); }
+        ENABLE_IF_FLOAT M_DECL_PURE rect_type ceil () const { return rect_type(min.ceil (), max.ceil ()); }
 
         //
         // bound checks
         //
 
         M_DECL_PURE bool contains(point_type  const& p) const { return p.x >= min.x && p.y >= min.y && p.x < max.x && p.y < max.y; }
-        M_DECL_PURE bool contains(region_type const& r) const { return r.min.x >= min.x && r.min.y >= min.y && r.max.x <= max.x && r.max.y <= max.y; }
-        M_DECL_PURE bool overlaps(region_type const& r) const { return r.min.y < max.y && r.max.y > min.y && r.min.x < max.x && r.max.x > min.x; }
+        M_DECL_PURE bool contains(rect_type const& r) const { return r.min.x >= min.x && r.min.y >= min.y && r.max.x <= max.x && r.max.y <= max.y; }
+        M_DECL_PURE bool overlaps(rect_type const& r) const { return r.min.y < max.y && r.max.y > min.y && r.min.x < max.x && r.max.x > min.x; }
 
         //
         // alignment
         //
 
 #define DECL_ANCHORS(alignment_) \
-    M_DECL_PURE region_type anchor##alignment_##_W(scaler w) const { return anchor##alignment_##_W(w(width())); } \
-    M_DECL_PURE region_type anchor##alignment_##_H(scaler h) const { return anchor##alignment_##_H(h(height())); } \
-    M_DECL_PURE region_type anchor##alignment_##_W(scalar_type w) const { return anchor##alignment_(w, (w/width()) * height()); } \
-    M_DECL_PURE region_type anchor##alignment_##_H(scalar_type h) const { return anchor##alignment_((h/height()) * width(), h); } \
-    M_DECL_PURE region_type anchor##alignment_(point_type const& s) const { return anchor##alignment_(s.x, s.y); } \
-    M_DECL_PURE region_type anchor##alignment_
+    M_DECL_PURE rect_type anchor##alignment_##_W(scaler w) const { return anchor##alignment_##_W(w(width())); } \
+    M_DECL_PURE rect_type anchor##alignment_##_H(scaler h) const { return anchor##alignment_##_H(h(height())); } \
+    M_DECL_PURE rect_type anchor##alignment_##_W(scalar_type w) const { return anchor##alignment_(w, (w/width()) * height()); } \
+    M_DECL_PURE rect_type anchor##alignment_##_H(scalar_type h) const { return anchor##alignment_((h/height()) * width(), h); } \
+    M_DECL_PURE rect_type anchor##alignment_(point_type const& s) const { return anchor##alignment_(s.x, s.y); } \
+    M_DECL_PURE rect_type anchor##alignment_
 
         DECL_ANCHORS(TLtoTL) (scalar_type w, scalar_type h) const { return { point_type(min.x    , min.y    ), point_type(min.x + w, min.y + h) }; }
         DECL_ANCHORS(TLtoTR) (scalar_type w, scalar_type h) const { return { point_type(min.x - w, min.y    ), point_type(min.x    , min.y + h) }; }
@@ -333,66 +333,66 @@ namespace ut
         // shrink
         //
 
-        M_DECL_PURE region_type shrunk(point_type const& tl, point_type const& br) const
+        M_DECL_PURE rect_type shrunk(point_type const& tl, point_type const& br) const
         { return { min + tl, max - br }; }
 
-        M_DECL_PURE region_type shrunk(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
+        M_DECL_PURE rect_type shrunk(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
         { return shrunk({left,top}, {right,bottom}); }
 
-        M_DECL_PURE region_type shrunk(scalar_type horz, scalar_type vert) const
+        M_DECL_PURE rect_type shrunk(scalar_type horz, scalar_type vert) const
         { return shrunk({horz,vert}, {horz,vert}); }
 
-        M_DECL_PURE region_type shrunk(scalar_type sz) const
+        M_DECL_PURE rect_type shrunk(scalar_type sz) const
         { return shrunk({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE region_type shrunk(scaler left, scaler top, scaler right, scaler bottom) const
+        M_DECL_PURE rect_type shrunk(scaler left, scaler top, scaler right, scaler bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return shrunk(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE region_type shrunk(scaler horz, scaler vert) const
+        M_DECL_PURE rect_type shrunk(scaler horz, scaler vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return shrunk(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE region_type shrunk(scaler f) const
+        M_DECL_PURE rect_type shrunk(scaler f) const
         { return shrunk(f, f); }
 
         //
         // expand
         //
 
-        M_DECL_PURE region_type expanded(point_type const& tl, point_type const& br) const
+        M_DECL_PURE rect_type expanded(point_type const& tl, point_type const& br) const
         { return { min - tl, max + br }; }
 
-        M_DECL_PURE region_type expanded(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
+        M_DECL_PURE rect_type expanded(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
         { return expanded({left,top}, {right,bottom}); }
 
-        M_DECL_PURE region_type expanded(scalar_type horz, scalar_type vert) const
+        M_DECL_PURE rect_type expanded(scalar_type horz, scalar_type vert) const
         { return expanded({horz,vert}, {horz,vert}); }
 
-        M_DECL_PURE region_type expanded(scalar_type sz) const
+        M_DECL_PURE rect_type expanded(scalar_type sz) const
         { return expanded({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE region_type expanded(scaler left, scaler top, scaler right, scaler bottom) const
+        M_DECL_PURE rect_type expanded(scaler left, scaler top, scaler right, scaler bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return expanded(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE region_type expanded(scaler horz, scaler vert) const
+        M_DECL_PURE rect_type expanded(scaler horz, scaler vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return expanded(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE region_type expanded(scaler f) const
+        M_DECL_PURE rect_type expanded(scaler f) const
         { return expanded(f, f); }
 
         //
@@ -422,7 +422,7 @@ namespace ut
         //
 
         // TODO: add output parameter option (and maybe eliminate return value)
-        M_DECL_PURE region_type splitV(scalar_type vmin, scalar_type vmax) const
+        M_DECL_PURE rect_type splitV(scalar_type vmin, scalar_type vmax) const
         {
             assert(vmin <= vmax);
             assert(vmax >= min.y && vmax <= max.y);
@@ -430,7 +430,7 @@ namespace ut
             return {{ min.x, vmin }, { max.x, vmax }};
         }
 
-        M_DECL_PURE region_type splitH(scalar_type hmin, scalar_type hmax) const
+        M_DECL_PURE rect_type splitH(scalar_type hmin, scalar_type hmax) const
         {
             assert(hmin <= hmax);
             assert(hmax >= min.x && hmax <= max.x);
@@ -439,7 +439,7 @@ namespace ut
         }
 
         template <size_t Count>
-        M_DECL_PURE std::array<region_type, Count> splitNV(scalar_type inner_margin = 0) const
+        M_DECL_PURE std::array<rect_type, Count> splitNV(scalar_type inner_margin = 0) const
         {
             static_assert(Count > 0);
 
@@ -449,7 +449,7 @@ namespace ut
 
             assert(step > 0 && "total inner margin must be less than height");
 
-            std::array<region_type, Count> tmp;
+            std::array<rect_type, Count> tmp;
             tmp[0] = {{ min.x, vmin }, { max.x, vmax }};
 
             step += inner_margin;
@@ -464,7 +464,7 @@ namespace ut
         }
 
         template <size_t Count>
-        M_DECL_PURE std::array<region_type, Count> splitNH(scalar_type inner_margin = 0) const
+        M_DECL_PURE std::array<rect_type, Count> splitNH(scalar_type inner_margin = 0) const
         {
             static_assert(Count > 0);
 
@@ -474,7 +474,7 @@ namespace ut
 
             assert(step > 0 && "total inner margin must be less than height");
 
-            std::array<region_type, Count> tmp;
+            std::array<rect_type, Count> tmp;
             //tmp[0] = {{ min.x, hmin }, { max.x, hmax }};
             tmp[0] = {{ hmin, min.y }, { hmax, max.y }};
 
@@ -512,6 +512,110 @@ namespace ut
         {
             auto split = max.x - dw;
             return {splitH(min.x, split-inner_margin), splitH(split, max.x)};
+        }
+
+        //
+        // grid
+        //
+
+        struct cellopt
+        {
+            size_t w=1, h=1; scalar_type inner_pad = scalar_type(0), outer_pad = scalar_type(0);
+        };
+
+        M_DECL_PURE rect_type cell(size_t w, size_t h, size_t x, size_t y, cellopt const& opt = {}) const
+        {
+            assert(w > 0);
+            assert(x + opt.w <= w);
+
+            assert(h > 0);
+            assert(y + opt.h <= h);
+
+            assert(opt.inner_pad >= 0.0f);
+            assert(opt.outer_pad >= 0.0f);
+
+            scalar_type cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
+            scalar_type ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
+
+            psize_type p
+            {
+                /* w */ cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad,
+                /* h */ ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad,
+                /* x */ pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad),
+                /* y */ pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)
+            };
+
+            return rect_type{p};
+        }
+
+        struct rowopt
+        {
+            size_t w=1; scalar_type inner_pad = scalar_type(0), outer_pad = scalar_type(0);
+        };
+
+        M_DECL_PURE rect_type row(size_t w, size_t x, rowopt const& opt = {}) const
+        {
+            assert(w > 0);
+            assert(x + opt.w <= w);
+
+            assert(opt.inner_pad >= 0.0f);
+            assert(opt.outer_pad >= 0.0f);
+
+            scalar_type cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
+            scalar_type ch = (height() - 2 * opt.outer_pad);
+
+            psize_type p
+            {
+                /* w */ cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad,
+                /* h */ ch,
+                /* x */ pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad),
+                /* y */ pos().y + opt.outer_pad
+            };
+
+            return rect_type{p};
+        }
+
+        template<typename... Args>
+        M_DECL void rowTie(rowopt const& opt, Args&... args) const
+        {
+            size_t w = sizeof...(Args) * opt.w;
+            size_t i = 0;
+            (..., (args = row(w, i++, opt)));
+        }
+
+        struct colopt
+        {
+            size_t h=1; scalar_type inner_pad = scalar_type(0), outer_pad = scalar_type(0);
+        };
+
+        M_DECL_PURE rect_type col(size_t h, size_t y, colopt const& opt = {}) const
+        {
+            assert(h > 0);
+            assert(y + opt.h <= h);
+
+            assert(opt.inner_pad >= 0.0f);
+            assert(opt.outer_pad >= 0.0f);
+
+            scalar_type cw = (width() - 2 * opt.outer_pad);
+            scalar_type ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
+
+            psize_type p
+            {
+                /* w */ cw,
+                /* h */ ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad,
+                /* x */ pos().x + opt.outer_pad,
+                /* y */ pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)
+            };
+
+            return rect_type{p};
+        }
+
+        template<typename... Args>
+        M_DECL void colTie(colopt const& opt, Args&... args) const
+        {
+            size_t h = sizeof...(Args) * opt.h;
+            size_t i = 0;
+            (..., (args = col(h, i++, opt)));
         }
 
         //

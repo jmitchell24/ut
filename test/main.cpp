@@ -11,19 +11,55 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
+#define DEBUG_PRINT(x_) cout << #x_ << endl; (x_);
+
 int main()
 {
-    auto c = colors::hsluv::aliceblue();
+    if (false)
+    {
+        auto r = rect(psize(100, 100));
+        cout << "row: " << endl;
+        for (size_t i = 0; i < 10; ++i)
+        {
+            cout << i << ": " << r.row(10, i, {.inner_pad=5, .outer_pad=10}) << endl;
+        }
+    }
 
-    cout << "aliceblue: " << c << endl;
+    if (false)
+    {
+        auto r = rect(psize(100, 100));
+        cout << "col: " << endl;
+        for (size_t i = 0; i < 10; ++i)
+        {
+            cout << i << ": " << r.col(10, i, {.inner_pad=5, .outer_pad=10}) << endl;
+        }
+    }
 
-    cout << "scheme: " << endl;
-    for (auto&& it: c.scheme<10>())
-        cout << it << endl;
+    if (false)
+    {
+        auto r = rect(psize(100, 100));
+        cout << "cell: " << endl;
+        for (size_t i = 0; i < 10; ++i)
+        {
+            for (size_t j = 0; j < 10; ++j)
+            {
+                cout << j << ": " << r.cell(10, 10, i, j, {.inner_pad=5, .outer_pad=10}) << endl;
+            }
+        }
+    }
 
-    cout << "swatch: " << endl;
-    for (auto&& it: c.swatch<10>())
-        cout << it << endl;
+    //if (false)
+    {
+        auto r = rect(psize(100, 100));
+        cout << "tie: " << endl;
+
+        rect a,b,c;
+        r.rowTie({.inner_pad=5}, a,b,c);
+
+        cout << a.psize() << endl;
+        cout << b.psize() << endl;
+        cout << c.psize() << endl;
+    }
 
     return EXIT_SUCCESS;
 }
