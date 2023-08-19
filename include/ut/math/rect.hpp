@@ -531,18 +531,18 @@ namespace ut
             assert(h > 0);
             assert(y + opt.h <= h);
 
-            assert(opt.inner_pad >= 0.0f);
-            assert(opt.outer_pad >= 0.0f);
+            assert(opt.inner_pad >= scalar_type(0));
+            assert(opt.outer_pad >= scalar_type(0));
 
-            scalar_type cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
-            scalar_type ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
+            auto cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
+            auto ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
 
             psize_type p
             {
-                /* w */ cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad,
-                /* h */ ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad,
-                /* x */ pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad),
-                /* y */ pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)
+                /* w */ scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad ),
+                /* h */ scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad ),
+                /* x */ scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  ),
+                /* y */ scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)  )
             };
 
             return rect_type{p};
@@ -561,15 +561,15 @@ namespace ut
             assert(opt.inner_pad >= 0.0f);
             assert(opt.outer_pad >= 0.0f);
 
-            scalar_type cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
-            scalar_type ch = (height() - 2 * opt.outer_pad);
+            auto cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
+            auto ch = (height() - 2 * opt.outer_pad);
 
             psize_type p
             {
-                /* w */ cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad,
-                /* h */ ch,
-                /* x */ pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad),
-                /* y */ pos().y + opt.outer_pad
+                /* w */ scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad ),
+                /* h */ scalar_type( ch                                                               ),
+                /* x */ scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  ),
+                /* y */ scalar_type( pos().y + opt.outer_pad                                          )
             };
 
             return rect_type{p};
@@ -580,7 +580,7 @@ namespace ut
         {
             size_t w = sizeof...(Args) * opt.w;
             size_t i = 0;
-            (..., (args = row(w, i++, opt)));
+            (..., (args = row(w, i, opt), i+=opt.w));
         }
 
         struct colopt
@@ -593,18 +593,18 @@ namespace ut
             assert(h > 0);
             assert(y + opt.h <= h);
 
-            assert(opt.inner_pad >= 0.0f);
-            assert(opt.outer_pad >= 0.0f);
+            assert(opt.inner_pad >= scalar_type(0));
+            assert(opt.outer_pad >= scalar_type(0));
 
-            scalar_type cw = (width() - 2 * opt.outer_pad);
-            scalar_type ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
+            auto cw = (width() - 2 * opt.outer_pad);
+            auto ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
 
             psize_type p
             {
-                /* w */ cw,
-                /* h */ ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad,
-                /* x */ pos().x + opt.outer_pad,
-                /* y */ pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)
+                /* w */ scalar_type( cw                                                                 ),
+                /* h */ scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad   ),
+                /* x */ scalar_type( pos().x + opt.outer_pad                                            ),
+                /* y */ scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)    ),
             };
 
             return rect_type{p};
@@ -615,7 +615,7 @@ namespace ut
         {
             size_t h = sizeof...(Args) * opt.h;
             size_t i = 0;
-            (..., (args = col(h, i++, opt)));
+            (..., (args = col(h, i, opt), i+=opt.h));
         }
 
         //

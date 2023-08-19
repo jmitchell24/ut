@@ -54,7 +54,7 @@ int main()
         cout << "tie: " << endl;
 
         rect a,b,c;
-        r.rowTie({.inner_pad=5}, a,b,c);
+        r.colTie({.h=100, .inner_pad=5}, a,b,c);
 
         cout << a.psize() << endl;
         cout << b.psize() << endl;

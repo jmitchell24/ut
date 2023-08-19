@@ -61,7 +61,7 @@ namespace ut
             : width{0}, height{0}, x{0}, y{0}
         {}
 
-        M_DECL psizex(scalar_type width, scalar_type height, scalar_type x=0, scalar_type y=0)
+        M_DECL psizex(scalar_type width, scalar_type height, scalar_type x=scalar_type(0), scalar_type y=scalar_type(0))
             : width{width}, height{height}, x{x}, y{y}
         { ASSERT_SIZE(width,height); }
 
