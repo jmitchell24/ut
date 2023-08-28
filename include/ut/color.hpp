@@ -199,16 +199,20 @@ namespace ut
                 : r{ r }, g{ g }, b{ b }, a{ a }
             { ASSERT_NORMAL4(r,g,b,a); }
 
-            M_DECL explicit normal(vec4 const& v)
+            M_DECL normal(vec4 const& v)
                 : normal(v.x, v.y, v.z, v.w)
-            {}
+            { ASSERT_NORMAL4(r,g,b,a); }
 
-            M_DECL explicit normal(vec3 const& v, real_t a = 1.0f)
+            M_DECL normal(vec3 const& v, real_t a = 1.0f)
                 : normal(v.x, v.y, v.z, a)
             {}
 
             M_DECL explicit normal(hsv const& hsv)
                 : normal(HSVtoNORMAL(hsv))
+            {}
+
+            inline explicit normal(hsluv const& hsluv)
+                : normal(HSLUVtoNORMAL(hsluv))
             {}
 
             M_DECL explicit normal(color const& c)
@@ -221,21 +225,19 @@ namespace ut
             M_DECL normal& operator=(normal const&)=default;
             M_DECL normal& operator=(normal&&) noexcept =default;
 
-            M_DECL_PURE normal withR(real_t x) const { ASSERT_NORMAL(x); return {x, g, b, a}; }
-            M_DECL_PURE normal withG(real_t x) const { ASSERT_NORMAL(x); return {r, x, b, a}; }
-            M_DECL_PURE normal withB(real_t x) const { ASSERT_NORMAL(x); return {r, g, x, a}; }
-            M_DECL_PURE normal withA(real_t x) const { ASSERT_NORMAL(x); return {r, g, b, x}; }
+            M_DECL_PURE operator vec4() const { return toVec4(); }
+            M_DECL_PURE operator vec3() const { return toVec3(); }
 
-            M_DECL_PURE normal opaque() const { return { r, g, b, 1.0f }; }
+            [[nodiscard]] inline    explicit operator hsv  () const { return toHSV(); }
+            [[nodiscard]] inline    explicit operator hsluv() const { return toHSLUV(); }
+            M_DECL_PURE             explicit operator color() const { return toColor(); }
 
-            M_DECL_PURE explicit operator vec4() const { return toVec4(); }
 
-            M_DECL_PURE vec4 toVec4() const { return { r,g,b,a }; }
-            M_DECL_PURE vec3 toVec3() const { return { r,g,b }; }
-
-            [[nodiscard]] inline  hsluv toHSLUV() const { return NORMALtoHSLUV(*this); }
-            M_DECL_PURE           hsv   toHSV  () const { return NORMALtoHSV  (*this); }
-            M_DECL_PURE           color toColor() const { return NORMALtoRGB  (*this); }
+            M_DECL_PURE             vec4    toVec4 () const { return { r,g,b,a }; }
+            M_DECL_PURE             vec3    toVec3 () const { return { r,g,b }; }
+            M_DECL_PURE             color   toColor() const { return NORMALtoRGB  (*this); }
+            [[nodiscard]] inline    hsv     toHSV  () const { return NORMALtoHSV  (*this); }
+            [[nodiscard]] inline    hsluv   toHSLUV() const { return NORMALtoHSLUV(*this); }
         };
 
         struct hsv
@@ -399,8 +401,12 @@ namespace ut
             { return { h,s,l,a }; }
         };
 
+        using pack_type = b8[4];
+
         b32 i;
         struct { b8 a,b,g,r; };
+        pack_type pack;
+
 
         M_DECL color()
             : i{0x000000ff}
@@ -611,13 +617,27 @@ namespace ut
 namespace colors
 {
 #define CASE(name_, i_) static constexpr color name_{i_};
-    UT_ENUM_COLORS
+UT_ENUM_COLORS
 #undef CASE
 
 namespace hsluv
 {
 #define CASE(name_, i_) inline static color::hsluv name_() { return color{i_}.toHSLUV(); }
-    UT_ENUM_COLORS
+UT_ENUM_COLORS
+#undef CASE
+}
+
+namespace hsv
+{
+#define CASE(name_, i_) inline static color::hsv name_() { return color{i_}.toHSV(); }
+UT_ENUM_COLORS
+#undef CASE
+}
+
+namespace normal
+{
+#define CASE(name_, i_) inline static color::normal name_() { return color{i_}.toNormal(); }
+UT_ENUM_COLORS
 #undef CASE
 }
 }
