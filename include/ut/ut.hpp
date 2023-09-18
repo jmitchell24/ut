@@ -11,6 +11,7 @@
 #include <ut/bit.hpp>
 #include <ut/time.hpp>
 #include <ut/color.hpp>
+#include <ut/random.hpp>
 
 
 namespace ut

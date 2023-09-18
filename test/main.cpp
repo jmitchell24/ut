@@ -5,6 +5,7 @@
 
 //#define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
+#include <ut/container/vector_array.hpp>
 using namespace ut;
 
 #include <iomanip>
@@ -13,11 +14,26 @@ using namespace std;
 
 #define DEBUG_PRINT(x_) cout << #x_ << endl; (x_);
 
+
+
+
+
 int main()
 {
-    vec4 x = colors::normal::blueviolet();
+    int a=0, b=0;
+    for (size_t i = 0; i < 1000000; ++i)
+    {
+        if (RNG.nextb())
+            ++a;
+        else
+            ++b;
+    }
 
-    cout << x << endl;
+    float fa = float(a) / float(a+b) * 100;
+    float fb = float(b) / float(a+b) * 100;
+
+    cout << fa << " / " << fb << endl;
+
 
     return EXIT_SUCCESS;
 }
