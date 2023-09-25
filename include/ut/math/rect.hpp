@@ -5,9 +5,9 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
-#define ENABLE_IF_INCLUSIVE template <bool I_ = I, typename = std::enable_if_t<I>>
+#define ENABLE_IF_INCLUSIVE     template <bool I_ = I, typename = std::enable_if_t<I>>
 
-#define UT_ENUM_RECT_ANCHORS      \
+#define UT_ENUM_RECT_ANCHORS \
     CASE(TL, tl) \
     CASE(TR, tr) \
     CASE(BL, bl) \
@@ -180,15 +180,15 @@ namespace ut
         M_DECL void offsetX(scalar_type o) { min.x += o; max.x += o; }
         M_DECL void offsetY(scalar_type o) { min.y += o; max.y += o; }
 
-        M_DECL void width(scaler sc)     { width(sc(width())); }
+        M_DECL void width(perc pc)       { width(pc(width())); }
         M_DECL void width(scalar_type s) { if constexpr(INCLUSIVE) max.x = min.x + s - 1; else max.x = min.x + s; }
 
-        M_DECL void height(scaler sc)     { height(sc(height())); }
+        M_DECL void height(perc pc)       { height(pc(height())); }
         M_DECL void height(scalar_type s) { if constexpr(INCLUSIVE) max.y = min.y + s - 1; else max.y = min.y + s; }
 
-        M_DECL void size(scaler scw, scaler sch)       { size(scw(width()), sch(height())); }
-        M_DECL void size(scalar_type w, scalar_type h) { size({w,h}); }
-        M_DECL void size(point_type const& p)          { if constexpr (INCLUSIVE) max = min + p - point_type{1,1}; else max = min + p; }
+        M_DECL void size(perc pc_w, perc pc_h)           { size(pc_w(width()), pc_h(height())); }
+        M_DECL void size(scalar_type w, scalar_type h)   { size({w,h}); }
+        M_DECL void size(point_type const& p)            { if constexpr (INCLUSIVE) max = min + p - point_type{1,1}; else max = min + p; }
 
         //
         // copy mutators
@@ -208,13 +208,13 @@ namespace ut
         M_DECL_PURE rect_type withOffsetY(scalar_type s)       const { MUT(offsetY(s)); }
         M_DECL_PURE rect_type withOffset (point_type const& p) const { MUT(offset(p)) }
 
-        M_DECL_PURE rect_type withWidth (scaler sc)     const { MUT(width(sc)) }
+        M_DECL_PURE rect_type withWidth (perc pc)       const { MUT(width(pc)) }
         M_DECL_PURE rect_type withWidth (scalar_type s) const { MUT(width(s)); }
 
-        M_DECL_PURE rect_type withHeight(scaler sc)     const { MUT(height(sc)) }
+        M_DECL_PURE rect_type withHeight(perc pc)       const { MUT(height(pc)) }
         M_DECL_PURE rect_type withHeight(scalar_type s) const { MUT(height(s)); }
 
-        M_DECL_PURE rect_type withSize(scaler scw, scaler sch)       const { MUT(size(scw, sch)) }
+        M_DECL_PURE rect_type withSize(perc pc_w, perc pc_h)         const { MUT(size(pc_w, pc_h)) }
         M_DECL_PURE rect_type withSize(scalar_type w, scalar_type h) const { MUT(size(w,h)) }
         M_DECL_PURE rect_type withSize(point_type const& p)          const { MUT(size(p)) }
 #undef MUT
@@ -278,8 +278,8 @@ namespace ut
         //
 
 #define DECL_ANCHORS(alignment_) \
-    M_DECL_PURE rect_type anchor##alignment_##_W(scaler w) const { return anchor##alignment_##_W(w(width())); } \
-    M_DECL_PURE rect_type anchor##alignment_##_H(scaler h) const { return anchor##alignment_##_H(h(height())); } \
+    M_DECL_PURE rect_type anchor##alignment_##_W(perc pc_w) const { return anchor##alignment_##_W(pc_w(width())); } \
+    M_DECL_PURE rect_type anchor##alignment_##_H(perc pc_h) const { return anchor##alignment_##_H(pc_h(height())); } \
     M_DECL_PURE rect_type anchor##alignment_##_W(scalar_type w) const { return anchor##alignment_(w, (w/width()) * height()); } \
     M_DECL_PURE rect_type anchor##alignment_##_H(scalar_type h) const { return anchor##alignment_((h/height()) * width(), h); } \
     M_DECL_PURE rect_type anchor##alignment_(point_type const& s) const { return anchor##alignment_(s.x, s.y); } \
@@ -345,21 +345,21 @@ namespace ut
         M_DECL_PURE rect_type shrunk(scalar_type sz) const
         { return shrunk({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE rect_type shrunk(scaler left, scaler top, scaler right, scaler bottom) const
+        M_DECL_PURE rect_type shrunk(perc left, perc top, perc right, perc bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return shrunk(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE rect_type shrunk(scaler horz, scaler vert) const
+        M_DECL_PURE rect_type shrunk(perc horz, perc vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return shrunk(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE rect_type shrunk(scaler f) const
+        M_DECL_PURE rect_type shrunk(perc f) const
         { return shrunk(f, f); }
 
         //
@@ -378,21 +378,21 @@ namespace ut
         M_DECL_PURE rect_type expanded(scalar_type sz) const
         { return expanded({sz,sz}, {sz,sz}); }
 
-        M_DECL_PURE rect_type expanded(scaler left, scaler top, scaler right, scaler bottom) const
+        M_DECL_PURE rect_type expanded(perc left, perc top, perc right, perc bottom) const
         {
             assert(left.v + right.v <= .5);
             assert(top.v + bottom.v <= .5);
             return expanded(left(width()), top(height()), right(width()), bottom(height()));
         }
 
-        M_DECL_PURE rect_type expanded(scaler horz, scaler vert) const
+        M_DECL_PURE rect_type expanded(perc horz, perc vert) const
         {
             assert(horz.v <= .5);
             assert(vert.v <= .5);
             return expanded(horz(width()), vert(height()));
         }
 
-        M_DECL_PURE rect_type expanded(scaler f) const
+        M_DECL_PURE rect_type expanded(perc f) const
         { return expanded(f, f); }
 
         //
@@ -416,6 +416,17 @@ namespace ut
 
         M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
         { return fitScale(d.x, d.y); }
+
+        M_DECL_PURE rect_type fitAspect(real_type ratio) const
+        {
+            auto w = real_type( width() );
+            auto h = real_type( height() );
+            auto r = w/h;
+
+            if (r > ratio)
+                return anchorCCtoCC(scalar_type( h*ratio ), scalar_type( h ));
+            return anchorCCtoCC(scalar_type( w ),scalar_type( w/ratio ));
+        }
 
         //
         // split
@@ -661,6 +672,9 @@ namespace ut
         static_assert(offsetof(rect_t, right)  == offsetof(rect_t, pack) + sizeof(N) * 2, "wrong 'right' layout in pack");
         static_assert(offsetof(rect_t, bottom) == offsetof(rect_t, pack) + sizeof(N) * 3, "wrong 'bottom' layout in pack");
     }
+
+    template <typename N> template <typename T, bool I> constexpr rectx<T,I> psizex<N>::rect() const
+    { return { minX(), minY(), maxX(), maxY() }; }
 
     using rect = rectx<real_t>;
 

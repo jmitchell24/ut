@@ -15,25 +15,28 @@ namespace ut
     template <typename N>
     struct psizex;
 
+    template <typename N, bool I>
+    struct rectx;
+
     /// strongly typed fractional value
-    struct scaler
+    struct perc
     {
         real_t v;
 
-        inline constexpr explicit scaler(real_t v)
+        inline constexpr explicit perc(real_t v)
             : v{v}
-        {}
+        { assert(v > static_cast<real_t>(0) ); }
 
         template <typename T>
         inline constexpr T operator() (T t) const
-        { return T(t * v); }
+        {
+            auto x = v * static_cast<real_t>(t);
+            return static_cast<T>(x);
+        }
     };
 
-    inline constexpr scaler operator "" _sc(long double x) noexcept
-    { return scaler{(real_t)x}; }
-
-    inline constexpr scaler operator "" _pc(unsigned long long i) noexcept
-    { return scaler((real_t)i / (real_t)100); }
+    inline constexpr perc operator "" _pc(unsigned long long i) noexcept
+    { return perc((real_t)i / (real_t)100); }
 
     template <typename N>
     struct psizex
@@ -76,12 +79,8 @@ namespace ut
         M_DECL psizex& operator=(psizex&&) noexcept =default;
 
         //
-        // mutators
+        // accessors
         //
-
-        template <typename T>
-        M_DECL_PURE psizex<T> cast() const
-        { return psizex<T>(static_cast<T>(x), static_cast<T>(y), static_cast<T>(width), static_cast<T>(height)); }
 
         M_DECL_PURE point_type min() const { return { x, y }; }
         M_DECL_PURE point_type max() const { ASSERT_SIZE(width,height); return { x + width, y + height }; }
@@ -90,6 +89,13 @@ namespace ut
         M_DECL_PURE scalar_type minY() const { return y; }
         M_DECL_PURE scalar_type maxX() const { assert(width >= 0); return x + width; }
         M_DECL_PURE scalar_type maxY() const { assert(height >= 0); return y + height; }
+
+        template <typename T>
+        M_DECL_PURE psizex<T> cast() const
+        { return psizex<T>(static_cast<T>(x), static_cast<T>(y), static_cast<T>(width), static_cast<T>(height)); }
+
+        template <typename T=N, bool I=false>
+        M_DECL_PURE rectx<T,I> rect() const;
 
         //
         // container utilities

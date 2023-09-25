@@ -10,6 +10,7 @@ using namespace ut;
 
 #include <iomanip>
 #include <iostream>
+#include <ranges>
 using namespace std;
 
 #define DEBUG_PRINT(x_) cout << #x_ << endl; (x_);
@@ -20,20 +21,9 @@ using namespace std;
 
 int main()
 {
-    int a=0, b=0;
-    for (size_t i = 0; i < 1000000; ++i)
-    {
-        if (RNG.nextb())
-            ++a;
-        else
-            ++b;
-    }
+    auto r = psize(100, 100).rect().psize().rect().psize();
 
-    float fa = float(a) / float(a+b) * 100;
-    float fb = float(b) / float(a+b) * 100;
-
-    cout << fa << " / " << fb << endl;
-
+    cout << r;
 
     return EXIT_SUCCESS;
 }
