@@ -23,7 +23,7 @@ int main()
 {
     auto r = psize(100, 100).rect().psize().rect().psize();
 
-    cout << r;
+    cout << to_string(r);
 
     return EXIT_SUCCESS;
 }

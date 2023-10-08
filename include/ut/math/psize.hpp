@@ -154,7 +154,7 @@ namespace ut
         return os << r.x << "x" << r.y << " [" << r.width << ", " << r.height << "]";
     }
 
-    template <typename N, size_t D>
+    template <typename N>
     inline std::string to_string(psizex<N> const& v)
     {
         std::ostringstream ss;
