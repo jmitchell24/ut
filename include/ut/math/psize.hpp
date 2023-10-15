@@ -8,8 +8,6 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
-#define ASSERT_SIZE(w_, h_) assert((w_) >= 0); assert((h_) >= 0)
-
 namespace ut
 {
     template <typename N>
@@ -62,15 +60,15 @@ namespace ut
 
         M_DECL psizex()
             : width{0}, height{0}, x{0}, y{0}
-        {}
+        { }
 
         M_DECL psizex(scalar_type width, scalar_type height, scalar_type x=scalar_type(0), scalar_type y=scalar_type(0))
             : width{width}, height{height}, x{x}, y{y}
-        { ASSERT_SIZE(width,height); }
+        { }
 
         M_DECL psizex(point_type const& size, point_type const& pos={})
             : psizex{size.x, size.y, pos.x, pos.y}
-        { ASSERT_SIZE(size.x, size.y); }
+        { }
 
         M_DECL psizex(psizex const&)=default;
         M_DECL psizex(psizex&&) noexcept =default;
@@ -83,6 +81,7 @@ namespace ut
         //
 
         M_DECL_PURE bool inverted() const { return width < 0 || height < 0; }
+        M_DECL_PURE bool empty() const { return width == 0 || height == 0; }
 
         M_DECL_PURE point_type min() const { return { x, y }; }
         M_DECL_PURE point_type max() const { return { x + width, y + height }; }
