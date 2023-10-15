@@ -68,7 +68,7 @@ color::normal color::HSLUVtoNORMAL(hsluv c)
     luv2xyz     (&tmp);
     xyz2rgb     (&tmp);
 
-    auto ret = normal{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c };
+    auto ret = normal{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c, c.a };
     ret.clamp();
     return ret;
 }
@@ -84,7 +84,7 @@ color::hsluv color::NORMALtoHSLUV(normal c)
     luv2lch     (&tmp);
     lch2hsluv   (&tmp);
 
-    auto ret = hsluv{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c };
+    auto ret = hsluv{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c, c.a };
     ret.clamp();
     return ret;
 }
