@@ -16,18 +16,18 @@ using namespace std;
 
 #define DEBUG_PRINT(x_) cout << #x_ << endl; (x_);
 
-
-
-
-
-
 int main()
 {
-    auto r = psize(10,10).rect().deflated(5);
 
-    r.normalize();
+    auto c = colors::aliceblue.toHSLUV();
 
-    cout << r.psize() << endl;
+    for (int i = 0; i < 10; ++i)
+    {
+        c.rotate(70);
+        c.h = 1000;
+        cout << c.clamped() << " " << c.toColor() << " " << c << endl;
+    }
+
 
 
     return EXIT_SUCCESS;

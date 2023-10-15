@@ -57,8 +57,10 @@ bool try_parse(char const* s, uint8_t& x1, uint8_t& x2, uint8_t& x3)
 // color
 //
 
-color::normal color::HSLUVtoNORMAL(hsluv const& c)
+color::normal color::HSLUVtoNORMAL(hsluv c)
 {
+    c.clamp();
+
     Triplet tmp = { (double)c.h, (double)c.s, (double)c.l };
 
     hsluv2lch   (&tmp);
@@ -66,17 +68,15 @@ color::normal color::HSLUVtoNORMAL(hsluv const& c)
     luv2xyz     (&tmp);
     xyz2rgb     (&tmp);
 
-    return
-    {
-        clamp(tmp.a, 0.f, 1.f),
-        clamp(tmp.b, 0.f, 1.f),
-        clamp(tmp.c, 0.f, 1.f),
-        c.a
-    };
+    auto ret = normal{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c };
+    ret.clamp();
+    return ret;
 }
 
-color::hsluv color::NORMALtoHSLUV(normal const& c)
+color::hsluv color::NORMALtoHSLUV(normal c)
 {
+    c.clamp();
+
     Triplet tmp = { (double)c.r, (double)c.g, (double)c.b };
 
     rgb2xyz     (&tmp);
@@ -84,13 +84,9 @@ color::hsluv color::NORMALtoHSLUV(normal const& c)
     luv2lch     (&tmp);
     lch2hsluv   (&tmp);
 
-    return
-    {
-        clamp(tmp.a, 0.f, 360.f),
-        clamp(tmp.b, 0.f, 100.f),
-        clamp(tmp.c, 0.f, 100.f),
-        c.a
-    };
+    auto ret = hsluv{ (real_t)tmp.a, (real_t)tmp.b, (real_t)tmp.c };
+    ret.clamp();
+    return ret;
 }
 
 color color::parseRGBA(char const* s) { color c; try_parse(s, c.r, c.g, c.b, c.a); return c; }
