@@ -82,13 +82,15 @@ namespace ut
         // accessors
         //
 
+        M_DECL_PURE bool inverted() const { return width < 0 || height < 0; }
+
         M_DECL_PURE point_type min() const { return { x, y }; }
-        M_DECL_PURE point_type max() const { ASSERT_SIZE(width,height); return { x + width, y + height }; }
+        M_DECL_PURE point_type max() const { return { x + width, y + height }; }
 
         M_DECL_PURE scalar_type minX() const { return x; }
         M_DECL_PURE scalar_type minY() const { return y; }
-        M_DECL_PURE scalar_type maxX() const { assert(width >= 0); return x + width; }
-        M_DECL_PURE scalar_type maxY() const { assert(height >= 0); return y + height; }
+        M_DECL_PURE scalar_type maxX() const { return x + width; }
+        M_DECL_PURE scalar_type maxY() const { return y + height; }
 
         template <typename T>
         M_DECL_PURE psizex<T> cast() const
@@ -96,6 +98,16 @@ namespace ut
 
         template <typename T=N, bool I=false>
         M_DECL_PURE rectx<T,I> rect() const;
+
+        //
+        // mutators
+        //
+
+        M_DECL void normalize()
+        {
+            if (width  < 0) { width  = -width;  x -= width;  }
+            if (height < 0) { height = -height; y -= height; }
+        }
 
         //
         // container utilities

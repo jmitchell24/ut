@@ -6,6 +6,7 @@
 //#define UT_PRINTER_USE_FMT
 #include <ut/ut.hpp>
 #include <ut/container/vector_array.hpp>
+#include <ut/check.hpp>
 using namespace ut;
 
 #include <iomanip>
@@ -19,11 +20,15 @@ using namespace std;
 
 
 
+
 int main()
 {
-    auto r = psize(100, 100).rect().psize().rect().psize();
+    auto r = psize(10,10).rect().deflated(5);
 
-    cout << to_string(r);
+    r.normalize();
+
+    cout << r.psize() << endl;
+
 
     return EXIT_SUCCESS;
 }

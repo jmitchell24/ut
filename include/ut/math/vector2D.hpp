@@ -7,8 +7,6 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
-// TODO: either replace all 'std::' functions or wrap their uses with a UT_STL_INTEROP define check
-
 namespace ut
 {
     template <typename N> class vec<N, 2>

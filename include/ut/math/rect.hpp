@@ -115,6 +115,7 @@ namespace ut
         //
 
         M_DECL_PURE bool inverted() const { return min.x > max.x || min.y > max.y; }
+        M_DECL_PURE bool empty() const { return max.x - min.x == 0 || max.y - min.x == 0; }
 
         M_DECL_PURE scalar_type area() const { return width() * height(); }
 
@@ -138,11 +139,6 @@ namespace ut
         M_DECL_PURE point_type lc() const { return point_type(min.x, min.y + (height()) / 2); } /// Left Center
         M_DECL_PURE point_type rc() const { return point_type(max.x, min.y + (height()) / 2); } /// Right Center
 
-//        M_DECL_PURE scalar_type left    () const { return min.x; }
-//        M_DECL_PURE scalar_type right   () const { return max.x; }
-//        M_DECL_PURE scalar_type top     () const { return min.y; }
-//        M_DECL_PURE scalar_type bottom  () const { return max.y; }
-
         template <typename T>
         M_DECL_PURE rectx<T> cast() const
         { return rectx<T>(static_cast<T>(left), static_cast<T>(top), static_cast<T>(right), static_cast<T>(bottom)); }
@@ -162,61 +158,64 @@ namespace ut
         M_DECL void set(point_type const& min, point_type const& max)
         { this->min.set(min); this->max.set(max); }
 
-//        M_DECL void set(rect_type const& r)
-//        { min.set(r.x, r.y); max.set(r.x + r.w, r.y + r.h); }
-
         M_DECL void set(rect_type const& r)
         { min = r.min; max = r.max; }
 
-        M_DECL void pos(scalar_type x, scalar_type y) { pos({x,y}); }
-        M_DECL void pos(point_type const& p) { offset(p - min); }
+        M_DECL void setPos(scalar_type x, scalar_type y) { setPos({x,y}); }
+        M_DECL void setPos(point_type const& p) { setOffset(p - min); }
 
-        M_DECL void posX(scalar_type s) { offsetX(s - min.x); }
-        M_DECL void posY(scalar_type s) { offsetY(s - min.y); }
+        M_DECL void setPosX(scalar_type s) { setOffsetX(s - min.x); }
+        M_DECL void setPosY(scalar_type s) { setOffsetY(s - min.y); }
 
-        M_DECL void offset (scalar_type x, scalar_type y) { point_type p{x,y}; min += p; max += p; }
-        M_DECL void offset (point_type  p) { offset(p.x, p.y); }
+        M_DECL void setOffset (scalar_type x, scalar_type y) { point_type p{x,y}; min += p; max += p; }
+        M_DECL void setOffset (point_type  p) { setOffset(p.x, p.y); }
 
-        M_DECL void offsetX(scalar_type o) { min.x += o; max.x += o; }
-        M_DECL void offsetY(scalar_type o) { min.y += o; max.y += o; }
+        M_DECL void setOffsetX(scalar_type o) { min.x += o; max.x += o; }
+        M_DECL void setOffsetY(scalar_type o) { min.y += o; max.y += o; }
 
-        M_DECL void width(perc pc)       { width(pc(width())); }
-        M_DECL void width(scalar_type s) { if constexpr(INCLUSIVE) max.x = min.x + s - 1; else max.x = min.x + s; }
+        M_DECL void setWidth(perc pc)       { setWidth(pc(width())); }
+        M_DECL void setWidth(scalar_type s) { if constexpr(INCLUSIVE) max.x = min.x + s - 1; else max.x = min.x + s; }
 
-        M_DECL void height(perc pc)       { height(pc(height())); }
-        M_DECL void height(scalar_type s) { if constexpr(INCLUSIVE) max.y = min.y + s - 1; else max.y = min.y + s; }
+        M_DECL void setHeight(perc pc)       { setHeight(pc(height())); }
+        M_DECL void setHeight(scalar_type s) { if constexpr(INCLUSIVE) max.y = min.y + s - 1; else max.y = min.y + s; }
 
-        M_DECL void size(perc pc_w, perc pc_h)           { size(pc_w(width()), pc_h(height())); }
-        M_DECL void size(scalar_type w, scalar_type h)   { size({w,h}); }
-        M_DECL void size(point_type const& p)            { if constexpr (INCLUSIVE) max = min + p - point_type{1,1}; else max = min + p; }
+        M_DECL void setSize(perc pc_w, perc pc_h)           { setSize(pc_w(width()), pc_h(height())); }
+        M_DECL void setSize(scalar_type w, scalar_type h)   { setSize({w,h}); }
+        M_DECL void setSize(point_type const& p)            { if constexpr (INCLUSIVE) max = min + p - point_type{1,1}; else max = min + p; }
+
+        M_DECL void normalize()
+        {
+            if (min.x > max.x) std::swap(min.x, max.x);
+            if (min.y > max.y) std::swap(min.y, max.y);
+        }
 
         //
         // copy mutators
         //
 
-        M_DECL_PURE rect_type withMin(point_type const& p) { auto tmp = *this; tmp.min = p; return tmp; }
-        M_DECL_PURE rect_type withMax(point_type const& p) { auto tmp = *this; tmp.max = p; return tmp; }
+        M_DECL_PURE rect_type withMin(point_type const& p) const { auto tmp = *this; tmp.min = p; return tmp; }
+        M_DECL_PURE rect_type withMax(point_type const& p) const { auto tmp = *this; tmp.max = p; return tmp; }
 
 #define MUT(op_) auto tmp = *this; tmp.op_; return tmp;
-        M_DECL_PURE rect_type withPos(scalar_type x, scalar_type y) const { MUT(pos({x,y})); }
-        M_DECL_PURE rect_type withPos(point_type const& p)          const { MUT(pos(p)) }
+        M_DECL_PURE rect_type withPos(scalar_type x, scalar_type y) const { MUT(setPos({x,y})); }
+        M_DECL_PURE rect_type withPos(point_type const& p)          const { MUT(setPos(p)) }
 
-        M_DECL_PURE rect_type withPosX(scalar_type s) const { MUT(posX(s)) }
-        M_DECL_PURE rect_type withPosY(scalar_type s) const { MUT(posY(s)) }
+        M_DECL_PURE rect_type withPosX(scalar_type s) const { MUT(setPosX(s)) }
+        M_DECL_PURE rect_type withPosY(scalar_type s) const { MUT(setPosY(s)) }
 
-        M_DECL_PURE rect_type withOffsetX(scalar_type s)       const { MUT(offsetX(s)) }
-        M_DECL_PURE rect_type withOffsetY(scalar_type s)       const { MUT(offsetY(s)); }
-        M_DECL_PURE rect_type withOffset (point_type const& p) const { MUT(offset(p)) }
+        M_DECL_PURE rect_type withOffsetX(scalar_type s)       const { MUT(setOffsetX(s)) }
+        M_DECL_PURE rect_type withOffsetY(scalar_type s)       const { MUT(setOffsetY(s)); }
+        M_DECL_PURE rect_type withOffset (point_type const& p) const { MUT(setOffset(p)) }
 
-        M_DECL_PURE rect_type withWidth (perc pc)       const { MUT(width(pc)) }
-        M_DECL_PURE rect_type withWidth (scalar_type s) const { MUT(width(s)); }
+        M_DECL_PURE rect_type withWidth (perc pc)       const { MUT(setWidth(pc)) }
+        M_DECL_PURE rect_type withWidth (scalar_type s) const { MUT(setWidth(s)); }
 
-        M_DECL_PURE rect_type withHeight(perc pc)       const { MUT(height(pc)) }
-        M_DECL_PURE rect_type withHeight(scalar_type s) const { MUT(height(s)); }
+        M_DECL_PURE rect_type withHeight(perc pc)       const { MUT(setHeight(pc)) }
+        M_DECL_PURE rect_type withHeight(scalar_type s) const { MUT(setHeight(s)); }
 
-        M_DECL_PURE rect_type withSize(perc pc_w, perc pc_h)         const { MUT(size(pc_w, pc_h)) }
-        M_DECL_PURE rect_type withSize(scalar_type w, scalar_type h) const { MUT(size(w,h)) }
-        M_DECL_PURE rect_type withSize(point_type const& p)          const { MUT(size(p)) }
+        M_DECL_PURE rect_type withSize(perc pc_w, perc pc_h)         const { MUT(setSize(pc_w, pc_h)) }
+        M_DECL_PURE rect_type withSize(scalar_type w, scalar_type h) const { MUT(setSize(w,h)) }
+        M_DECL_PURE rect_type withSize(point_type const& p)          const { MUT(setSize(p)) }
 #undef MUT
 
         //
@@ -307,8 +306,6 @@ namespace ut
 
 #define PADX  w=(width()-w)/2;
 #define PADY  h=(height()-h)/2;
-#define HALFX w=w/2;
-#define HALFY h=h/2;
 
         DECL_ANCHORS(TCtoTC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y    ), point_type(max.x - w, min.y + h) }; }
         DECL_ANCHORS(TCtoBC) (scalar_type w, scalar_type h) const { PADX return { point_type(min.x + w, min.y - h), point_type(max.x - w, min.y    ) }; }
@@ -324,76 +321,52 @@ namespace ut
 
 #undef PADX
 #undef PADY
-#undef HALFX
-#undef HALFY
 
 #undef DECL_ALIGN
 
         //
-        // shrink
+        // deflated
         //
 
-        M_DECL_PURE rect_type shrunk(point_type const& tl, point_type const& br) const
-        { return { min + tl, max - br }; }
+        M_DECL_PURE rect_type deflated(scalar_type l, scalar_type t, scalar_type r, scalar_type b) const
+        { return { left+l, top+t, right-r, bottom-b }; }
 
-        M_DECL_PURE rect_type shrunk(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
-        { return shrunk({left,top}, {right,bottom}); }
+        M_DECL_PURE rect_type deflated(scalar_type h, scalar_type v) const
+        { return deflated( h, v, h, v ); }
 
-        M_DECL_PURE rect_type shrunk(scalar_type horz, scalar_type vert) const
-        { return shrunk({horz,vert}, {horz,vert}); }
+        M_DECL_PURE rect_type deflated(scalar_type sz) const
+        { return deflated( sz, sz, sz, sz ); }
 
-        M_DECL_PURE rect_type shrunk(scalar_type sz) const
-        { return shrunk({sz,sz}, {sz,sz}); }
+        M_DECL_PURE rect_type deflated(rect_type const& r) const
+        { return deflated( r.left, r.top, r.right, r.bottom ); }
 
-        M_DECL_PURE rect_type shrunk(perc left, perc top, perc right, perc bottom) const
-        {
-            assert(left.v + right.v <= .5);
-            assert(top.v + bottom.v <= .5);
-            return shrunk(left(width()), top(height()), right(width()), bottom(height()));
-        }
+        M_DECL_PURE rect_type deflated(point_type const& tl, point_type const& br) const
+        { return deflated( tl.x, tl.y, br.x, br.y ); }
 
-        M_DECL_PURE rect_type shrunk(perc horz, perc vert) const
-        {
-            assert(horz.v <= .5);
-            assert(vert.v <= .5);
-            return shrunk(horz(width()), vert(height()));
-        }
-
-        M_DECL_PURE rect_type shrunk(perc f) const
-        { return shrunk(f, f); }
+        M_DECL_PURE rect_type deflated(point_type const& hv) const
+        { return deflated( hv.x, hv.y, hv.x, hv.y ); }
 
         //
-        // expand
+        // inflated
         //
 
-        M_DECL_PURE rect_type expanded(point_type const& tl, point_type const& br) const
-        { return { min - tl, max + br }; }
+        M_DECL_PURE rect_type inflated(scalar_type l, scalar_type t, scalar_type r, scalar_type b) const
+        { return { left-l, top-t, right+r, bottom+b }; }
 
-        M_DECL_PURE rect_type expanded(scalar_type left, scalar_type top, scalar_type right, scalar_type bottom) const
-        { return expanded({left,top}, {right,bottom}); }
+        M_DECL_PURE rect_type inflated(scalar_type h, scalar_type v) const
+        { return inflated( h, v, h, v ); }
 
-        M_DECL_PURE rect_type expanded(scalar_type horz, scalar_type vert) const
-        { return expanded({horz,vert}, {horz,vert}); }
+        M_DECL_PURE rect_type inflated(scalar_type sz) const
+        { return inflated( sz, sz, sz, sz ); }
 
-        M_DECL_PURE rect_type expanded(scalar_type sz) const
-        { return expanded({sz,sz}, {sz,sz}); }
+        M_DECL_PURE rect_type inflated(rect_type const& r) const
+        { return inflated( r.left, r.top, r.right, r.bottom ); }
 
-        M_DECL_PURE rect_type expanded(perc left, perc top, perc right, perc bottom) const
-        {
-            assert(left.v + right.v <= .5);
-            assert(top.v + bottom.v <= .5);
-            return expanded(left(width()), top(height()), right(width()), bottom(height()));
-        }
+        M_DECL_PURE rect_type inflated(point_type const& tl, point_type const& br) const
+        { return inflated( tl.x, tl.y, br.x, br.y ); }
 
-        M_DECL_PURE rect_type expanded(perc horz, perc vert) const
-        {
-            assert(horz.v <= .5);
-            assert(vert.v <= .5);
-            return expanded(horz(width()), vert(height()));
-        }
-
-        M_DECL_PURE rect_type expanded(perc f) const
-        { return expanded(f, f); }
+        M_DECL_PURE rect_type inflated(point_type const& hv) const
+        { return inflated( hv.x, hv.y, hv.x, hv.y ); }
 
         //
         // fit
