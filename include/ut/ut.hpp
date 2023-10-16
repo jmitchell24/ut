@@ -12,7 +12,7 @@
 #include <ut/time.hpp>
 #include <ut/color.hpp>
 #include <ut/random.hpp>
-
+#include <ut/check.hpp>
 
 namespace ut
 { }

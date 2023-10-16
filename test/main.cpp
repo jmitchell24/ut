@@ -19,14 +19,7 @@ using namespace std;
 int main()
 {
 
-    auto c = colors::aliceblue.toHSLUV();
-
-    for (int i = 0; i < 10; ++i)
-    {
-        c.rotate(70);
-        c.h = 1000;
-        cout << c.clamped() << " " << c.toColor() << " " << c << endl;
-    }
+    nopath_impl;
 
 
 

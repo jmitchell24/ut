@@ -27,41 +27,57 @@
 #define nopath_impl         nopath("UNIMPLEMENTED")
 #define nopath_break        nopath("BREAKPOINT")
 
-[[noreturn]] static inline void __check_impl(int line, char const* msg, char const* expr, char const* func, char const* file)
+namespace ut
 {
-    bool m=msg != nullptr, e=expr!= nullptr;
-
-    if (m && e)
+    [[noreturn]] static inline void __check_impl(int line, char const* msg, char const* expr, char const* func, char const* file)
     {
-        fprintf(stderr, "\nASSERTION : %s"
-                        "\nEXPR      : %s"
-                        "\nFILE      : %s:%d"
-                        "\nFUNC      : %s",
-                msg, expr, file, line, func);
+        bool m=msg != nullptr, e=expr!= nullptr;
 
+        if (m && e)
+        {
+            fprintf(stderr, "\nASSERTION : %s"
+                            "\nEXPR      : %s"
+                            "\nFILE      : %s:%d"
+                            "\nFUNC      : %s",
+                    msg, expr, file, line, func);
+
+        }
+        else if (!m && !e)
+        {
+            fprintf(stderr, "\nASSERTION"
+                            "\nFILE      : %s:%d"
+                            "\nFUNC      : %s",
+                    file, line, func);
+        }
+        else
+        {
+            fprintf(stderr, "\nASSERTION : %s"
+                            "\nFILE      : %s:%d"
+                            "\nFUNC      : %s",
+                    m ? msg : expr, file, line, func);
+        }
+
+        fflush(stderr);
+        abort();
     }
-    else if (!m && !e)
+
+    static inline void __check_expression(bool b, int line, char const* expr, char const* func, char const* file, char const* fmt, ...)
     {
-        fprintf(stderr, "\nASSERTION"
-                        "\nFILE      : %s:%d"
-                        "\nFUNC      : %s",
-                file, line, func);
-    }
-    else
-    {
-        fprintf(stderr, "\nASSERTION : %s"
-                        "\nFILE      : %s:%d"
-                        "\nFUNC      : %s",
-                m ? msg : expr, file, line, func);
+        if (!b)
+        {
+            size_t constexpr MAX_LEN = 512;
+            static char buffer[MAX_LEN];
+
+            va_list args;
+            va_start(args, fmt);
+            bool has_msg = vsnprintf(buffer, MAX_LEN, fmt, args) > 0;
+            va_end(args);
+
+            __check_impl(line, has_msg ? buffer : nullptr, expr, func, file);
+        }
     }
 
-    fflush(stderr);
-    abort();
-}
-
-static inline void __check_expression(bool b, int line, char const* expr, char const* func, char const* file, char const* fmt, ...)
-{
-    if (!b)
+    static inline void __check_impossible(int line, char const* func, char const* file, char const* fmt, ...)
     {
         size_t constexpr MAX_LEN = 512;
         static char buffer[MAX_LEN];
@@ -71,19 +87,7 @@ static inline void __check_expression(bool b, int line, char const* expr, char c
         bool has_msg = vsnprintf(buffer, MAX_LEN, fmt, args) > 0;
         va_end(args);
 
-        __check_impl(line, has_msg ? buffer : nullptr, expr, func, file);
+        __check_impl(line, has_msg ? buffer : nullptr, nullptr, func, file);
     }
-}
 
-static inline void __check_impossible(int line, char const* func, char const* file, char const* fmt, ...)
-{
-    size_t constexpr MAX_LEN = 512;
-    static char buffer[MAX_LEN];
-
-    va_list args;
-    va_start(args, fmt);
-    bool has_msg = vsnprintf(buffer, MAX_LEN, fmt, args) > 0;
-    va_end(args);
-
-    __check_impl(line, has_msg ? buffer : nullptr, nullptr, func, file);
 }
