@@ -16,10 +16,15 @@ using namespace std;
 
 #define DEBUG_PRINT(x_) cout << #x_ << endl; (x_);
 
+enum Foo {};
+
 int main()
 {
 
-    nopath_impl;
+    check(true, "");
+    //nopath("something");
+    //nopath_case(Foo);
+    check_null(nullptr);
 
 
 
