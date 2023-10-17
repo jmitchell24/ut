@@ -21,12 +21,9 @@ enum Foo {};
 int main()
 {
 
-    check(true, "");
-    //nopath("something");
-    //nopath_case(Foo);
-    check_null(nullptr);
+    auto r = psize(100,100).rect();
 
-
+    cout << r.fitAspectSize(1.32);
 
     return EXIT_SUCCESS;
 }

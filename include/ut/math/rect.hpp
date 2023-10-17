@@ -372,33 +372,39 @@ namespace ut
         // fit
         //
 
-        M_DECL_PURE point_type fit(scalar_type dw, scalar_type dh) const
+
+        [[deprecated]] M_DECL_PURE point_type fit(scalar_type dw, scalar_type dh) const
         {
             real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
             return point_type( dw*scale, dh*scale );
         }
 
-        M_DECL_PURE point_type fit(point_type const& d) const
+        [[deprecated]] M_DECL_PURE point_type fit(point_type const& d) const
         { return fit(d.x, d.y); }
 
-        M_DECL_PURE std::tuple<point_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
+        [[deprecated]] M_DECL_PURE std::tuple<point_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
         {
             real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
             return { point_type( dw*scale, dh*scale ), scale };
         }
 
-        M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
+        [[deprecated]] M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
         { return fitScale(d.x, d.y); }
 
-        M_DECL_PURE rect_type fitAspect(real_type ratio) const
+        M_DECL_PURE point_type fitAspectSize(real_type ratio) const
         {
             auto w = real_type( width() );
             auto h = real_type( height() );
             auto r = w/h;
 
             if (r > ratio)
-                return anchorCCtoCC(scalar_type( h*ratio ), scalar_type( h ));
-            return anchorCCtoCC(scalar_type( w ),scalar_type( w/ratio ));
+                return { scalar_type( h*ratio ), scalar_type( h ) };
+            return { scalar_type( w ),scalar_type( w/ratio ) };
+        }
+
+        M_DECL_PURE rect_type fitAspect(real_type ratio) const
+        {
+            return anchorCCtoCC(fitAspectSize(ratio));
         }
 
         //
