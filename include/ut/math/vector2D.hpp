@@ -144,8 +144,9 @@ namespace ut
         ENABLE_IF_FLOAT M_DECL_PURE vector_type project(vector_param base)   const { return base * ( (*this*base) / base.sumSquared() ); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * scalar_type{2}); }
 
-        ENABLE_IF_FLOAT M_DECL_PURE bool isNan() const { return std::isnan(x) || std::isnan(y); }
-        ENABLE_IF_FLOAT M_DECL_PURE bool isInf() const { return std::isinf(x) || std::isinf(y); }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isNan () const { return std::isnan(x) || std::isnan(y); }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isInf () const { return std::isinf(x) || std::isinf(y); }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isZero() const { return x==0          || y==0;          }
 
         //
         // operators
