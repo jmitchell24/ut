@@ -126,9 +126,9 @@ namespace ut
         ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * scalar_type { 2 }); }
         //ENABLE_IF_FLOAT M_DECL_PURE vector_type cross  (vector_param v)      const { return vector_type((y * v.z) - (v.y * z), (z * v.x) - (v.z * x), (x * v.y) - (v.x * y)); }
 
-        ENABLE_IF_FLOAT M_DECL_PURE bool isNan () const { return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w); }
-        ENABLE_IF_FLOAT M_DECL_PURE bool isInf () const { return std::isinf(x) || std::isinf(y) || std::isinf(z) || std::isinf(w); }
-        ENABLE_IF_FLOAT M_DECL_PURE bool isZero() const { return x==0          || y==0          || z==0          || w==0;          }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isFltNan   () const { return std::isnan   (x) || std::isnan   (y) || std::isnan   (z) || std::isnan   (w); }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isFltInf   () const { return std::isinf   (x) || std::isinf   (y) || std::isinf   (z) || std::isinf   (w); }
+        ENABLE_IF_FLOAT M_DECL_PURE bool isFltNormal() const { return std::isnormal(x) && std::isnormal(y) && std::isnormal(z) && std::isnormal(w); }
 
         //
         // operators
