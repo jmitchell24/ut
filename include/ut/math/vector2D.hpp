@@ -7,6 +7,10 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
+#define zero_                   scalar_type{0}
+#define one_                    scalar_type{1}
+#define two_                    scalar_type{2}
+
 namespace ut
 {
     template <typename N> class vec<N, 2>
@@ -31,7 +35,7 @@ namespace ut
         //
 
         M_DECL vec()
-            : x{scalar_type(0)}, y{scalar_type(0)}
+            : x{zero_}, y{zero_}
         {}
 
         M_DECL explicit vec(scalar_param n)
@@ -130,19 +134,21 @@ namespace ut
         // In this instance I'll accept the implicit narrowing
 
         ENABLE_IF_FLOAT M_DECL_PURE scalar_type dot     (vector_param v) const { return x*v.x + y*v.y; }
-        ENABLE_IF_FLOAT M_DECL_PURE scalar_type angle   (vector_param v) const { return (*this==v) ? scalar_type{0} : std::acos(dot(v) / (length()*v.length())); }
+        ENABLE_IF_FLOAT M_DECL_PURE scalar_type angle   (vector_param v) const { return (*this==v) ? zero_ : std::acos(dot(v) / (length()*v.length())); }
         ENABLE_IF_FLOAT M_DECL_PURE scalar_type distance(vector_param v) const { return ((*this) - v).length(); }
 
         ENABLE_IF_FLOAT M_DECL_PURE vector_type round() const { return vector_type(std::round(x), std::round(y)); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type floor() const { return vector_type(std::floor(x), std::floor(y)); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type ceil () const { return vector_type(std::ceil (x), std::ceil (y)); }
 
+
         M_DECL_PURE vector_type neg    () const { return vector_type(-x,-y); }
-        M_DECL_PURE vector_type reverse() const { return vector_type(y, x); }
+        M_DECL_PURE vector_type reverse() const { return vector_type( y, x); }
+        M_DECL_PURE vector_type inverse() const { return vector_type(one_ / x, one_ / y); }
 
         ENABLE_IF_FLOAT M_DECL_PURE vector_type normal () const { return *this / length(); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type project(vector_param base)   const { return base * ( (*this*base) / base.sumSquared() ); }
-        ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * scalar_type{2}); }
+        ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * two_); }
 
         ENABLE_IF_FLOAT M_DECL_PURE bool isFltNan   () const { return std::isnan   (x) || std::isnan   (y); }
         ENABLE_IF_FLOAT M_DECL_PURE bool isFltInf   () const { return std::isinf   (x) || std::isinf   (y); }
@@ -237,6 +243,10 @@ namespace ut
     extern template struct vec<unsigned     , 2>;
     extern template struct vec<unsigned char, 2>;
 }
+
+#undef zero_
+#undef one_
+#undef two_
 
 #undef M_DECL_PURE
 #undef M_DECL

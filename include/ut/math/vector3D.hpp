@@ -7,6 +7,10 @@
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
+#define zero_                   scalar_type{0}
+#define one_                    scalar_type{1}
+#define two_                    scalar_type{2}
+
 namespace ut
 {
     template <typename N> class vec<N, 3>
@@ -31,7 +35,7 @@ namespace ut
         //
 
         M_DECL vec()
-            : x{scalar_type(0)}, y{scalar_type(0)}, z{scalar_type(0)}
+            : x{zero_}, y{zero_}, z{zero_}
         {}
 
         M_DECL explicit vec(scalar_param n)
@@ -119,12 +123,13 @@ namespace ut
         ENABLE_IF_FLOAT M_DECL_PURE vector_type floor() const { return vector_type(std::floor(x), std::floor(y)); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type ceil () const { return vector_type(std::ceil (x), std::ceil (y)); }
 
-        M_DECL_PURE vector_type neg    () const { return vector_type(-x,-y,-z); }
-        M_DECL_PURE vector_type reverse() const { return vector_type(z, y, x); }
+        M_DECL_PURE vector_type neg    () const { return vector_type(      -x,       -y,       -z); }
+        M_DECL_PURE vector_type reverse() const { return vector_type(       z,        y,        x); }
+        M_DECL_PURE vector_type inverse() const { return vector_type(one_ / x, one_ / y, one_ / z); }
 
         ENABLE_IF_FLOAT M_DECL_PURE vector_type normal () const { return *this / length(); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type project(vector_param base)   const { return base * ( (*this*base) / base.sumSquared() ); }
-        ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * scalar_type{2}); }
+        ENABLE_IF_FLOAT M_DECL_PURE vector_type reflect(vector_param normal) const { return *this + (normal * -(normal * *this) * two_); }
         ENABLE_IF_FLOAT M_DECL_PURE vector_type cross  (vector_param v)      const { return vector_type((y * v.z) - (v.y * z), (z * v.x) - (v.z * x), (x * v.y) - (v.x * y)); }
 
         ENABLE_IF_FLOAT M_DECL_PURE bool isFltNan   () const { return std::isnan   (x) || std::isnan   (y) || std::isnan   (z); }
@@ -221,6 +226,10 @@ namespace ut
     extern template struct vec<unsigned    , 3>;
     extern template struct vec<std::uint8_t, 3>;
 }
+
+#undef zero_
+#undef one_
+#undef two_
 
 #undef M_DECL_PURE
 #undef M_DECL

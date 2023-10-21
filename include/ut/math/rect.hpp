@@ -411,7 +411,6 @@ namespace ut
         // split
         //
 
-        // TODO: add output parameter option (and maybe eliminate return value)
         M_DECL_PURE rect_type splitV(scalar_type vmin, scalar_type vmax) const
         {
             assert(vmin <= vmax);
@@ -606,6 +605,27 @@ namespace ut
             size_t h = sizeof...(Args) * opt.h;
             size_t i = 0;
             (..., (args = col(h, i, opt), i+=opt.h));
+        }
+
+        //
+        // transform
+        //
+
+        M_DECL_PURE point_type transformPoint(rect_type const& to, point_type const& p) const
+        { return transformPoint(*this, to, p); }
+
+        M_DECL_PURE rect_type transformPoint(rect_type const& to, rect_type const& r) const
+        { return transformRect(*this, to, r); }
+
+        M_DECL static point_type transformPoint(rect_type const& from, rect_type const& to, point_type const& p)
+        {
+            auto scale = (to.max - to.min) / (from.max - from.min);
+            return to.min + (p - from.min) * scale;
+        }
+
+        M_DECL static rect_type transformRect(rect_type const& from, rect_type const& to, rect_type const& r)
+        {
+            return { transformPoint(from,to,r.min), transformPoint(from,to,r.max) };
         }
 
         //
