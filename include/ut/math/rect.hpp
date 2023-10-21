@@ -614,7 +614,7 @@ namespace ut
         M_DECL_PURE point_type transformPoint(rect_type const& to, point_type const& p) const
         { return transformPoint(*this, to, p); }
 
-        M_DECL_PURE rect_type transformPoint(rect_type const& to, rect_type const& r) const
+        M_DECL_PURE rect_type transformRect(rect_type const& to, rect_type const& r) const
         { return transformRect(*this, to, r); }
 
         M_DECL static point_type transformPoint(rect_type const& from, rect_type const& to, point_type const& p)
