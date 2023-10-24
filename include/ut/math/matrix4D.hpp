@@ -211,6 +211,13 @@ namespace ut
             set(tmp);
         }
 
+        M_DECL void invert()
+        {
+            matrix_type tmp{noinit_tag{}};
+            inv(tmp.pack, pack);
+            set(tmp);
+        }
+
         //
         // utilities
         //

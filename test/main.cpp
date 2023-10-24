@@ -60,10 +60,15 @@ int main()
         2,3,4,
         2,3,4);
 
-    //c.transpose();
+
 
     vec2 v;
 
+    cout << c << endl;
+    cout << c.transformPoint(v) << endl;
+
+
+    c.invert();
     cout << c << endl;
     cout << c.transformPoint(v) << endl;
 
