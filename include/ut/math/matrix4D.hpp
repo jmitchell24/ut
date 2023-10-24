@@ -205,7 +205,7 @@ namespace ut
             tmp.m8  = m2; tmp.m9  = m6; tmp.m10 = m10; tmp.m11 = m14;
             tmp.m12 = m3; tmp.m13 = m7; tmp.m14 = m11; tmp.m15 = m15;
 
-            tmp.set(tmp);
+            set(tmp);
         }
 
         //
