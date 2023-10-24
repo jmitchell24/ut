@@ -196,6 +196,18 @@ namespace ut
             set(tmp);
         }
 
+        M_DECL void transpose()
+        {
+            matrix_type tmp{noinit_tag{}};
+
+            tmp.m0  = m0; tmp.m1  = m4; tmp.m2  =  m8; tmp.m3  = m12;
+            tmp.m4  = m1; tmp.m5  = m5; tmp.m6  =  m9; tmp.m7  = m13;
+            tmp.m8  = m2; tmp.m9  = m6; tmp.m10 = m10; tmp.m11 = m14;
+            tmp.m12 = m3; tmp.m13 = m7; tmp.m14 = m11; tmp.m15 = m15;
+
+            tmp.set(tmp);
+        }
+
         //
         // utilities
         //
