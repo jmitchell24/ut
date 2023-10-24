@@ -2,13 +2,7 @@
 
 #pragma once
 
-#define ENABLE_IF_INTEGRAL template <typename N_ = N, typename = std::enable_if_t<std::is_integral_v<N_>>>
-#define ENABLE_IF_FLOAT    template <typename N_ = N, typename = std::enable_if_t<std::is_floating_point_v<N_>>>
-
-#define M_DECL_PURE             [[nodiscard]] inline constexpr
-#define M_DECL                  inline constexpr
-
-#define FOR_SIZE(i_)            for (size_t i_ = 0; i_ < SIZE; ++i)
+#include "real.hpp"
 
 #include <array>
 #include <cassert>
@@ -22,9 +16,17 @@
 #include <cstddef>
 #include <sstream>
 
+#define ENABLE_IF_INTEGRAL template <typename N_ = N, typename = std::enable_if_t<std::is_integral_v<N_>>>
+#define ENABLE_IF_FLOAT    template <typename N_ = N, typename = std::enable_if_t<std::is_floating_point_v<N_>>>
+
+#define M_DECL_PURE             [[nodiscard]] inline constexpr
+#define M_DECL                  inline constexpr
+
+#define FOR_SIZE(i_)            for (size_t i_ = 0; i_ < SIZE; ++i)
+
 namespace ut
 {
-    using real_t = float;
+
     using size_t = std::size_t;
 
     template <typename N, size_t D>

@@ -7,6 +7,7 @@
 #include <ut/ut.hpp>
 #include <ut/container/vector_array.hpp>
 #include <ut/check.hpp>
+#include <ut/math/matrix4D.hpp>
 using namespace ut;
 
 #include <iomanip>
@@ -53,27 +54,16 @@ using namespace std;
 int main()
 {
 
-    {
-        auto real = psize(1280, 720).rect();
-        auto virt = real.fitAspect(1).withOffset({123,123}).deflated(123);
+    ut::mat4 m(1);
 
-        cout << "real: " << real.psize() << endl;
-        cout << "virt: " << virt.psize() << endl;
-        cout << "\n\n";
+    auto c = ut::mat4::scaleTranslate(
+        2,3,4,
+        2,3,4);
 
-        auto x = real.center();
+    vec2 v;
 
-        cout << "real: " << x << endl;
-
-        x = real.transformPoint(virt, x);
-
-        cout << "virt: " << x << endl;
-
-        x = virt.transformPoint(real, x);
-
-        cout << "real: " << x << endl;
-    }
-
+    cout << c << endl;
+    cout << c.transformPoint(v) << endl;
 
 
 

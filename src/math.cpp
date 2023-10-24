@@ -20,15 +20,16 @@ namespace ut
     template struct vec<unsigned    , 4>;
     template struct vec<std::uint8_t, 4>;
 
+    template struct mat<float       , 4, 4>;
+    template struct mat<double      , 4, 4>;
+
     template struct rectx<float       , false>;
     template struct rectx<double      , false>;
     template struct rectx<int         , false>;
     template struct rectx<unsigned    , false>;
-    template struct rectx<std::uint8_t, false>;
 
     template struct rectx<int         , true>;
     template struct rectx<unsigned    , true>;
-    template struct rectx<std::uint8_t, true>;
 
     template struct psizex<float       >;
     template struct psizex<double      >;
