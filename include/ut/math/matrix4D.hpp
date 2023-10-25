@@ -159,6 +159,9 @@ namespace ut
             };
         }
 
+        M_DECL static matrix_type translate(vector3_param p)
+        { return translate(p.x, p.y, p.z); }
+
         M_DECL static matrix_type scale(scalar_type x, scalar_type y, scalar_type z)
         {
             return matrix_type {
@@ -168,6 +171,9 @@ namespace ut
                 zero_, zero_, zero_, one_
             };
         }
+
+        M_DECL static matrix_type scale(vector3_param p)
+        { return scale(p.x, p.y, p.z); }
 
         M_DECL static matrix_type scaleTranslate(
             scalar_type sx, scalar_type sy, scalar_type sz,
@@ -180,6 +186,9 @@ namespace ut
                 zero_, zero_, zero_, one_
             };
         }
+
+        M_DECL static matrix_type scaleTranslate(vector3_param s, vector3_param p)
+        { return scaleTranslate(s.x, s.y, s.z, p.x, p.y, p.z); }
 
         //
         // mutators
@@ -216,6 +225,34 @@ namespace ut
             matrix_type tmp{noinit_tag{}};
             inv(tmp.pack, pack);
             set(tmp);
+        }
+
+        //
+        // accessors
+        //
+
+        M_DECL_PURE matrix_type transposed() const
+        {
+            return matrix_type {
+                m11, m21, m31, m41,
+                m12, m22, m32, m42,
+                m13, m23, m33, m34,
+                m14, m24, m34, m44
+            };
+        }
+
+        M_DECL_PURE matrix_type inverted() const
+        {
+            matrix_type tmp{noinit_tag{}};
+            inv(tmp.pack, pack);
+            return tmp;
+        }
+
+        M_DECL_PURE matrix_type multiplied(matrix_type const& m) const
+        {
+            matrix_type tmp{noinit_tag{}};
+            mul(tmp.pack, pack, m.pack);
+            return tmp;
         }
 
         //
