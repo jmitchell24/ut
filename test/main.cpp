@@ -54,23 +54,21 @@ using namespace std;
 int main()
 {
 
-    ut::mat4 m(1);
+    auto test = "test yaml"_sv;
 
-    auto c = ut::mat4::scaleTranslate(
-        2,3,4,
-        2,3,4);
+    cout << (test.contains('.') ? "yes" : "no") << endl;
+
+    test = "test.yaml"_sv;
+    cout << (test.contains('.') ? "yes" : "no") << endl;
+
+    test = "test"_sv;
+    cout << (test.contains(".yaml") ? "yes" : "no") << endl;
+
+    test = "test.yaml"_sv;
+    cout << (test.contains(".yaml") ? "yes" : "no") << endl;
 
 
 
-    vec2 v;
-
-    cout << c << endl;
-    cout << c.transformPoint(v) << endl;
-
-
-    c.invert();
-    cout << c << endl;
-    cout << c.transformPoint(v) << endl;
 
 
 

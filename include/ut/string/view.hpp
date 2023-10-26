@@ -407,7 +407,7 @@ namespace ut
         { return find(s) != m_end; }
 
         M_DECL_PURE bool contains(char_type c) const
-        { return find(c) != m_end; }
+        { return find(c) != nullptr; }
 
         M_DECL_PURE char_type operator[] (size_type i) const { return *(m_begin+i); }
 
