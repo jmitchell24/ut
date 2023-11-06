@@ -54,6 +54,8 @@ using namespace std;
 int main()
 {
 
+    constexpr rect r{1,1,1,1};
+
     auto test = "test yaml"_sv;
 
     cout << (test.contains('.') ? "yes" : "no") << endl;
@@ -68,7 +70,7 @@ int main()
     cout << (test.contains(".yaml") ? "yes" : "no") << endl;
 
 
-
+    cout << "eq: " << ( r==rect() ? "yes" : "no" ) << endl;
 
 
 

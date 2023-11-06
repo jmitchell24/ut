@@ -54,6 +54,12 @@
 
 namespace ut
 {
+    template<typename N, bool I>
+    constexpr bool less(rectx<N,I> const& a, rectx<N,I> const& b);
+
+    template<typename N, bool I>
+    constexpr bool same(rectx<N,I> const& a, rectx<N,I> const& b);
+
     /// 'I' indicates the use of Inclusive Maximum for all size (width/height) calculations. (e.g. "(1,1), (2,2)" will
     /// have size "(2,2)", instead of "(1,1)". It is disallowed for non-integer types.
     template <typename N, bool I = false>
@@ -629,6 +635,17 @@ namespace ut
         }
 
         //
+        // operator overloads
+        //
+
+        M_DECL_PURE bool operator== (rect_type const& r) const { return same(*this, r); }
+        M_DECL_PURE bool operator!= (rect_type const& r) const { return !(*this == r);  }
+        M_DECL_PURE bool operator<  (rect_type const& r) const { return less(*this, r); }
+        M_DECL_PURE bool operator>  (rect_type const& r) const { return *this < r;      }
+        M_DECL_PURE bool operator<= (rect_type const& r) const { return !(*this < r);   }
+        M_DECL_PURE bool operator>= (rect_type const& r) const { return !(r < *this);   }
+
+        //
         // container utilities
         //
 
@@ -682,6 +699,30 @@ namespace ut
     typedef rectx<int>          recti;
     typedef rectx<unsigned>     rectu;
     typedef rectx<std::uint8_t> rectb;
+
+    template<typename N, bool I>
+    constexpr bool less(rectx<N,I> const& a, rectx<N,I> const& b)
+    {
+        // https://en.cppreference.com/w/cpp/algorithm/lexicographical_compare
+        auto first1 = a.begin(), last1 = a.end();
+        auto first2 = b.begin(), last2 = b.end();
+        for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 )
+        {
+            if (*first1 < *first2) return true;
+            if (*first2 < *first1) return false;
+        }
+        return (first1 == last1) && (first2 != last2);
+    }
+
+    template<typename N, bool I>
+    constexpr bool same(rectx<N,I> const& a, rectx<N,I> const& b)
+    {
+        return
+            a.pack[0] == b.pack[0] &&
+            a.pack[1] == b.pack[1] &&
+            a.pack[2] == b.pack[2] &&
+            a.pack[3] == b.pack[3];
+    }
 
     template <typename N, bool I>
     inline std::ostream& operator<<(std::ostream& os, rectx<N,I> const& r)
