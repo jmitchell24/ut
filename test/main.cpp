@@ -50,29 +50,54 @@ using namespace std;
 //    return b.min + (p - a.min) * scale;
 //}
 
+void gulpTest()
+{
+    vector<b8> out_bytes;
+
+    auto sz = 16777216;
+
+
+
+    for (size_t i = 0; i < sz; ++i)
+    {
+        out_bytes.push_back(RNG.nextu() % 255);
+    }
+
+    if (FILE* file = fopen("/tmp/gulp.bin", "wb"))
+    {
+        fwrite(out_bytes.data(), sizeof(b8), out_bytes.size(), file);
+        fclose(file);
+    }
+    else
+    {
+        fprintf(stderr, "failed to write gulp test file");
+        return;
+    }
+
+    if (FILE* file = fopen("/tmp/gulp.bin", "rb"))
+    {
+        auto in_bytes = gulp::file_to_vector(file);
+
+        check(out_bytes.size() == in_bytes.size(), "size doesn't match");
+        for (size_t i = 0; i < out_bytes.size(); ++i)
+        {
+            check(out_bytes[i] == in_bytes[i], "byte doesn't match");
+        }
+
+        fclose(file);
+    }
+    else
+    {
+        fprintf(stderr, "failed to read gulp test file");
+        return;
+    }
+}
+
 
 int main()
 {
 
-    constexpr rect r{1,1,1,1};
-
-    auto test = "test yaml"_sv;
-
-    cout << (test.contains('.') ? "yes" : "no") << endl;
-
-    test = "test.yaml"_sv;
-    cout << (test.contains('.') ? "yes" : "no") << endl;
-
-    test = "test"_sv;
-    cout << (test.contains(".yaml") ? "yes" : "no") << endl;
-
-    test = "test.yaml"_sv;
-    cout << (test.contains(".yaml") ? "yes" : "no") << endl;
-
-
-    cout << "eq: " << ( r==rect() ? "yes" : "no" ) << endl;
-
-
+    gulpTest();
 
     return EXIT_SUCCESS;
 }

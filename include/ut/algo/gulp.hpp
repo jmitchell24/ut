@@ -12,18 +12,21 @@
 //        return ret;
 //    }
 
-#include <cstdio>
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cassert>
 #include <memory>
+#include <cstdio>
+#include <cstring>
 #include <cstdint>
+#include <cassert>
 
 namespace ut::gulp
 {
 
-    std::size_t static constexpr GULP_MAX_BLOCKS = 1024;
+    // Equivalent to 1 GiB
+
+    std::size_t static constexpr GULP_MAX_BLOCKS = 262'144;
     std::size_t static constexpr GULP_BLOCK_SIZE = 4096;
 
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename T=std::uint8_t>
@@ -43,7 +46,9 @@ namespace ut::gulp
                 throw std::runtime_error{"gulp::file_to_vector(): error while reading file"};
             }
 
-            ret.append(block, cnt);
+            std::size_t old_size = ret.size();
+            ret.resize(ret.size() + cnt);
+            memcpy(ret.data() + old_size, block, cnt);
 
             if (feof(in))
             {
