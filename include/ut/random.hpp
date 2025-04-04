@@ -56,6 +56,14 @@ namespace ut
         M_DECL int      nexti(int      bound) { return bound < 1 ? 0 : nexti(0, bound-1); }
         M_DECL unsigned nextu(unsigned bound) { return bound < 1 ? 0 : nextu(0, bound-1); }
 
+        template <typename T>
+        M_DECL T* choice(T* data, size_t size)
+        { return data + nextu(size); }
+
+        template <typename T>
+        M_DECL T const* choice(T const* data, size_t size)
+        { return data + nextu(size); }
+
     private:
         std::random_device  m_dev;
         std::mt19937        m_rng;

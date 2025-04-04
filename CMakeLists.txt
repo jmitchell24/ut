@@ -1,51 +1,51 @@
 # https://gitlab.com/CLIUtils/modern-cmake
 
-
-# Works with 3.11 and tested through 3.21
-cmake_minimum_required(VERSION 3.11...3.21)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+cmake_minimum_required(VERSION 3.12)
 
 project(
     ut
     VERSION 1.0
-    DESCRIPTION "My Modern C++ Utility Library"
+    DESCRIPTION "My personal c++ utilty library"
     LANGUAGES CXX
 )
 
-# Only do these if this is the main project, and not if it is included through add_subdirectory
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-    # Optionally set things like CMAKE_CXX_STANDARD, CMAKE_POSITION_INDEPENDENT_CODE here
+# Library source files
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
-    # Let's ensure -std=c++xx instead of -std=g++xx
-    set(CMAKE_CXX_EXTENSIONS OFF)
+# Create the library
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-    # Let's nicely support folders in IDEs
-    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+# Include directories
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
-    # Testing only available if this is the main app
-    # Note this needs to be done in the main CMakeLists
-    # since it calls enable_testing, which must be in the
-    # main CMakeLists.
-    include(CTest)
+# Testing target (separate from CMake's testing features)
+option(BUILD_TESTS "Build the test program" OFF)
 
-endif()
+if(BUILD_TESTS)
+    # Test source files
+    file(GLOB_RECURSE TEST_SOURCES "testing/*.cpp")
 
+    # Create testing executable
+    add_executable(${PROJECT_NAME}_test ${TEST_SOURCES})
 
-# FetchContent_MakeAvailable was not added until CMake 3.14; use our shim
-if(${CMAKE_VERSION} VERSION_LESS 3.14)
-  include(cmake/add_FetchContent_MakeAvailable.cmake)
-endif()
+    # Link against our library
+    target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME})
 
-
-# The compiled library code is here
-add_subdirectory(src)
-
-# Testing only available if this is the main app
-# Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
-if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
-    AND BUILD_TESTING)
-    add_subdirectory(test)
+    # Include testing directories
+    target_include_directories(${PROJECT_NAME}_test
+            PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
 endif()

@@ -379,22 +379,22 @@ namespace ut
         //
 
 
-        [[deprecated]] M_DECL_PURE point_type fit(scalar_type dw, scalar_type dh) const
+        M_DECL_PURE point_type fit(scalar_type dw, scalar_type dh) const
         {
             real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
             return point_type( dw*scale, dh*scale );
         }
 
-        [[deprecated]] M_DECL_PURE point_type fit(point_type const& d) const
+        M_DECL_PURE point_type fit(point_type const& d) const
         { return fit(d.x, d.y); }
 
-        [[deprecated]] M_DECL_PURE std::tuple<point_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
+        M_DECL_PURE std::tuple<point_type, real_type> fitScale(scalar_type dw, scalar_type dh) const
         {
             real_type scale = std::min((real_type)width() / dw, (real_type)height() / dh);
             return { point_type( dw*scale, dh*scale ), scale };
         }
 
-        [[deprecated]] M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
+        M_DECL_PURE std::tuple<point_type, real_type> fitScale(point_type const& d) const
         { return fitScale(d.x, d.y); }
 
         M_DECL_PURE point_type fitAspectSize(real_type ratio) const

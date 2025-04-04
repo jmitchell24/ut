@@ -1,8 +1,10 @@
 *.txt.user*
 *build*
 *out*
-*test*
+testing
 *.idea*
 *.vs*
 *scripts*
 *ob-vault*
+*junk*
+testing
