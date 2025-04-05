@@ -60,7 +60,7 @@ namespace ut
                 va_list args;
                 va_start(args, fmt);
                 char* s = grow(n);
-                int res = vsnprintf(s, n+1, fmt, args);
+                size_t res = (size_t)vsnprintf(s, n+1, fmt, args);
                 assert(res == n);
                 va_end(args);
             }

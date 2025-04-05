@@ -5,7 +5,7 @@
 #include <ut/container.hpp>
 #include <ut/string.hpp>
 
-#include <ut/func/delegate.hpp>
+#include <func.hpp>
 
 
 #include <ut/bit.hpp>

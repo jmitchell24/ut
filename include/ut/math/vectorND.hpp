@@ -11,7 +11,6 @@
 #include <type_traits>
 #include <cmath>
 #include <cstdint>
-#include <execution>
 
 #include <cstddef>
 #include <sstream>

@@ -1,5 +1,4 @@
-#ifndef STRING_HPP
-#define STRING_HPP
+#pragma once
 
 //
 // Preprocessor Options
@@ -257,5 +256,3 @@ namespace ut
 #undef M_DECL
 #undef M_ARR
 #undef M_SZ
-
-#endif // STRING_HPP

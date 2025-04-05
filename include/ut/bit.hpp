@@ -1,5 +1,4 @@
-#ifndef UTIL_HPP
-#define UTIL_HPP
+#pragma once
 
 #include "int.hpp"
 
@@ -185,4 +184,4 @@ namespace bit
 }
 }
 
-#endif // UTIL_HPP
+

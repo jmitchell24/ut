@@ -2,8 +2,7 @@
 // Created by james on 29/03/22.
 //
 
-#ifndef UT_COLOR_HPP
-#define UT_COLOR_HPP
+#pragma once
 
 #include <ut/math/vector3D.hpp>
 #include <ut/math/vector4D.hpp>
@@ -449,7 +448,7 @@ namespace ut
         {}
 
         M_DECL color(b8 r, b8 g, b8 b, b8 a = 255)
-            : r{r}, g{g}, b{b}, a{a}
+            : a{a}, b{b}, g{g}, r{r}
         {}
 
         M_DECL explicit color(b32 i)
@@ -457,7 +456,7 @@ namespace ut
         {}
 
         M_DECL explicit color(vec4b const& v)
-            : r{v.x}, g{v.y}, b{v.z}, a{v.w}
+            : a{v.w}, b{v.z}, g{v.y}, r{v.x}
         {}
 
         inline explicit color(normal const& n)
@@ -673,5 +672,3 @@ namespace colors
 
 #undef M_DECL_PURE
 #undef M_DECL
-
-#endif //UT_COLOR_HPP

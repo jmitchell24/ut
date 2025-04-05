@@ -2,8 +2,7 @@
 // Created by james on 2022-03-29.
 //
 
-#ifndef UT_INT_HPP
-#define UT_INT_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -22,4 +21,4 @@ namespace ut
     using i64 = std::int_fast64_t;
 }
 
-#endif //UT_INT_HPP
+

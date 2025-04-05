@@ -1,5 +1,4 @@
-#ifndef STRINGVIEW_HPP
-#define STRINGVIEW_HPP
+#pragma once
 
 //---- Enable implicit conversion to c string (char const*)
 #define UT_VIEW_CSTR_CONVERSION
@@ -500,5 +499,3 @@ namespace std
 
 #undef M_DECL_PURE
 #undef M_DECL
-
-#endif // STRINGVIEW_HPP
