@@ -14,6 +14,8 @@
 #include <cstdint>
 #include <cassert>
 
+#include "ut/check.hpp"
+
 namespace ut
 {
     struct base64
@@ -78,19 +80,22 @@ namespace ut
 //            return sink;
 //        }
 
-        static string_type encode(void* data, size_type size)
+        static string_type encode(void const* data, size_type size)
         {
-            assert(data != nullptr);
+            check_null(data);
 
             string_type res;
             auto d = 0u;
             auto a = 0u;
             auto l = static_cast<unsigned>(size);
-            auto v = reinterpret_cast<std::uint8_t*>(data);
+            auto v = reinterpret_cast<std::uint8_t const*>(data);
 
             while (l > 2)
             {
-                d = v[a++] << 16 | v[a++] << 8 | v[a++];
+                d = v[a++] << 16;
+                d |= v[a++] << 8;
+                d |= v[a++];
+
                 res.append( 1, CHAR_SET[ ( d & M1 ) >> 18 ] );
                 res.append( 1, CHAR_SET[ ( d & M2 ) >> 12 ] );
                 res.append( 1, CHAR_SET[ ( d & M3 ) >>  6 ] );
@@ -100,7 +105,9 @@ namespace ut
 
             if (l == 2)
             {
-                d = v[a++] << 16 | v[a++] << 8;
+                d = v[a++] << 16;
+                d |= v[a] << 8;
+
                 res.append( 1, CHAR_SET[ ( d & M1 ) >> 18 ] );
                 res.append( 1, CHAR_SET[ ( d & M2 ) >> 12 ] );
                 res.append( 1, CHAR_SET[ ( d & M3 ) >>  6 ] );

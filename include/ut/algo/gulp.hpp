@@ -112,7 +112,7 @@ namespace ut::gulp
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename Char=char, typename Traits = std::char_traits<Char>>
     std::basic_string<Char,Traits> exec_to_string(char const* cmd)
     {
-        std::unique_ptr<FILE, decltype(&pclose)> pipe{popen(cmd, "r"), pclose};
+        std::unique_ptr<FILE, int(*)(FILE*)> pipe{popen(cmd, "r"), pclose};
 
         if (!pipe)
         {

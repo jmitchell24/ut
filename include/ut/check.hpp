@@ -13,16 +13,17 @@
 
 
 #ifdef NDEBUG
-#define check(...)          (void)0;
+#define check_msg(...)      (void)0;
 #define nopath(...)         (void)0;
 #define nopath_case(x_)     (void)0;
 #else
-#define check(x_, ...)      do { ::ut::internal::check_expression(x_, __LINE__, #x_, __func__, __FILE__, __VA_ARGS__); }while(0)
+#define check_msg(x_, ...)  do { ::ut::internal::check_expression(x_, __LINE__, #x_, __func__, __FILE__, __VA_ARGS__); }while(0)
 #define nopath(...)         do { ::ut::internal::check_impossible(__LINE__, __func__, __FILE__, __VA_ARGS__); }while(0)
 #define nopath_case(x_)     do { static_assert(std::is_enum_v<x_>); ::ut::internal::check_impossible(__LINE__, __func__, __FILE__, "BAD ENUM CASE: %s", #x_); }while(0)
 #endif
 
-#define check_null(x_)       check((x_) != nullptr, "NULL POINTER")
+#define check(x_)           check_msg(x_, "SILENT CHECK")
+#define check_null(x_)      check_msg((x_) != nullptr, "NULL POINTER")
 
 #define nopath_impl         nopath("UNIMPLEMENTED")
 #define nopath_break        nopath("BREAKPOINT")
