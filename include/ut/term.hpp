@@ -8,6 +8,8 @@
 #include "func.hpp"
 #include "string.hpp"
 
+#include <ostream>
+
 // ESC character and common sequence beginnings
 #define ESC                     "\033"_sv  // ASCII escape character
 #define CSI                     ESC "["_sv // Control Sequence Introducer
@@ -106,25 +108,25 @@
 #define TERM_CURSOR_SHOW       CSI "?25h"_sv  // Show cursor
 
 // ==================== Terminal Bell ====================
-#define TERM_BELL              "\a"_sv       // Audible bell
-#define TERM_VISUAL_BELL       CSI "?5h"_sv  // Enable visual bell mode (flash screen)
-#define TERM_VISUAL_BELL_OFF   CSI "?5l"_sv  // Disable visual bell mode
+#define TERM_BELL                   "\a"_sv       // Audible bell
+#define TERM_VISUAL_BELL            CSI "?5h"_sv  // Enable visual bell mode (flash screen)
+#define TERM_VISUAL_BELL_OFF        CSI "?5l"_sv  // Disable visual bell mode
 
 // ==================== Screen Control ====================
 
 // Clear screen parts
-#define TERM_CLEAR_SCREEN      CSI "2J"_sv    // Clear entire screen
-#define TERM_CLEAR_SCREEN_TO_END CSI "0J"_sv  // Clear from cursor to end of screen
-#define TERM_CLEAR_SCREEN_TO_BEGIN CSI "1J"_sv // Clear from cursor to beginning of screen
+#define TERM_CLEAR_SCREEN           CSI "2J"_sv     // Clear entire screen
+#define TERM_CLEAR_SCREEN_TO_END    CSI "0J"_sv     // Clear from cursor to end of screen
+#define TERM_CLEAR_SCREEN_TO_BEGIN  CSI "1J"_sv     // Clear from cursor to beginning of screen
 
 // Clear line parts
-#define TERM_CLEAR_LINE        CSI "2K"_sv    // Clear entire line
-#define TERM_CLEAR_LINE_TO_END CSI "0K"_sv    // Clear from cursor to end of line
-#define TERM_CLEAR_LINE_TO_BEGIN CSI "1K"_sv  // Clear from cursor to beginning of line
+#define TERM_CLEAR_LINE             CSI "2K"_sv     // Clear entire line
+#define TERM_CLEAR_LINE_TO_END      CSI "0K"_sv     // Clear from cursor to end of line
+#define TERM_CLEAR_LINE_TO_BEGIN    CSI "1K"_sv     // Clear from cursor to beginning of line
 
 // Scrolling
-#define TERM_SCROLL_UP(_n)      CSI #_n "S"_sv  // Scroll up n lines
-#define TERM_SCROLL_DOWN(_n)    CSI #_n "T"_sv  // Scroll down n lines
+#define TERM_SCROLL_UP(_n)          CSI #_n "S"_sv  // Scroll up n lines
+#define TERM_SCROLL_DOWN(_n)        CSI #_n "T"_sv  // Scroll down n lines
 
 // ==================== Terminal Control ====================
 
@@ -144,7 +146,6 @@
 #define TERM_INFO              TERM_FG_CYAN      // Informational messages
 #define TERM_HIGHLIGHT         TERM_FG_MAGENTA   // Highlighted text
 
-
 namespace ut::term
 {
     void enableRawMode();
@@ -157,6 +158,36 @@ namespace ut::term
     void rawputc(char c);
     char rawgetc();
     void rawsync();
+}
+
+namespace ut::term::esc
+{
+#define DECL_COLOR(_x, _y, _z) \
+    inline static std::ostream& _x(std::ostream& os) { return os << _y; } \
+    inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }
+
+    DECL_COLOR(black    , TERM_FG_BLACK,    TERM_BG_BLACK)
+    DECL_COLOR(red      , TERM_FG_RED,      TERM_BG_RED)
+    DECL_COLOR(green    , TERM_FG_GREEN,    TERM_BG_GREEN)
+    DECL_COLOR(yellow   , TERM_FG_YELLOW,   TERM_BG_YELLOW)
+    DECL_COLOR(blue     , TERM_FG_BLUE,     TERM_BG_BLUE)
+    DECL_COLOR(magenta  , TERM_FG_MAGENTA,  TERM_BG_MAGENTA)
+    DECL_COLOR(cyan     , TERM_FG_CYAN,     TERM_BG_CYAN)
+    DECL_COLOR(white    , TERM_FG_WHITE,    TERM_BG_WHITE)
+    DECL_COLOR(original , TERM_FG_DEFAULT,  TERM_BG_DEFAULT)
+
+    DECL_COLOR(brightBlack,     TERM_FG_BRIGHT_BLACK,   TERM_BG_BRIGHT_BLACK)
+    DECL_COLOR(brightRed,       TERM_FG_BRIGHT_RED,     TERM_BG_BRIGHT_RED)
+    DECL_COLOR(brightGreen,     TERM_FG_BRIGHT_GREEN,   TERM_BG_BRIGHT_GREEN)
+    DECL_COLOR(brightYellow,    TERM_FG_BRIGHT_YELLOW,  TERM_BG_BRIGHT_YELLOW)
+    DECL_COLOR(brightBlue,      TERM_FG_BRIGHT_BLUE,    TERM_BG_BRIGHT_BLUE)
+    DECL_COLOR(brightMagenta,   TERM_FG_BRIGHT_MAGENTA, TERM_BG_BRIGHT_MAGENTA)
+    DECL_COLOR(brightCyan,      TERM_FG_BRIGHT_CYAN,    TERM_BG_BRIGHT_CYAN)
+    DECL_COLOR(brightWhite,     TERM_FG_BRIGHT_WHITE,   TERM_BG_BRIGHT_WHITE)
+#undef DECL_COLOR
+
+
+    inline static std::ostream& reset(std::ostream& os) { return os << TERM_RESET; }
 }
 
 namespace ut
@@ -191,3 +222,5 @@ namespace ut
         return SHELL.getLine(line);
     }
 }
+
+

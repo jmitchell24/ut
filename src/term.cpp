@@ -3,6 +3,7 @@
 //
 
 #include "ut/term.hpp"
+#include "ut/check.hpp"
 using namespace ut;
 using namespace ut::term;
 
@@ -12,6 +13,7 @@ using namespace ut::term;
 using namespace std;
 
 
+
 #ifdef __linux__
 
 //
@@ -19,6 +21,12 @@ using namespace std;
 //
 #include <unistd.h>
 #include <termio.h>
+
+//
+// term.hpp -> implementation
+//
+
+static bool g_raw_mode_enabled = false;
 
 void die(char const* s)
 {
@@ -37,6 +45,8 @@ void ut::term::disableRawMode()
 
     if (tcsetattr(STDIN_FILENO, TCSANOW, &term) < 0)
         die("tcsetattr");
+
+    g_raw_mode_enabled=false;
 }
 
 void ut::term::enableRawMode()
@@ -52,10 +62,12 @@ void ut::term::enableRawMode()
         die("tcsetattr");
 
     atexit(disableRawMode);
+    g_raw_mode_enabled=true;
 }
 
 void ut::term::rawputs(char const* buf, size_t sz)
 {
+    check_msg(g_raw_mode_enabled, "raw mode should have been enabled");
     if (write(STDOUT_FILENO, buf, sz) < 0)
         die("write");
 }
@@ -72,6 +84,8 @@ void ut::term::rawputc(char c)
 
 char ut::term::rawgetc()
 {
+    check_msg(g_raw_mode_enabled, "raw mode should have been enabled");
+
     char c;
     if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
         die("read");
@@ -80,8 +94,11 @@ char ut::term::rawgetc()
 
 void ut::term::rawsync()
 {
+    check_msg(g_raw_mode_enabled, "raw mode should have been enabled");
+
     fsync(STDOUT_FILENO);
 }
+
 #else
 static void die()
 {
