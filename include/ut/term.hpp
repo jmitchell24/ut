@@ -162,6 +162,10 @@ namespace ut::term
 
 namespace ut::term::esc
 {
+
+
+
+
 #define DECL_COLOR(_x, _y, _z) \
     inline static std::ostream& _x(std::ostream& os) { return os << _y; } \
     inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }

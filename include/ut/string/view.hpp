@@ -20,6 +20,8 @@
 #include <ostream>
 #include <istream>
 
+#include "ut/color.hpp"
+
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
@@ -373,7 +375,7 @@ namespace ut
 
         M_DECL_PURE bool beginsWith(strview_type const& s) const
         {
-            if (m_begin == m_end)
+            if (s.size() > size())
                 return false;
             return equals(takeBegin(s.size()), s);
         }
