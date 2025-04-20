@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(
     ut
-    VERSION "25.4.10"
-    DESCRIPTION "My personal c++ utilty library"
+    VERSION "25.4.20"
+    DESCRIPTION "ut, my personal c++ code library"
     LANGUAGES CXX
 )
 
