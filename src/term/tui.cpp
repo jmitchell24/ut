@@ -26,16 +26,25 @@ using namespace std;
 using namespace ut::tui;
 
 Table g_table;
+bool g_table_flag=false;
 
 bool ut::tui::beginTable(char const* name, int column_count, int table_flags)
 {
+    if (g_table_flag)
+        return false;
+
     g_table = Table(name, column_count);
+    g_table_flag = true;
     return true;
 }
 
 void ut::tui::endTable()
 {
-    g_table.print();
+    if (g_table_flag)
+    {
+        g_table.print();
+        g_table_flag = false;
+    }
 }
 
 void ut::tui::tableHeader(char const* name, int index)
