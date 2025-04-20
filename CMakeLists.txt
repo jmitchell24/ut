@@ -22,12 +22,21 @@ configure_file(
         @ONLY)
 
 # Library source files
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
 # Create the library
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS}
-        src/term.cpp)
+        src/term/tui.cpp
+        src/term/tui_table.hpp
+        src/term/tui_table.cpp
+        include/ut/term/escapes.hpp
+        include/ut/term/shell.hpp
+        include/ut/term/rawterm.hpp
+        src/term/shell.cpp
+        include/ut/term/tui.hpp
+        src/term/rawterm.cpp
+)
 
 # Include directories
 target_include_directories(${PROJECT_NAME}
@@ -46,7 +55,8 @@ if(BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES "testing/*.cpp")
 
     # Create testing executable
-    add_executable(${PROJECT_NAME}_test ${TEST_SOURCES})
+    add_executable(${PROJECT_NAME}_test ${TEST_SOURCES}
+            testing/2025-04-18_main.cpp.old)
 
     # Link against our library
     target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME})

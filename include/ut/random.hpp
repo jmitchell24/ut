@@ -3,6 +3,8 @@
 #include <random>
 #include <limits>
 
+#include "math/vectorND.hpp"
+
 #define M_DECL inline
 
 namespace ut
@@ -40,12 +42,16 @@ namespace ut
         M_DECL unsigned nextu(unsigned bound) { return bound < 1 ? 0 : nextu(0, bound-1); }
 
         template <typename T>
-        M_DECL T* choice(T* data, size_t size)
+        M_DECL T* choosePtr(T* data, size_t size)
         { return data + nextu(size); }
 
         template <typename T>
-        M_DECL T const* choice(T const* data, size_t size)
+        M_DECL T const* choosePtr(T const* data, size_t size)
         { return data + nextu(size); }
+
+        template <typename T, size_t I>
+        M_DECL T const& choose(std::array<T, I> const& arr)
+        { return *(arr.data() + nextu(arr.size())); }
 
     private:
         std::random_device  m_dev;
