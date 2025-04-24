@@ -404,6 +404,82 @@ namespace ut
         M_DECL_PURE bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
         M_DECL_PURE bool trimmedRight() const { return empty() || ( !std::isspace(last()) ); }
 
+        M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int maxsplit = -1)
+        {
+#define SPLIT_CHECK { if (maxsplit > 0 && v.size() >= (size_t)(maxsplit)) { v.push_back(with(word_beg, m_end)); return v; } }
+
+            std::vector<strview_nstr_type> v;
+
+            if (maxsplit == 0)
+                return v;
+
+            // Default separator (whitespace)
+            if (sep.empty())
+            {
+                auto word_beg = m_begin;
+
+                while (word_beg != m_end)
+                {
+                    // Skip leading whitespace
+                    while (std::isspace(*word_beg))
+                    {
+                        if (++word_beg == m_end)
+                            return v;
+                    }
+
+                    auto word_end = word_beg;
+
+                    // Find end of current token
+                    while (not std::isspace(*word_end))
+                    {
+                        if (++word_end == m_end)
+                        {
+                            v.push_back(with(word_beg, word_end));
+                            return v;
+                        }
+                    }
+
+                    SPLIT_CHECK
+                    v.push_back(with(word_beg, word_end));
+
+                    word_beg = word_end;
+                }
+            }
+            else
+            {
+                auto word_beg = m_begin;
+                auto sep_end = m_end-sep.size();
+                auto sep_sz = sep.size();
+
+                while (word_beg <= sep_end)
+                {
+                    auto word_end = word_beg;
+
+                    while (with(word_end, word_end+sep_sz) != sep)
+                    {
+                        if (++word_end >= sep_end)
+                        {
+                            SPLIT_CHECK
+                            v.push_back(with(word_beg, word_end));
+                            return v;
+                        }
+                    }
+
+                    SPLIT_CHECK
+                    v.push_back(with(word_beg, word_end));
+
+                    word_beg = word_end + sep_sz;
+                }
+
+                SPLIT_CHECK
+                v.push_back(with(word_beg, m_end));
+            }
+
+            return v;
+#undef SPLIT_CHECK
+        }
+
+
         M_DECL_PURE bool contains(strview_type const& s) const
         { return find(s) != m_end; }
 

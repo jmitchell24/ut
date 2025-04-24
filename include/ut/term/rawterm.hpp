@@ -5,15 +5,44 @@
 #pragma once
 
 #include "ut/string.hpp"
+#include "ut/check.hpp"
+
+//
+// std
+//
+#include <variant>
 
 namespace ut
 {
+    enum Key
+    {
+        KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_DELETE,
+        KEY_BACKSPACE, KEY_HOME, KEY_END, KEY_ENTER, KEY_TAB, KEY_PAGE_UP, KEY_PAGE_DOWN, KEY_SPACE
+    };
 
+    struct Coord { size_t row=0,col=0; };
+
+    struct RawTermChar
+    {
+
+
+        using var_type = std::variant<char, Key>;
+
+        inline bool isChar() const { return data.index()==0; }
+        inline bool isKey() const { return data.index()==1; }
+
+        inline char asChar() const { check(isChar()); return std::get<char>(data); }
+        inline Key asKey() const { check(isKey()); return std::get<Key>(data); }
+
+        inline bool keyIf(Key k) const { check(isKey()); return asKey() == k; }
+        inline bool charIf(char c) const { check(isChar()); return asChar() == c; }
+
+        var_type data;
+    };
 
     class RawTerm
     {
     public:
-
         inline bool enabled() const
         { return m_enabled; }
 
@@ -21,10 +50,17 @@ namespace ut
         void disable();
 
 
-        void puts(char const* s, size_t n);
-        void puts(strparam s);
-        void putc(char c);
-        char getc();
+        RawTerm& puts(char const* s, size_t n);
+        RawTerm& puts(char const* s);
+        RawTerm& putf(char const* fmt, ...);
+        RawTerm& puts(strparam s);
+        RawTerm& putc(char c);
+
+        inline RawTerm& operator<< (char const* s) { return puts(s); }
+        inline RawTerm& operator<< (strparam s) { return puts(s); }
+        inline RawTerm& operator<< (char c) { return putc(c); }
+
+        RawTermChar getc();
         void sync();
 
         std::pair<int,int> getWindowSize();
@@ -33,6 +69,7 @@ namespace ut
 
     private:
         bool m_enabled=false;
+
     };
 
     [[maybe_unused]]
