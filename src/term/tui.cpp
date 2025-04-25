@@ -52,6 +52,15 @@ void ut::tui::tableHeader(char const* name, int index)
     //nopath_impl;
 }
 
+string sanitize(char const* s, size_t n)
+{
+    string res;
+    for (size_t i = 0; i < n; ++i)
+        if (isprint(s[i]))
+            res += s[i];
+    return res;
+}
+
 void ut::tui::tableCell(int x, int y, char const* fmt, ...)
 {
     array<char, 1000> buffer{};
@@ -64,6 +73,6 @@ void ut::tui::tableCell(int x, int y, char const* fmt, ...)
 
     va_end(args);
 
-    g_table.setCell(x, y, string(buffer.data(), res));
+    g_table.setCell(x, y, sanitize(buffer.data(), res));
 
 }

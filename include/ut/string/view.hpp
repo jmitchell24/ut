@@ -6,15 +6,11 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <streambuf>
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
 #include <type_traits>
 #include <string_view>
-#include <cwctype>
-#include <cstdlib>
-#include <cerrno>
 #include <cstring>
 #include <cassert>
 #include <ostream>
@@ -404,13 +400,13 @@ namespace ut
         M_DECL_PURE bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
         M_DECL_PURE bool trimmedRight() const { return empty() || ( !std::isspace(last()) ); }
 
-        M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int maxsplit = -1)
+        M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)
         {
-#define SPLIT_CHECK { if (maxsplit > 0 && v.size() >= (size_t)(maxsplit)) { v.push_back(with(word_beg, m_end)); return v; } }
+#define SPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.push_back(with(word_beg, m_end)); return v; } }
 
             std::vector<strview_nstr_type> v;
 
-            if (maxsplit == 0)
+            if (max_split == 0)
                 return v;
 
             // Default separator (whitespace)
@@ -486,7 +482,8 @@ namespace ut
         M_DECL_PURE bool contains(char_type c) const
         { return find(c) != nullptr; }
 
-        M_DECL_PURE char_type operator[] (size_type i) const { return *(m_begin+i); }
+        M_DECL_PURE char_type operator[] (size_type i) const
+        { return *(m_begin+i); }
 
 #if defined(UT_VIEW_CSTR_CONVERSION)
         ENABLE_IF_NULL_TERMINATED
