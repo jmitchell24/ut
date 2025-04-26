@@ -212,13 +212,13 @@ RawTermChar RawTerm::getc()
 
     EscScanner scan;
 
-    // scan first char
+    // read a char from terminal
     scan.next();
 
-    // if escape sequence
+    // if char is beginning of escape sequence
     if (scan.nextIf('\x1b'))
     {
-        // if escape sequence
+        // if char is beginning of escape sequence
         if (scan.nextIf('['))
         {
             if (scan.peekIf('A')) return { KEY_UP };
@@ -241,8 +241,9 @@ RawTermChar RawTerm::getc()
 
     if (scan.peekIf(127)) return { KEY_BACKSPACE };
     if (scan.peekIf('\t')) return { KEY_TAB };
-    if (scan.peekIf('\n')) return { KEY_ENTER };
-    if (scan.peekIf(' ')) return { KEY_SPACE };
+    if (scan.peekIf('\n')) return { KEY_NEWLINE };
+    if (scan.peekIf('\r')) return { KEY_CARRIAGE_RETURN };
+
 
     // not an escape sequence or special key
     return {scan.peek()};

@@ -17,22 +17,21 @@ namespace ut
     enum Key
     {
         KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_DELETE,
-        KEY_BACKSPACE, KEY_HOME, KEY_END, KEY_ENTER, KEY_TAB, KEY_PAGE_UP, KEY_PAGE_DOWN, KEY_SPACE
+        KEY_BACKSPACE, KEY_HOME, KEY_END, KEY_NEWLINE, KEY_CARRIAGE_RETURN, KEY_TAB, KEY_PAGE_UP, KEY_PAGE_DOWN,
+        KEY_EOF
     };
 
     struct Coord { size_t row=0,col=0; };
 
     struct RawTermChar
     {
-
-
         using var_type = std::variant<char, Key>;
 
         inline bool isChar() const { return data.index()==0; }
         inline bool isKey() const { return data.index()==1; }
 
-        inline char asChar() const { check(isChar()); return std::get<char>(data); }
-        inline Key asKey() const { check(isKey()); return std::get<Key>(data); }
+        inline char asChar() const { check(isChar()); return std::get<0>(data); }
+        inline Key asKey() const { check(isKey()); return std::get<1>(data); }
 
         inline bool keyIf(Key k) const { check(isKey()); return asKey() == k; }
         inline bool charIf(char c) const { check(isChar()); return asChar() == c; }

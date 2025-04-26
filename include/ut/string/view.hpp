@@ -215,7 +215,7 @@ namespace ut
 
         /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().
         /// \param begin    Pointer to the first char of the substring.
-        /// \param end      Pointer to the char following following the last char of the view.
+        /// \param end      Pointer to the char following the last char of the view.
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type with(pointer_type begin, pointer_type end) const
         {
@@ -230,7 +230,7 @@ namespace ut
 
         /// Returns a view of substring [begin, end], where begin >= begin() and end <= end().
         /// \param begin    Pointer to the first char of the substring.
-        /// \param end      Pointer to the char following following the last char of the view.
+        /// \param end      Pointer to the char following the last char of the view.
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type withClamp(pointer_type begin, pointer_type end) const
         {
@@ -241,7 +241,7 @@ namespace ut
 
 
         /// Returns a view of substring [begin(), end], where end <= end().
-        /// \param end  Pointer to the char following following the last char of the view.
+        /// \param end  Pointer to the char following the last char of the view.
         /// \return     View of the substring [begin(), end]
         M_DECL_PURE strview_nstr_type withEnd(pointer_type end) const
         { return with(m_begin, end); }
@@ -263,7 +263,7 @@ namespace ut
 
         /// Returns a view of substring [begin()+begin_idx, begin()+end_idx].
         /// \param beg_idx  index of the first char of the substring.
-        /// \param end_idx  Pointer to the char following following the last char of the view.
+        /// \param end_idx  Pointer to the char following the last char of the view.
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type withIndices(size_t beg_idx, size_t end_idx) const
         { return with(m_begin+beg_idx, m_begin+end_idx); }
@@ -388,17 +388,14 @@ namespace ut
             return equals(with(m_end - s.size(), m_end), s);
         }
 
-        M_DECL_PURE strview_nstr_type trimLeft  () const { return with(trimBegin(), m_end); }
-        M_DECL_PURE strview_nstr_type trimRight () const { return with(m_begin, trimEnd()); }
-        M_DECL_PURE strview_nstr_type trim      () const { return with(trimBegin(), trimEnd()); }
-
-        M_DECL_PURE strview_nstr_type trimLeft  (size_t n) const { return with(m_begin+n, m_end  ); }
-        M_DECL_PURE strview_nstr_type trimRight (size_t n) const { return with(m_begin  , m_end-n); }
-        M_DECL_PURE strview_nstr_type trim      (size_t n) const { return with(m_begin+n, m_end-n); }
+        M_DECL_PURE strview_nstr_type ltrim () const { return with(trimBegin(), m_end); }
+        M_DECL_PURE strview_nstr_type rtrim () const { return with(m_begin, trimEnd()); }
+        M_DECL_PURE strview_nstr_type trim  () const { return with(trimBegin(), trimEnd()); }
 
         M_DECL_PURE bool trimmed     () const { return empty() || ( !std::isspace(first()) && !std::isspace(last()) ); }
         M_DECL_PURE bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
         M_DECL_PURE bool trimmedRight() const { return empty() || ( !std::isspace(last()) ); }
+
 
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)
         {
@@ -453,10 +450,10 @@ namespace ut
 
                     while (with(word_end, word_end+sep_sz) != sep)
                     {
-                        if (++word_end >= sep_end)
+                        if (++word_end > sep_end)
                         {
                             SPLIT_CHECK
-                            v.push_back(with(word_beg, word_end));
+                            v.push_back(with(word_beg, m_end));
                             return v;
                         }
                     }

@@ -30,8 +30,10 @@ void Tester::runTests()
         {
             auto&& it = m_testlist[i];
             tui::tableCell(0, i, "%d", i);
-            tui::tableCell(2, i, "%s", it.name.c_str());
-            tui::tableCell(1, i, "%d", it.line);
+            tui::tableCell(1, i, "%s", it.name.c_str());
+
+            it.fn();
+            tui::tableCell(2, i, "PASSED");
         }
         tui::endTable();
     }

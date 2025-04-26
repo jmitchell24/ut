@@ -4,8 +4,6 @@
 
 #pragma once
 
-#if 0
-
 #include <string>
 
 namespace ut
@@ -14,20 +12,30 @@ namespace ut
     {
     public:
         using prompt_type = void(*)();
-        prompt_type prompt;
+        prompt_type prompt = nullptr;
+
+        using hint_type = std::string(*)(strparam);
+        hint_type hint = nullptr;
 
 
-        static Shell& instance();
 
         Shell();
-
-        bool getLine(std::string& line);
 
         inline std::string const& lineBuffer() const
         { return m_line_buffer; }
 
+
+
+        bool getLine(std::string& line);
+
+
+
+        static Shell& instance();
+
     private:
         std::string m_line_buffer;
+
+        void putHint(strparam s);
     };
 
     [[maybe_unused]]
@@ -40,5 +48,3 @@ namespace ut
         return SHELL.getLine(line);
     }
 }
-
-#endif

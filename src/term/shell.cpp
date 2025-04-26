@@ -2,20 +2,28 @@
 // Created by james on 20/04/25.
 //
 
+//
+// ut
+//
+#include "ut/term/escapes.hpp"
+#include "ut/term/rawterm.hpp"
 #include "ut/term/shell.hpp"
+using namespace ut;
 
+//
+// std
+//
+using namespace std;
 
 //
 // Shell -> Implementation
 //
 
-#if 0
-
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 static void defaultPrompt()
 {
-    rawputs("$ "_sv);
+    RAWTERM << "$ ";
 }
 
 Shell::Shell()
@@ -28,9 +36,33 @@ Shell& Shell::instance()
     return x;
 }
 
+void Shell::putHint(strparam s)
+{
+    if (hint != nullptr)
+    {
+        RAWTERM <<
+            TERM_CURSOR_SAVE
+            TERM_CURSOR_COLUMN(1)
+            TERM_CURSOR_DOWN(1)
+            TERM_CLEAR_LINE
+            TERM_DIM;
+
+        RAWTERM << hint(s);
+
+        RAWTERM <<
+            TERM_RESET
+            TERM_CURSOR_RESTORE;
+    }
+}
+
+
 bool Shell::getLine(string& line)
 {
-    enableRawMode();
+    RAWTERM.enable();
+
+    RAWTERM <<
+        TERM_CURSOR_COLUMN(1)
+        TERM_CLEAR_LINE;
 
     (prompt == nullptr ? defaultPrompt : prompt)();
 
@@ -38,44 +70,47 @@ bool Shell::getLine(string& line)
 
     for (;;)
     {
-        char c = rawgetc();
+        auto c = RAWTERM.getc();
 
-        switch (c)
+        if (c.isChar())
         {
-        case 127: // backspace
-            if (!buffer.empty())
+            buffer += c.asChar();
+            RAWTERM << c.asChar();
+
+            putHint(buffer);
+        }
+
+        if (c.isKey())
+        {
+            switch (c.asKey())
             {
-                buffer.pop_back();
-                rawputs(TERM_CURSOR_LEFT(1));
-                rawputc(' ');
-                rawputs(TERM_CURSOR_LEFT(1));
+            case KEY_BACKSPACE:
+                if (!buffer.empty())
+                {
+                    buffer.pop_back();
+
+                    RAWTERM <<
+                        TERM_CURSOR_LEFT(1)
+                        " "
+                        TERM_CURSOR_LEFT(1);
+
+                    putHint(buffer);
+                }
+                break;
+
+            case KEY_EOF:
+            case KEY_NEWLINE:
+            case KEY_CARRIAGE_RETURN:
+                line = buffer;
+                RAWTERM << TERM_CURSOR_NEXT_LINE(1);
+                RAWTERM.disable();
+                return true;
+            default:break;
             }
-            break;
-
-
-        case CTRL_KEY('c'): // ctrl+c
-            break;
-
-        case '\0':
-        case '\r':
-        case '\n': // newline / eof
-            line = buffer;
-            rawputs(TERM_CURSOR_NEXT_LINE(1));
-
-            disableRawMode();
-
-            return true;
-
-        default: // everything else...
-            buffer += c;
-            rawputc(c);
-            break;
 
         }
     }
 
-    disableRawMode();
+    RAWTERM.disable();
     return false;
 }
-
-#endif
