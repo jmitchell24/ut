@@ -64,9 +64,11 @@ bool Shell::getLine(string& line)
         TERM_CURSOR_COLUMN(1)
         TERM_CLEAR_LINE;
 
-    (prompt == nullptr ? defaultPrompt : prompt)();
+    auto _prompt = prompt == nullptr ? defaultPrompt : prompt;
+    _prompt();
 
     string buffer;
+    size_t buffer_loc=0;
 
     for (;;)
     {
@@ -74,8 +76,19 @@ bool Shell::getLine(string& line)
 
         if (c.isChar())
         {
-            buffer += c.asChar();
-            RAWTERM << c.asChar();
+            buffer.insert(buffer.begin()+buffer_loc, c.asChar());
+            ++buffer_loc;
+
+            RAWTERM <<
+                TERM_CURSOR_SAVE
+                TERM_CURSOR_COLUMN(1)
+                TERM_CLEAR_LINE;
+
+            _prompt();
+            RAWTERM << buffer;
+
+            RAWTERM <<
+                TERM_CURSOR_RESTORE;
 
             putHint(buffer);
         }
@@ -95,6 +108,24 @@ bool Shell::getLine(string& line)
                         TERM_CURSOR_LEFT(1);
 
                     putHint(buffer);
+                }
+                break;
+
+            case KEY_LEFT:
+                if (buffer_loc > 0)
+                {
+                    RAWTERM <<
+                        TERM_CURSOR_LEFT(1);
+                    --buffer_loc;
+                }
+                break;
+
+            case KEY_RIGHT:
+                if (buffer_loc < buffer.size())
+                {
+                    RAWTERM <<
+                        TERM_CURSOR_RIGHT(1);
+                    ++buffer_loc;
                 }
                 break;
 

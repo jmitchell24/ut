@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(
     ut
-    VERSION "25.4.25"
+    VERSION "25.5.2"
     DESCRIPTION "ut, my personal c++ code library"
     LANGUAGES CXX
 )
@@ -26,17 +26,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
 # Create the library
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS}
-        src/term/tui.cpp
-        src/term/tui_table.hpp
-        src/term/tui_table.cpp
-        include/ut/term/escapes.hpp
-        include/ut/term/shell.hpp
-        include/ut/term/rawterm.hpp
-        src/term/shell.cpp
-        include/ut/term/tui.hpp
-        src/term/rawterm.cpp
-)
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Include directories
 target_include_directories(${PROJECT_NAME}
