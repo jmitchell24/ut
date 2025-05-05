@@ -141,6 +141,7 @@
 #pragma once
 
 #include <ostream>
+#include <sstream>
 
 namespace ut::esc
 {
@@ -168,6 +169,22 @@ inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }
     DECL_COLOR(brightWhite,     TERM_FG_BRIGHT_WHITE,   TERM_BG_BRIGHT_WHITE)
 #undef DECL_COLOR
 
+#define DECL_ESC_INT(_name, _suffix) \
+    inline static std::string _name(int arg) \
+    { \
+        std::ostringstream oss; \
+        oss << CSI << arg << _suffix; \
+        return oss.str(); \
+    }
 
-    inline static std::ostream& reset(std::ostream& os) { return os << TERM_RESET; }
+    DECL_ESC_INT(termScrollUp, "S")
+    DECL_ESC_INT(termScrollDown, "T")
+    DECL_ESC_INT(termCursorUp, "A")
+    DECL_ESC_INT(termCursorDown, "B")
+    DECL_ESC_INT(termCursorRight, "C")
+    DECL_ESC_INT(termCursorLeft, "D")
+    DECL_ESC_INT(termCursorNextLine, "E")
+    DECL_ESC_INT(termCursorPrevLine, "F")
+    DECL_ESC_INT(termCursorColumn, "G")
+#undef DECL_DYN_ESC
 }

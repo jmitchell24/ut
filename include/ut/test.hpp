@@ -10,25 +10,51 @@
 namespace ut::tests \
 { \
     struct I_##_line { \
-        static void run(); \
+        static void run(TestState& ts); \
         I_##_line() { TESTER.add({_label_text, _line, &run}); } \
     } static i_##_line; \
 } \
-void ut::tests::I_##_line::run()
+void ut::tests::I_##_line::run(TestState& ts)
 
 #define ut_test_expansion_1(_line, _label_text) ut_test_expansion_2(_line, _label_text)
 #define ut_test(_label_text) ut_test_expansion_1(__LINE__, _label_text)
 
+#define ut_require(_expression) { if (!(_expression)) return ts.fail(__LINE__, #_expression);  }
+
 namespace ut
 {
+    class TestState
+    {
+    public:
+
+        inline int line() const
+        { return m_line; }
+
+        inline bool passed() const
+        { return m_passed; }
+
+        inline char const* expr() const
+        { return m_expr; }
+
+        inline void fail(int line, char const* expr)
+        { m_line = line; m_passed = false; m_expr = expr; }
+
+    private:
+        bool m_passed = true;
+        int m_line = 0;
+        char const* m_expr;
+    };
+
     struct TestCase
     {
-        using fn_type = void(*)();
+        using fn_type = void(*)(TestState& tc);
 
         std::string name;
         size_t      line;
         fn_type     fn;
     };
+
+
 
     class Tester
     {
@@ -40,6 +66,7 @@ namespace ut
 
 
         void add(TestCase const&);
+        void require(TestCase const& tc, char const* expr);
         void runTests();
 
         static Tester& instance();

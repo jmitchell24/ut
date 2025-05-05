@@ -13,6 +13,7 @@ using namespace ut;
 //
 // std
 //
+#include <string>
 using namespace std;
 
 //
@@ -21,13 +22,7 @@ using namespace std;
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
-static void defaultPrompt()
-{
-    RAWTERM << "$ ";
-}
-
 Shell::Shell()
-    : prompt{nullptr}
 {}
 
 Shell& Shell::instance()
@@ -55,20 +50,24 @@ void Shell::putHint(strparam s)
     }
 }
 
+#define DO_CURSOR_RESET \
+    TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE
+
+#define DO_CURSOR_REFRESH \
+    esc::termCursorColumn(1 + prompt.size() + buffer_loc)
+
+#define DO_BUFFER_REFRESH \
+    DO_CURSOR_RESET << prompt << buffer << DO_CURSOR_REFRESH
 
 bool Shell::getLine(string& line)
 {
     RAWTERM.enable();
 
-    RAWTERM <<
-        TERM_CURSOR_COLUMN(1)
-        TERM_CLEAR_LINE;
+    string prompt       = "$ ";
+    string buffer       = "";
+    size_t buffer_loc   = 0;
 
-    auto _prompt = prompt == nullptr ? defaultPrompt : prompt;
-    _prompt();
-
-    string buffer;
-    size_t buffer_loc=0;
+    RAWTERM << DO_BUFFER_REFRESH;
 
     for (;;)
     {
@@ -79,17 +78,8 @@ bool Shell::getLine(string& line)
             buffer.insert(buffer.begin()+buffer_loc, c.asChar());
             ++buffer_loc;
 
-            RAWTERM <<
-                TERM_CURSOR_SAVE
-                TERM_CURSOR_COLUMN(1)
-                TERM_CLEAR_LINE;
 
-            _prompt();
-            RAWTERM << buffer;
-
-            RAWTERM <<
-                TERM_CURSOR_RESTORE;
-
+            RAWTERM << DO_BUFFER_REFRESH;
             putHint(buffer);
         }
 
@@ -98,37 +88,59 @@ bool Shell::getLine(string& line)
             switch (c.asKey())
             {
             case KEY_BACKSPACE:
-                if (!buffer.empty())
+                if (!buffer.empty() && buffer_loc > 0)
                 {
-                    buffer.pop_back();
+                    if (buffer_loc < buffer.size())
+                        buffer.erase(buffer.begin() + buffer_loc);
+                    else
+                        buffer.pop_back();
+                    --buffer_loc;
 
-                    RAWTERM <<
-                        TERM_CURSOR_LEFT(1)
-                        " "
-                        TERM_CURSOR_LEFT(1);
-
+                    RAWTERM << DO_BUFFER_REFRESH;
                     putHint(buffer);
                 }
+                break;
+
+            case KEY_DELETE:
+                if (!buffer.empty())
+                {
+                    if (buffer_loc < buffer.size())
+                    {
+                        buffer.erase(buffer.begin() + buffer_loc);
+                        RAWTERM << DO_BUFFER_REFRESH;
+                        putHint(buffer);
+                    }
+                }
+                break;
+
+            case KEY_HOME:
+                buffer_loc = 0;
+                RAWTERM << DO_CURSOR_REFRESH;
+                break;
+
+            case KEY_END:
+                buffer_loc = buffer.size();
+                RAWTERM << DO_CURSOR_REFRESH;
                 break;
 
             case KEY_LEFT:
                 if (buffer_loc > 0)
                 {
-                    RAWTERM <<
-                        TERM_CURSOR_LEFT(1);
                     --buffer_loc;
+                    RAWTERM << DO_CURSOR_REFRESH;
                 }
                 break;
 
             case KEY_RIGHT:
                 if (buffer_loc < buffer.size())
                 {
-                    RAWTERM <<
-                        TERM_CURSOR_RIGHT(1);
                     ++buffer_loc;
+                    RAWTERM << DO_CURSOR_REFRESH;
                 }
                 break;
 
+
+            case KEY_CTRL_C:
             case KEY_EOF:
             case KEY_NEWLINE:
             case KEY_CARRIAGE_RETURN:

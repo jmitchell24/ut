@@ -93,10 +93,10 @@ void Table::print() const
 {
     // draw title
 
-    if (!title.empty())
+    if (!title.empty() )
     {
 
-        auto sz = getCellWidthsSum() + m_cell_widths.size()*3 -1;
+        auto sz = m_cell_widths.empty() ? 0 : getCellWidthsSum() + m_cell_widths.size()*3 - 1;
         printf(box_chars.tl);
         for (size_t i = 0; i < sz; ++i)
             printf(box_chars.hz);

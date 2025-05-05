@@ -130,6 +130,13 @@ RawTerm& RawTerm::puts(strparam s)
     return puts(s.data(), s.size());
 }
 
+RawTerm& RawTerm::puts(std::string const& s)
+{
+    check_msg(m_enabled, "raw mode should have been enabled");
+
+    return puts(s.data(), s.size());
+}
+
 RawTerm& RawTerm::putf(char const* fmt, ...)
 {
     string buf;
@@ -244,6 +251,32 @@ RawTermChar RawTerm::getc()
     if (scan.peekIf('\n')) return { KEY_NEWLINE };
     if (scan.peekIf('\r')) return { KEY_CARRIAGE_RETURN };
 
+    if (scan.peekIf('a' & 0x1f)) return { KEY_CTRL_A };
+    if (scan.peekIf('b' & 0x1f)) return { KEY_CTRL_B };
+    if (scan.peekIf('c' & 0x1f)) return { KEY_CTRL_C };
+    if (scan.peekIf('d' & 0x1f)) return { KEY_CTRL_D };
+    if (scan.peekIf('e' & 0x1f)) return { KEY_CTRL_E };
+    if (scan.peekIf('f' & 0x1f)) return { KEY_CTRL_F };
+    if (scan.peekIf('g' & 0x1f)) return { KEY_CTRL_G };
+    if (scan.peekIf('h' & 0x1f)) return { KEY_CTRL_H };
+    if (scan.peekIf('i' & 0x1f)) return { KEY_CTRL_I };
+    if (scan.peekIf('j' & 0x1f)) return { KEY_CTRL_J };
+    if (scan.peekIf('k' & 0x1f)) return { KEY_CTRL_K };
+    if (scan.peekIf('l' & 0x1f)) return { KEY_CTRL_L };
+    if (scan.peekIf('m' & 0x1f)) return { KEY_CTRL_M };
+    if (scan.peekIf('n' & 0x1f)) return { KEY_CTRL_N };
+    if (scan.peekIf('o' & 0x1f)) return { KEY_CTRL_O };
+    if (scan.peekIf('p' & 0x1f)) return { KEY_CTRL_P };
+    if (scan.peekIf('q' & 0x1f)) return { KEY_CTRL_Q };
+    if (scan.peekIf('r' & 0x1f)) return { KEY_CTRL_R };
+    if (scan.peekIf('s' & 0x1f)) return { KEY_CTRL_S };
+    if (scan.peekIf('t' & 0x1f)) return { KEY_CTRL_T };
+    if (scan.peekIf('u' & 0x1f)) return { KEY_CTRL_U };
+    if (scan.peekIf('v' & 0x1f)) return { KEY_CTRL_V };
+    if (scan.peekIf('w' & 0x1f)) return { KEY_CTRL_W };
+    if (scan.peekIf('x' & 0x1f)) return { KEY_CTRL_X };
+    if (scan.peekIf('y' & 0x1f)) return { KEY_CTRL_Y };
+    if (scan.peekIf('z' & 0x1f)) return { KEY_CTRL_Z };
 
     // not an escape sequence or special key
     return {scan.peek()};

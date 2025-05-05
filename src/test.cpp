@@ -21,6 +21,11 @@ void Tester::add(TestCase const& tc)
     m_testlist.push_back(tc);
 }
 
+void Tester::require(TestCase const& tc, char const* expr)
+{
+    cout << TERM_RESET << TERM_FG_BRIGHT_RED << expr << TERM_RESET << endl;
+}
+
 void Tester::runTests()
 {
 
@@ -32,8 +37,19 @@ void Tester::runTests()
             tui::tableCell(0, i, "%d", i);
             tui::tableCell(1, i, "%s", it.name.c_str());
 
-            it.fn();
-            tui::tableCell(2, i, "PASSED");
+            TestState ts;
+            it.fn(ts);
+
+            if (ts.passed())
+            {
+                tui::tableCell(2, i, "PASSED");
+            }
+            else
+            {
+                auto s = PRINTER(
+                    "FAILED @ line %d: '%s'", ts.line(), ts.expr());
+                tui::tableCell(2, i, s.c_str());
+            }
         }
         tui::endTable();
     }
