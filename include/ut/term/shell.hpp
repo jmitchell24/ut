@@ -5,13 +5,14 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 namespace ut
 {
     class Shell
     {
     public:
-        using hint_type = std::string(*)(strparam);
+        using hint_type = std::function<void(strparam)>;
         hint_type hint = nullptr;
 
 

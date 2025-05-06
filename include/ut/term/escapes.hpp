@@ -137,7 +137,7 @@
 #define TERM_SUCCESS           TERM_FG_GREEN     // Success messages
 #define TERM_INFO              TERM_FG_CYAN      // Informational messages
 #define TERM_HIGHLIGHT         TERM_FG_MAGENTA   // Highlighted text
-
+#define TERM_NEWLINE           "\r\n"
 #pragma once
 
 #include <ostream>

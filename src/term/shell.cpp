@@ -39,12 +39,12 @@ void Shell::putHint(strparam s)
             TERM_CURSOR_SAVE
             TERM_CURSOR_COLUMN(1)
             TERM_CURSOR_DOWN(1)
-            TERM_CLEAR_LINE
-            TERM_DIM;
+            TERM_CLEAR_LINE;
 
-        RAWTERM << hint(s);
+        hint(s);
 
         RAWTERM <<
+            TERM_CLEAR_SCREEN_TO_END
             TERM_RESET
             TERM_CURSOR_RESTORE;
     }
