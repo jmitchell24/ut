@@ -7,6 +7,8 @@
 
 #define M_DECL inline
 
+#define ut_rng ( ut::rng::instance() )
+
 namespace ut
 {
     class rng
@@ -57,9 +59,6 @@ namespace ut
         std::random_device  m_dev;
         std::mt19937        m_rng;
     };
-
-    [[maybe_unused]]
-    rng& RNG = rng::instance();
 }
 
 #undef M_DECL
