@@ -25,7 +25,7 @@ namespace ut
 
         M_DECL rng() : m_dev(), m_rng(m_dev()) { }
 
-        static rng& instance();
+        M_DECL static rng& instance() { static rng x; return x; }
 
         M_DECL float    nextf(float     min, float      max) { return distf_type(min,max)(m_rng); }
         M_DECL double   nextd(double    min, double     max) { return distd_type(min,max)(m_rng); }
@@ -58,7 +58,8 @@ namespace ut
         std::mt19937        m_rng;
     };
 
-    static rng& RNG = rng::instance();
+    [[maybe_unused]]
+    rng& RNG = rng::instance();
 }
 
 #undef M_DECL

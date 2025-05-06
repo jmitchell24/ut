@@ -26,8 +26,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
 # Create the library
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS}
-        src/random.cpp)
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Include directories
 target_include_directories(${PROJECT_NAME}
