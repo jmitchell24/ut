@@ -51,9 +51,9 @@ namespace ut
         M_DECL T const* choosePtr(T const* data, size_t size)
         { return data + nextu(size); }
 
-        template <typename T, size_t I>
-        M_DECL T const& choose(std::array<T, I> const& arr)
-        { return *(arr.data() + nextu(arr.size())); }
+        template <typename It>
+        auto choose(It first, It last)
+        { return *( first + nextu(std::distance(first, last)) ); }
 
     private:
         std::random_device  m_dev;
