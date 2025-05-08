@@ -303,7 +303,9 @@ namespace ut
         M_DECL_PURE strview_nstr_type skipEnd(size_type size) const
         { return with(m_begin, m_end-size); }
 
-
+        /// Returns a pointer to the first occurrence of \a s in this view.
+        /// \param s        String to search for.
+        /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
         M_DECL_PURE pointer_type find(strview_type const& s) const
         {
             size_type sz = s.size();
@@ -316,15 +318,32 @@ namespace ut
             return m_end;
         }
 
+        /// Returns a pointer to the first occurrence of \a c in this view.
+        /// \param c        Character to search for.
+        /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
         M_DECL_PURE pointer_type find(char_type c) const
-        { return traits_type::find(m_begin, size(), c); }
+        {
+            for (pointer_type i = m_begin; i != m_end; ++i)
+                if (traits_type::eq(*i, c))
+                    return i;
+            return m_end;
+        }
 
+        /// Returns a pointer to the first occurrence of \a s in this view.
+        /// \param s        String to search for.
+        /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
         M_DECL_PURE pointer_type findFirst(strview_type const& s) const
         { return find(s); }
 
+        /// Returns a pointer to the first occurrence of \a c in this view.
+        /// \param c        Character to search for.
+        /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findFirst(char_type c) const
         { return find(c); }
 
+        /// Returns a pointer to the first occurence of a character not equal to \a c in this view.
+        /// \param c        Character to search for.
+        /// \return         Pointer to the first occurrence of a character not equal to \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findFirstNot(char_type c) const
         {
             for (pointer_type i = m_begin; i != m_end; ++i)
@@ -333,6 +352,9 @@ namespace ut
             return m_end;
         }
 
+        /// Returns a pointer to the last occurrence of \a s in this view.
+        /// \param s        String to search for.
+        /// \return         Pointer to the last occurrence of \a s, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(strview_type const& s) const
         {
             size_type sz = s.size();
@@ -344,6 +366,9 @@ namespace ut
             return m_end;
         }
 
+        /// Returns a pointer to the last occurrence of \a c in this view.
+        /// \param c        Character to search for.
+        /// \return         Pointer to the last occurrence of \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(char_type c) const
         {
             if (m_begin == m_end)
@@ -354,6 +379,9 @@ namespace ut
             return m_end;
         }
 
+        /// Returns a pointer to the last occurrence of a character not equal to \a c in this view.
+        /// \param c        Character to search for.
+        /// \return         Pointer to the last occurrence of a character not equal to \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findLastNot(char_type c) const
         {
             for (pointer_type i = m_end-1; i != m_begin-1; --i)
@@ -362,6 +390,9 @@ namespace ut
             return m_end;
         }
 
+        /// Returns true if this view begins with the character \a c.
+        /// \param c        Character to search for.
+        /// \return         True if this view begins with the character \a c, false otherwise.
         M_DECL_PURE bool beginsWith(char_type c) const
         {
             if (m_begin == m_end)
@@ -369,6 +400,9 @@ namespace ut
             return *m_begin == c;
         }
 
+        /// Returns true if this view begins with the string \a s.
+        /// \param s        String to search for.
+        /// \return         True if this view begins with the string \a s, false otherwise.
         M_DECL_PURE bool beginsWith(strview_type const& s) const
         {
             if (s.size() > size())
@@ -376,6 +410,9 @@ namespace ut
             return equals(takeBegin(s.size()), s);
         }
 
+        /// Returns true if this view ends with the character \a c.
+        /// \param c        Character to search for.
+        /// \return         True if this view ends with the character \a c, false otherwise.
         M_DECL_PURE bool endsWith(char_type c) const
         {
             if (m_begin == m_end)
@@ -383,18 +420,37 @@ namespace ut
             return *(m_end-1) == c;
         }
 
+        /// Returns true if this view ends with the string \a s.
+        /// \param s        String to search for.
+        /// \return         True if this view ends with the string \a s, false otherwise.
         M_DECL_PURE bool endsWith(strview_type const& s) const
         {
             return equals(with(m_end - s.size(), m_end), s);
         }
 
-        M_DECL_PURE strview_nstr_type ltrim () const { return with(trimBegin(), m_end); }
-        M_DECL_PURE strview_nstr_type rtrim () const { return with(m_begin, trimEnd()); }
-        M_DECL_PURE strview_nstr_type trim  () const { return with(trimBegin(), trimEnd()); }
+        /// Removes leading whitespace from this view.
+        /// \return        A new view with leading whitespace removed.
+        M_DECL_PURE strview_nstr_type ltrim() const { return with(trimBegin(), m_end); }
 
-        M_DECL_PURE bool trimmed     () const { return empty() || ( !std::isspace(first()) && !std::isspace(last()) ); }
-        M_DECL_PURE bool trimmedLeft () const { return empty() || ( !std::isspace(first()) ); }
-        M_DECL_PURE bool trimmedRight() const { return empty() || ( !std::isspace(last()) ); }
+        /// Removes trailing whitespace from this view.
+        /// \return       A new view with trailing whitespace removed.
+        M_DECL_PURE strview_nstr_type rtrim() const { return with(m_begin, trimEnd()); }
+
+        /// Removes leading and trailing whitespace from this view.
+        /// \return       A new view with leading and trailing whitespace removed.
+        M_DECL_PURE strview_nstr_type trim() const { return with(trimBegin(), trimEnd()); }
+
+        /// Checks if this view is trimmed. A view is considered trimmed if it is empty or if the first and last characters are not whitespace.
+        /// \return       True if this view is trimmed, false otherwise.       
+        M_DECL_PURE bool isTrim() const { return empty() || ( !std::isspace(first()) && !std::isspace(last()) ); }
+
+        /// Checks if leading whitespace has been removed from this view.
+        /// \return       True if leading whitespace has been removed, false otherwise.
+        M_DECL_PURE bool isLtrim() const { return empty() || ( !std::isspace(first()) ); }
+
+        /// Checks if trailing whitespace has been removed from this view.
+        /// \return       True if trailing whitespace has been removed, false otherwise.
+        M_DECL_PURE bool isRtrim() const { return empty() || ( !std::isspace(last()) ); }
 
 
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)

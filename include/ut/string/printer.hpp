@@ -47,6 +47,11 @@
 #define M_ARR                   ( m_buffer[m_index%BUFFER_COUNT].arr )
 #define M_SZ                    ( m_buffer[m_index%BUFFER_COUNT].sz )
 
+/// Default instance of format_ring_buffer.
+/// Stores previously formatted strings in a ring buffer so that subsequent
+/// format results remain available through the returned view objects.
+#define ut_printer ( ut::printer_t::instance() )
+
 namespace ut
 {
     template <size_t BufferSize, size_t BufferCount>
@@ -245,11 +250,6 @@ namespace ut
     }
 
     using printer_t = basic_printer<UT_PRINTER_BUFFER_SIZE, UT_PRINTER_BUFFER_COUNT>;
-
-    /// Default instance of format_ring_buffer.
-    /// Stores previously formatted strings in a ring buffer so that subsequent
-    /// format results remain available through the returned view objects.
-    [[maybe_unused]] static printer_t& PRINTER = printer_t::instance();
 }
 
 #undef M_DECL_PURE

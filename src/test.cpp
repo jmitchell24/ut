@@ -46,7 +46,7 @@ void Tester::runTests()
             }
             else
             {
-                auto s = PRINTER(
+                auto s = ut_printer(
                     "FAILED @ line %d: '%s'", ts.line(), ts.expr());
                 tui::tableCell(2, i, s.c_str());
             }
