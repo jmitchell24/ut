@@ -305,14 +305,15 @@ namespace ut
 
         /// Returns a pointer to the first occurrence of \a s in this view.
         /// \param s        String to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
-        M_DECL_PURE pointer_type find(strview_type const& s) const
+        M_DECL_PURE pointer_type find(strview_type const& s, size_type n=0) const
         {
             size_type sz = s.size();
             if (sz > this->size())
                 return m_end;
 
-            for (pointer_type i = m_begin; i != m_end-sz+1; ++i)
+            for (pointer_type i = m_begin+n; i < m_end-sz+1; ++i)
                 if (equals(with(i,i+sz), s))
                     return i;
             return m_end;
@@ -320,33 +321,37 @@ namespace ut
 
         /// Returns a pointer to the first occurrence of \a c in this view.
         /// \param c        Character to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type find(char_type c) const
+        M_DECL_PURE pointer_type find(char_type c, size_type n=0) const
         {
-            for (pointer_type i = m_begin; i != m_end; ++i)
+            for (pointer_type i = m_begin+n; i < m_end; ++i)
                 if (traits_type::eq(*i, c))
                     return i;
             return m_end;
         }
-
+ 
         /// Returns a pointer to the first occurrence of \a s in this view.
         /// \param s        String to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirst(strview_type const& s) const
-        { return find(s); }
+        M_DECL_PURE pointer_type findFirst(strview_type const& s, size_type n=0) const
+        { return find(s, n); }
 
         /// Returns a pointer to the first occurrence of \a c in this view.
         /// \param c        Character to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirst(char_type c) const
-        { return find(c); }
+        M_DECL_PURE pointer_type findFirst(char_type c, size_type n=0) const
+        { return find(c, n); }
 
         /// Returns a pointer to the first occurence of a character not equal to \a c in this view.
         /// \param c        Character to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of a character not equal to \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirstNot(char_type c) const
+        M_DECL_PURE pointer_type findFirstNot(char_type c, size_type n=0) const
         {
-            for (pointer_type i = m_begin; i != m_end; ++i)
+            for (pointer_type i = m_begin+n; i < m_end; ++i)
                 if (!traits_type::eq(*i, c))
                     return i;
             return m_end;
@@ -354,13 +359,14 @@ namespace ut
 
         /// Returns a pointer to the last occurrence of \a s in this view.
         /// \param s        String to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the last occurrence of \a s, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(strview_type const& s) const
         {
             size_type sz = s.size();
             if (sz > size())
                 return m_end;
-            for(pointer_type i = m_end-s.size(); i != m_begin-1; --i)
+            for(pointer_type i = m_end-s.size(); i > m_begin-1; --i)
                 if (equals(with(i,i+sz), s))
                     return i;
             return m_end;
@@ -368,12 +374,13 @@ namespace ut
 
         /// Returns a pointer to the last occurrence of \a c in this view.
         /// \param c        Character to search for.
+        /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the last occurrence of \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(char_type c) const
         {
             if (m_begin == m_end)
                 return m_begin;
-            for (pointer_type i = m_end-1; i != m_begin-1; --i)
+            for (pointer_type i = m_end-1; i > m_begin-1; --i)
                 if (traits_type::eq(*i,c))
                     return i;
             return m_end;
