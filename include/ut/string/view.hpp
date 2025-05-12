@@ -495,6 +495,13 @@ namespace ut
         M_DECL_PURE bool isRtrim() const { return empty() || ( !std::isspace(last()) ); }
 
 
+
+        M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1)
+        {
+            nopath_impl; // TODO: implement this
+            return { };
+        }
+
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)
         {
 #define SPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.push_back(with(word_beg, m_end)); return v; } }
