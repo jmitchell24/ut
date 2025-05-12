@@ -6,12 +6,14 @@
 #include <vector>
 #include <string>
 
+
+
 #define ut_test_expansion_2(_line, _label_text) \
 namespace ut::tests \
 { \
     struct I_##_line { \
         static void run(TestState& ts); \
-        I_##_line() { TESTER.add({_label_text, _line, &run}); } \
+        I_##_line() { ut::Tester::instance().add({_label_text, _line, &run}); } \
     } static i_##_line; \
 } \
 void ut::tests::I_##_line::run(TestState& ts)
@@ -20,6 +22,8 @@ void ut::tests::I_##_line::run(TestState& ts)
 #define ut_test(_label_text) ut_test_expansion_1(__LINE__, _label_text)
 
 #define ut_require(_expression) { if (!(_expression)) return ts.fail(__LINE__, #_expression);  }
+
+#define ut_tester ( ut::Tester::instance() )
 
 namespace ut
 {
@@ -74,6 +78,4 @@ namespace ut
     private:
         testlist_type m_testlist;
     };
-
-    inline Tester& TESTER = Tester::instance();
 }

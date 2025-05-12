@@ -35,7 +35,7 @@ void Shell::putHint(strparam s)
 {
     if (hint != nullptr)
     {
-        RAWTERM <<
+        ut_term <<
             TERM_CURSOR_SAVE
             TERM_CURSOR_COLUMN(1)
             TERM_CURSOR_DOWN(1)
@@ -43,7 +43,7 @@ void Shell::putHint(strparam s)
 
         hint(s);
 
-        RAWTERM <<
+        ut_term <<
             TERM_CLEAR_SCREEN_TO_END
             TERM_RESET
             TERM_CURSOR_RESTORE;
@@ -61,17 +61,17 @@ void Shell::putHint(strparam s)
 
 bool Shell::getLine(string& line)
 {
-    RAWTERM.enable();
+    ut_term.enable();
 
     string prompt       = "$ ";
     string buffer       = "";
     size_t buffer_loc   = 0;
 
-    RAWTERM << DO_BUFFER_REFRESH;
+    ut_term << DO_BUFFER_REFRESH;
 
     for (;;)
     {
-        auto c = RAWTERM.getc();
+        auto c = ut_term.getc();
 
         if (c.isChar())
         {
@@ -79,7 +79,7 @@ bool Shell::getLine(string& line)
             ++buffer_loc;
 
 
-            RAWTERM << DO_BUFFER_REFRESH;
+            ut_term << DO_BUFFER_REFRESH;
             putHint(buffer);
         }
 
@@ -96,7 +96,7 @@ bool Shell::getLine(string& line)
                         buffer.pop_back();
                     --buffer_loc;
 
-                    RAWTERM << DO_BUFFER_REFRESH;
+                    ut_term << DO_BUFFER_REFRESH;
                     putHint(buffer);
                 }
                 break;
@@ -107,7 +107,7 @@ bool Shell::getLine(string& line)
                     if (buffer_loc < buffer.size())
                     {
                         buffer.erase(buffer.begin() + buffer_loc);
-                        RAWTERM << DO_BUFFER_REFRESH;
+                        ut_term << DO_BUFFER_REFRESH;
                         putHint(buffer);
                     }
                 }
@@ -115,19 +115,19 @@ bool Shell::getLine(string& line)
 
             case KEY_HOME:
                 buffer_loc = 0;
-                RAWTERM << DO_CURSOR_REFRESH;
+                ut_term << DO_CURSOR_REFRESH;
                 break;
 
             case KEY_END:
                 buffer_loc = buffer.size();
-                RAWTERM << DO_CURSOR_REFRESH;
+                ut_term << DO_CURSOR_REFRESH;
                 break;
 
             case KEY_LEFT:
                 if (buffer_loc > 0)
                 {
                     --buffer_loc;
-                    RAWTERM << DO_CURSOR_REFRESH;
+                    ut_term << DO_CURSOR_REFRESH;
                 }
                 break;
 
@@ -135,25 +135,30 @@ bool Shell::getLine(string& line)
                 if (buffer_loc < buffer.size())
                 {
                     ++buffer_loc;
-                    RAWTERM << DO_CURSOR_REFRESH;
+                    ut_term << DO_CURSOR_REFRESH;
                 }
                 break;
 
 
-            case KEY_CTRL_C:
             case KEY_EOF:
             case KEY_NEWLINE:
             case KEY_CARRIAGE_RETURN:
                 line = buffer;
-                RAWTERM << TERM_CURSOR_NEXT_LINE(1);
-                RAWTERM.disable();
+                ut_term << TERM_CURSOR_NEXT_LINE(1);
+                ut_term.disable();
                 return true;
+
+            case KEY_CTRL_C:
+                line = buffer;
+                ut_term << TERM_CURSOR_NEXT_LINE(1);
+                ut_term.disable();
+                return false;
             default:break;
             }
 
         }
     }
 
-    RAWTERM.disable();
+    ut_term.disable();
     return false;
 }

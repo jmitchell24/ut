@@ -496,10 +496,84 @@ namespace ut
 
 
 
-        M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1)
+M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1)
         {
-            nopath_impl; // TODO: implement this
+
+            // TODO: implement this correctly (below is broken)
+            nopath_impl;
             return { };
+
+#define RSPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.insert(v.begin(), with(m_begin, word_end)); return v; } }
+
+            std::vector<strview_nstr_type> v;
+
+            if (max_split == 0)
+                return v;
+
+            // Default separator (whitespace)
+            if (sep.empty())
+            {
+                auto word_end = m_end;
+
+                while (word_end != m_begin)
+                {
+                    // Skip trailing whitespace
+                    while (word_end != m_begin && std::isspace(*(word_end - 1)))
+                    {
+                        if (--word_end == m_begin)
+                            return v;
+                    }
+
+                    auto word_beg = word_end;
+
+                    // Find beginning of current token
+                    while (word_beg != m_begin && !std::isspace(*(word_beg - 1)))
+                    {
+                        if (--word_beg == m_begin)
+                        {
+                            v.insert(v.begin(), with(word_beg, word_end));
+                            return v;
+                        }
+                    }
+
+                    RSPLIT_CHECK
+                    v.insert(v.begin(), with(word_beg, word_end));
+
+                    word_end = word_beg;
+                }
+            }
+            else
+            {
+                auto word_end = m_end;
+                auto sep_beg = m_begin;
+                auto sep_sz = sep.size();
+
+                while (word_end >= sep_beg + sep_sz)
+                {
+                    auto word_beg = word_end;
+
+                    while (with(word_beg - sep_sz, word_beg) != sep)
+                    {
+                        if (--word_beg < sep_beg)
+                        {
+                            RSPLIT_CHECK
+                            v.insert(v.begin(), with(m_begin, m_end));
+                            return v;
+                        }
+                    }
+
+                    RSPLIT_CHECK
+                    v.insert(v.begin(), with(word_beg + sep_sz, word_end));
+
+                    word_end = word_beg;
+                }
+
+                RSPLIT_CHECK
+                v.insert(v.begin(), with(m_begin, word_end));
+            }
+
+            return v;
+#undef RSPLIT_CHECK
         }
 
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)

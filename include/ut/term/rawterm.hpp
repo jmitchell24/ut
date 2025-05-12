@@ -12,6 +12,8 @@
 //
 #include <variant>
 
+#define ut_term ( ut::RawTerm::instance() )
+
 namespace ut
 {
     enum Key
@@ -98,7 +100,4 @@ namespace ut
         bool m_enabled=false;
 
     };
-
-    [[maybe_unused]]
-    inline RawTerm& RAWTERM = RawTerm::instance();
 }

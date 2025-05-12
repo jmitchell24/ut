@@ -7,6 +7,8 @@
 #include <string>
 #include <functional>
 
+#define ut_shell ( ut::Shell::instance() )
+
 namespace ut
 {
     class Shell
@@ -35,9 +37,4 @@ namespace ut
 
         void putHint(strparam s);
     };
-
-    [[maybe_unused]]
-    static Shell& SHELL = Shell::instance();
-
-
 }
