@@ -83,7 +83,8 @@ namespace ut
         stack_array& operator= (stack_array const&)=delete;
         stack_array& operator= (stack_array&&)=delete;
 
-        using store_type = std::aligned_storage<sizeof(T), alignof(T)>;
+        // using store_type = std::aligned_storage<sizeof(T), alignof(T)>;
+        using store_type = std::byte[sizeof(T)];
 
         store_type  m_data[N];
         T*          m_top       = M_DATA-1;

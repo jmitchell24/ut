@@ -3,20 +3,25 @@
 //---- Enable implicit conversion to c string (char const*)
 #define UT_VIEW_CSTR_CONVERSION
 
+//
+// ut
+//
+#include "ut/check.hpp" 
+
+//
+// std
+//
+
 #include <memory>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
-#include <utility>
 #include <type_traits>
 #include <string_view>
 #include <cstring>
-#include <cassert>
 #include <ostream>
 #include <istream>
-
-#include "ut/color.hpp"
 
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
@@ -64,73 +69,81 @@ namespace ut
         M_DECL basic_strview(string_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
         }
 
         /// Construct with an STL basic_string_view
         M_DECL basic_strview(string_view_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
         }
 
+        
         /// Construct with a begin and end pointer
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(pointer_type begin, pointer_type end)
             : m_begin{begin}, m_end{end}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
         }
+
 
         /// Construct with a begin pointer and length
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL_PURE explicit basic_strview(pointer_type begin, size_type sz)
             : m_begin{begin}, m_end{m_begin+sz}
-        { assert(m_begin != nullptr); }
+        { check(m_begin != nullptr); }
+
 
         /// Construct with a begin pointer and length. Will dereference to check null-terminated.
         M_DECL_PURE basic_strview(pointer_type begin, size_type sz, basic_strview_cstr_tag)
                 : m_begin{begin}, m_end{m_begin+sz}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
-            assert(*m_end == '\0');
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
+            check(*m_end == '\0');
         }
+
 
         /// Construct with a null-terminated stringview
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(strview_cstr_type const& s)
             : m_begin{s.begin()}, m_end{s.end()}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
         }
+
 
         /// Construct with a null-terminated string
         ENABLE_IF_NULL_TERMINATED
         M_DECL basic_strview(pointer_type p)
             : m_begin{p}, m_end{p+traits_type::length(p)}
         {
-            assert(m_begin != nullptr);
-            assert(m_end   != nullptr);
-            assert(m_begin <= m_end);
+            check(m_begin != nullptr);
+            check(m_end   != nullptr);
+            check(m_begin <= m_end);
         }
+
 
         /// Returns a pointer to the first char of the string. Equivalent to \a begin()
         /// \return     Pointer to the beginning of the string.
         M_DECL_PURE pointer_type data() const { return m_begin; }
 
+
         /// Returns a pointer to the first char of the string.
         /// \return     Pointer to the beginning of the string.
         M_DECL_PURE pointer_type begin() const { return m_begin; }
+
 
         /// Returns a pointer to the \b past-the-end character of the string.
         /// \return     Pointer to the past-the-end of the string.
@@ -138,20 +151,28 @@ namespace ut
 
         /// Returns the first char of the string.
         /// \return     The first char of the string.
-        M_DECL_PURE char_type first() const { assert(m_begin != m_end); return *m_begin; }
+        M_DECL_PURE char_type first() const { check(m_begin != m_end); return *m_begin; }
+
 
         /// Returns the last char of the string.
         /// \return     The last char of the string.
-        M_DECL_PURE char_type last() const { assert(m_begin != m_end); return *(m_end-1); }
+        M_DECL_PURE char_type last() const { check(m_begin != m_end); return *(m_end-1); }
+
 
         /// Returns the length of the string, in number of chars.
         /// \return     The number of chars in the string.
         M_DECL_PURE size_type size() const { return m_end - m_begin; }
 
+
         /// Returns whether the string is empty
         /// \return     \a true if the string length is 0, \a false otherwise.
         M_DECL_PURE bool empty() const { return m_begin == m_end; }
 
+
+        /// Returns the character at a given position.
+        /// \param i    The index of the character to access.
+        /// \return     The character at the specified position.
+        /// \throw      std::out_of_range if \a i is out of range.
         M_DECL_PURE char_type at(size_type i) const
         {
             if (i < size())
@@ -159,11 +180,19 @@ namespace ut
             throw std::out_of_range{"ut::stringview::at()"};
         }
 
+
+        /// Copys the string to a buffer using strncpy() from the C standard library. 
+        /// \param dest The destination buffer.
+        /// \param n    The maximum number of characters to copy.
+        /// \return     A pointer to the destination buffer.
         M_DECL char_type* strncpy(char_type* dest, size_t n) const
         {
             return ::strncpy(dest, m_begin, std::min<size_t>(n, m_end-m_begin));
         }
 
+
+        /// Returns an stl shared_ptr copy of the string. 
+        /// \return     A shared_ptr copy of the string. 
         M_DECL_PURE shared_copy shared_ptr_copy() const
         {
             size_type sz = size();
@@ -173,6 +202,9 @@ namespace ut
             return {shared_pointer_type(ptr), make_cstrview(ptr, sz)};
         }
 
+
+        /// Returns an stl unique_ptr copy of the string. 
+        /// \return     A unique_ptr copy of the string. 
         M_DECL_PURE unique_copy unique_ptr_copy() const
         {
             size_type sz = size();
@@ -182,13 +214,16 @@ namespace ut
             return {unique_pointer_type(ptr), make_cstrview(ptr, sz)};
         }
 
+
         /// Returns a c-string (if NullTerminated == true)
         /// \return     Pointer to null-terminated char array
         ENABLE_IF_NULL_TERMINATED
         M_DECL_PURE pointer_type c_str() const { return m_begin; }
 
+
         /// Returns an STL basic_string_view
         M_DECL_PURE string_view_type view() const { return string_view_type(m_begin, m_end-m_begin); }
+
 
         /// Returns an STL basic_string
         M_DECL_PURE string_type str() const { return string_type(m_begin, m_end); }
@@ -201,11 +236,11 @@ namespace ut
         /// \return         A new sub-view derived from \p copy and equivalent to this sub-view.
         M_DECL_PURE strview_nstr_type mirror(strview_type const& orig, strview_type const& copy) const
         {
-            assert(orig == copy);
-            assert(m_begin >= orig.m_begin);
-            assert(m_begin <= orig.m_end);
-            assert(m_end   <= orig.m_end);
-            assert(m_end   >= orig.m_begin);
+            check(orig == copy);
+            check(m_begin >= orig.m_begin);
+            check(m_begin <= orig.m_end);
+            check(m_end   <= orig.m_end);
+            check(m_end   >= orig.m_begin);
 
             pointer_type begin = copy.m_begin + size_type(m_begin - orig.m_begin);
             pointer_type end   = begin + size();
@@ -219,10 +254,10 @@ namespace ut
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type with(pointer_type begin, pointer_type end) const
         {
-            assert(begin >= m_begin);
-            assert(begin <= m_end);
-            assert(end   <= m_end);
-            assert(end   >= m_begin);
+            check(begin >= m_begin);
+            check(begin <= m_end);
+            check(end   <= m_end);
+            check(end   >= m_begin);
 
             return strview_nstr_type{begin, end};
         }

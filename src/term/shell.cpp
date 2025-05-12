@@ -91,7 +91,7 @@ bool Shell::getLine(string& line)
                 if (!buffer.empty() && buffer_loc > 0)
                 {
                     if (buffer_loc < buffer.size())
-                        buffer.erase(buffer.begin() + buffer_loc);
+                        buffer.erase(buffer.begin() + buffer_loc - 1);
                     else
                         buffer.pop_back();
                     --buffer_loc;
