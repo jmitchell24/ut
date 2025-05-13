@@ -97,21 +97,21 @@ void Table::print() const
     {
 
         auto sz = m_cell_widths.empty() ? 0 : getCellWidthsSum() + m_cell_widths.size()*3 - 1;
-        printf(box_chars.tl);
+        puts(box_chars.tl);
         for (size_t i = 0; i < sz; ++i)
-            printf(box_chars.hz);
-        printf(box_chars.tr);
-        printf("\n");
+            puts(box_chars.hz);
+        puts(box_chars.tr);
+        puts("\n");
 
-        printf(box_chars.vt);
+        puts(box_chars.vt);
         printf(" %*s", 1-(int)sz, title.c_str());
-        printf(box_chars.vt);
+        puts(box_chars.vt);
         printf("\n");
-        printf(box_chars.vtr);
+        puts(box_chars.vtr);
     }
     else
     {
-        printf(box_chars.tl);
+        puts(box_chars.tl);
     }
 
     // draw top border
@@ -119,10 +119,10 @@ void Table::print() const
     for (auto&& it: m_cell_widths)
     {
         for (size_t i = 0; i < it; ++i)
-            printf(box_chars.hz);
-        printf(box_chars.hz);
-        printf(box_chars.hz);
-        printf(box_chars.hzd);
+            puts(box_chars.hz);
+        puts(box_chars.hz);
+        puts(box_chars.hz);
+        puts(box_chars.hzd);
     }
     printf("\b%s\n", title.empty() ? box_chars.tr : box_chars.vtl);
 
@@ -131,7 +131,7 @@ void Table::print() const
 
     for (size_t j = 0; j < m_height; ++j)
     {
-        printf(box_chars.vt);
+        puts(box_chars.vt);
         for (size_t i = 0; i < m_width; ++i)
         {
             auto&& it = cell(i, j);
@@ -141,19 +141,19 @@ void Table::print() const
                 it.text.c_str(),
                 box_chars.vt);
         }
-        printf("\n");
+        puts("\n");
     }
 
     // draw bottom border
 
-    printf(box_chars.bl);
+    puts(box_chars.bl);
     for (auto&& it: m_cell_widths)
     {
         for (size_t i = 0; i < it; ++i)
-            printf(box_chars.hz);
-        printf(box_chars.hz);
-        printf(box_chars.hz);
-        printf(box_chars.hzu);
+            puts(box_chars.hz);
+        puts(box_chars.hz);
+        puts(box_chars.hz);
+        puts(box_chars.hzu);
     }
     printf("\b%s\n", box_chars.br);
 }
