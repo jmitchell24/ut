@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(
     ut
-    VERSION "25.5.13"
+    VERSION "25.5.16"
     DESCRIPTION "ut, my personal c++ code library"
     LANGUAGES CXX
 )
@@ -12,8 +12,8 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wformat-security -Werror")
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wformat-security")
+# set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # Configure headers
 configure_file(

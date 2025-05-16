@@ -93,6 +93,7 @@ namespace ut
         void sync();
 
         std::pair<int,int> getWindowSize();
+        std::pair<int,int> getCursorPosition() const;
 
         static RawTerm& instance();
 

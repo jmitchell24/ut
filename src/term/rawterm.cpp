@@ -6,6 +6,7 @@
 #include "ut/term/rawterm.hpp"
 
 #include "ut/time.hpp"
+#include "ut/term/escapes.hpp"
 using namespace ut;
 
 //
@@ -21,6 +22,8 @@ using namespace std;
 //
 #include <unistd.h>
 #include <termio.h>
+
+#define check_raw_mode { check_msg(m_enabled, "raw mode should be enabled"); }
 
 //
 // helper functions
@@ -66,6 +69,17 @@ static char rawGetChar()
     return c;
 }
 
+static void rawPuts(char const* s, size_t n)
+{
+    if (write(STDOUT_FILENO, s, n) < 0)
+        rawErrorExit("write");
+}
+
+// static void rawPutc(char c)
+// {
+//     rawPuts(&c, 1);
+// }
+
 static pair<int, int> rawGetWinSize()
 {
     //check_msg(g_raw_mode_enabled, "raw mode should be enabled") ;
@@ -74,8 +88,6 @@ static pair<int, int> rawGetWinSize()
         rawErrorExit("ioctl");
     return {ws.ws_col, ws.ws_row};
 }
-
-
 
 //
 // RawTerm -> implementation
@@ -109,31 +121,27 @@ void RawTerm::enable()
 
 RawTerm& RawTerm::puts(char const* buf, size_t sz)
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
-    if (write(STDOUT_FILENO, buf, sz) < 0)
-        rawErrorExit("write");
+    check_raw_mode
+    rawPuts(buf, sz);
     return *this;
 }
 
 RawTerm& RawTerm::puts(char const* buf)
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
-    if (write(STDOUT_FILENO, buf, strlen(buf)) < 0)
-        rawErrorExit("write");
+    check_raw_mode
+    rawPuts(buf, strlen(buf));
     return *this;
 }
 
 RawTerm& RawTerm::puts(strparam s)
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
-
+    check_raw_mode
     return puts(s.data(), s.size());
 }
 
 RawTerm& RawTerm::puts(std::string const& s)
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
-
+    check_raw_mode
     return puts(s.data(), s.size());
 }
 
@@ -152,8 +160,7 @@ RawTerm& RawTerm::putf(char const* fmt, ...)
 
 RawTerm& RawTerm::putc(char c)
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
-
+    check_raw_mode
     puts(&c, 1);
     return *this;
 }
@@ -161,6 +168,9 @@ RawTerm& RawTerm::putc(char c)
 struct EscScanner
 {
     string buf;
+
+    size_t size() const
+    { return buf.size(); }
 
     bool nextIf(char c)
     {
@@ -215,7 +225,7 @@ struct EscScanner
 
 RawTermChar RawTerm::getc()
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
+    check_raw_mode
 
     EscScanner scan;
 
@@ -284,14 +294,14 @@ RawTermChar RawTerm::getc()
 
 void RawTerm::sync()
 {
-    check_msg(m_enabled, "raw mode should have been enabled");
+    check_raw_mode
 
     fsync(STDOUT_FILENO);
 }
 
 pair<int, int> RawTerm::getWindowSize()
 {
-    check_msg(m_enabled, "raw mode should be enabled") ;
+    check_raw_mode
 
     for (size_t i = 0; i < 5; ++i)
     {
@@ -304,5 +314,30 @@ pair<int, int> RawTerm::getWindowSize()
     rawErrorExit("zero window size");
     return{0,0};
 }
+
+std::pair<int, int> RawTerm::getCursorPosition() const
+{
+    check_raw_mode
+
+    auto req = CSI "6n"_sv;
+    rawPuts(req.data(), req.size());
+
+    EscScanner scan;
+
+    scan.next();
+    while (scan.size() < 100)
+    {
+        if (scan.peekIf('R'))
+        {
+            int row, col;
+            sscanf(scan.buf.c_str()+2, "%d;%d", &row,&col);
+            return {col, row};
+        }
+        scan.next();
+    }
+
+    return {};
+}
+
 
 #endif

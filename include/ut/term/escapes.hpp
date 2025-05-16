@@ -170,7 +170,7 @@ inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }
 #undef DECL_COLOR
 
 #define DECL_ESC_INT(_name, _suffix) \
-    inline static std::string _name(int arg) \
+    inline static std::string _name(unsigned arg) \
     { \
         std::ostringstream oss; \
         oss << CSI << arg << _suffix; \

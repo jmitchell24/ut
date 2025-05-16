@@ -20,8 +20,6 @@ using namespace std;
 // Shell -> Implementation
 //
 
-#define CTRL_KEY(k) ((k) & 0x1f)
-
 Shell::Shell()
 {}
 
@@ -50,24 +48,41 @@ void Shell::putHint(strparam s)
     }
 }
 
-#define DO_CURSOR_RESET \
-    TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE
 
-#define DO_CURSOR_REFRESH \
-    esc::termCursorColumn(1 + prompt.size() + buffer_loc)
 
-#define DO_BUFFER_REFRESH \
-    DO_CURSOR_RESET << prompt << buffer << DO_CURSOR_REFRESH
+void Shell::putLineRefresh(strparam buffer, size_t buffer_loc) const
+{
+    // reset cursor, clear line
+    ut_term << TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE;
 
-bool Shell::getLine(string& line)
+    // reprint prompt (move cursor to beginning of buffer)
+    ut_term << prompt << TERM_RESET;
+
+    // get cursor column
+    auto col = ut_term.getCursorPosition().first;
+
+    // reprint buffer, with cursor save/load
+    ut_term << buffer;
+
+    // move cursor to correct position
+    ut_term << esc::termCursorColumn(col + buffer_loc);
+}
+
+#define REPOSITION_CURSOR ( ut_term << esc::termCursorColumn(prompt_loc.first + buffer_loc) )
+
+bool Shell::getLine()
 {
     ut_term.enable();
 
-    string prompt       = "$ ";
-    string buffer       = "";
-    size_t buffer_loc   = 0;
+    // reset cursor, clear line
+    ut_term << TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE;
 
-    ut_term << DO_BUFFER_REFRESH;
+    // reprint prompt (move cursor to beginning of buffer)
+    ut_term << prompt << TERM_RESET;
+
+    size_t prompt_loc   = ut_term.getCursorPosition().first;
+    size_t buffer_loc   = 0;
+    string buffer       = "";
 
     for (;;)
     {
@@ -78,8 +93,11 @@ bool Shell::getLine(string& line)
             buffer.insert(buffer.begin()+buffer_loc, c.asChar());
             ++buffer_loc;
 
+            ut_term
+                << esc::termCursorColumn(prompt_loc)
+                << buffer
+                << esc::termCursorColumn(prompt_loc + buffer_loc);
 
-            ut_term << DO_BUFFER_REFRESH;
             putHint(buffer);
         }
 
@@ -96,7 +114,12 @@ bool Shell::getLine(string& line)
                         buffer.pop_back();
                     --buffer_loc;
 
-                    ut_term << DO_BUFFER_REFRESH;
+                    ut_term
+                        << esc::termCursorColumn(prompt_loc)
+                        << TERM_CLEAR_LINE_TO_END
+                        << buffer
+                        << esc::termCursorColumn(prompt_loc + buffer_loc);
+
                     putHint(buffer);
                 }
                 break;
@@ -107,7 +130,13 @@ bool Shell::getLine(string& line)
                     if (buffer_loc < buffer.size())
                     {
                         buffer.erase(buffer.begin() + buffer_loc);
-                        ut_term << DO_BUFFER_REFRESH;
+
+                        ut_term
+                            << esc::termCursorColumn(prompt_loc)
+                            << TERM_CLEAR_LINE_TO_END
+                            << buffer
+                            << esc::termCursorColumn(prompt_loc + buffer_loc);
+
                         putHint(buffer);
                     }
                 }
@@ -115,19 +144,19 @@ bool Shell::getLine(string& line)
 
             case KEY_HOME:
                 buffer_loc = 0;
-                ut_term << DO_CURSOR_REFRESH;
+                ut_term << esc::termCursorColumn(prompt_loc + buffer_loc);
                 break;
 
             case KEY_END:
                 buffer_loc = buffer.size();
-                ut_term << DO_CURSOR_REFRESH;
+                ut_term << esc::termCursorColumn(prompt_loc + buffer_loc);
                 break;
 
             case KEY_LEFT:
                 if (buffer_loc > 0)
                 {
                     --buffer_loc;
-                    ut_term << DO_CURSOR_REFRESH;
+                    ut_term << esc::termCursorColumn(prompt_loc + buffer_loc);
                 }
                 break;
 
@@ -135,7 +164,7 @@ bool Shell::getLine(string& line)
                 if (buffer_loc < buffer.size())
                 {
                     ++buffer_loc;
-                    ut_term << DO_CURSOR_REFRESH;
+                    ut_term << esc::termCursorColumn(prompt_loc + buffer_loc);
                 }
                 break;
 
@@ -143,13 +172,13 @@ bool Shell::getLine(string& line)
             case KEY_EOF:
             case KEY_NEWLINE:
             case KEY_CARRIAGE_RETURN:
-                line = buffer;
+                m_line = buffer;
                 ut_term << TERM_CURSOR_NEXT_LINE(1);
                 ut_term.disable();
                 return true;
 
             case KEY_CTRL_C:
-                line = buffer;
+                m_line = buffer;
                 ut_term << TERM_CURSOR_NEXT_LINE(1);
                 ut_term.disable();
                 return false;
@@ -161,4 +190,13 @@ bool Shell::getLine(string& line)
 
     ut_term.disable();
     return false;
+}
+
+string Shell::runInteractiveHint(hint_type hint, cstrparam prompt)
+{
+    this->prompt = prompt.str();
+    this->hint = hint;
+
+    getLine();
+    return m_line;
 }
