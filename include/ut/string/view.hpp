@@ -20,11 +20,15 @@
 #include <type_traits>
 #include <string_view>
 #include <cstring>
-#include <ostream>
-#include <istream>
+#include <climits>
 
+#define SUPPORTS_STD_FORMAT          ( __cplusplus >= 202002L )
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
+
+#if SUPPORTS_STD_FORMAT
+#include <format>
+#endif
 
 namespace ut
 {
@@ -228,6 +232,14 @@ namespace ut
         /// Returns an STL basic_string
         M_DECL_PURE string_type str() const { return string_type(m_begin, m_end); }
 
+
+        #if SUPPORTS_STD_FORMAT
+
+        template <typename... T>
+        M_DECL_PURE string_type vformat(T&&... t) const
+        { return std::vformat(view(), std::make_format_args(t...)); }
+
+        #endif
 
         /// Returns an equivalent sub-view for \p copy, assuming that this sub-view is of \p orig.
         /// \p orig and \p copy are assumed to be equivalent.
@@ -470,6 +482,17 @@ namespace ut
             return equals(with(m_end - s.size(), m_end), s);
         }
 
+        ///
+        M_DECL_PURE bool isPrint() const
+        {
+            for (auto&& it: *this)
+                if (!isprint(it))
+                    return false;
+            return true;
+        }
+
+        #pragma region Trim
+
         /// Removes leading whitespace from this view.
         /// \return        A new view with leading whitespace removed.
         M_DECL_PURE strview_nstr_type ltrim() const { return with(trimBegin(), m_end); }
@@ -494,7 +517,62 @@ namespace ut
         /// \return       True if trailing whitespace has been removed, false otherwise.
         M_DECL_PURE bool isRtrim() const { return empty() || ( !std::isspace(last()) ); }
 
+        ///
+        M_DECL_PURE size_type ltrimLength() const { return trimBegin() - m_begin; }
 
+        ///
+        M_DECL_PURE size_type rtrimLength() const { return m_end - trimEnd(); }
+
+
+        M_DECL_PURE std::string trimMargin(strview_cstr_type margin_prefix = "|") const
+        {
+            if (empty())
+                return "";
+
+            std::string result;
+
+            auto line_begin = m_begin;
+
+            while (line_begin < m_end)
+            {
+                // Find end of current line
+                auto line_end = line_begin;
+                while (line_end < m_end && *line_end != '\n')
+                    ++line_end;
+
+                // Skip leading whitespace
+                auto content_begin = line_begin;
+                while (content_begin < line_end && isspace(*content_begin) && *content_begin != '\n')
+                    ++content_begin;
+
+                // Check if line starts with margin prefix after whitespace
+                if (withBegin(content_begin).beginsWith(margin_prefix))
+                {
+
+                    // Copy content after margin prefix
+                    auto after_prefix = content_begin + margin_prefix.size();
+                    result += with(after_prefix, line_end).str();
+                }
+                else
+                {
+                    // Copy entire line (no margin prefix found)
+                    result += with(line_begin, line_end).str();
+                }
+
+                if (*line_end != '\n')
+                    break; // End of string
+
+                // Add newline if there was one in original
+                result += '\n';
+                line_begin = line_end + 1;
+            }
+
+            return result;
+        }
+
+        #pragma endregion Trim
+
+        #pragma region Split
 
 M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1)
         {
@@ -576,7 +654,7 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
 #undef RSPLIT_CHECK
         }
 
-        M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1)
+        M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1) const
         {
 #define SPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.push_back(with(word_beg, m_end)); return v; } }
 
@@ -650,6 +728,8 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
             return v;
 #undef SPLIT_CHECK
         }
+
+        #pragma endregion Split
 
 
         M_DECL_PURE bool contains(strview_type const& s) const
@@ -750,3 +830,4 @@ namespace std
 
 #undef M_DECL_PURE
 #undef M_DECL
+#undef SUPPORTS_STD_FORMAT

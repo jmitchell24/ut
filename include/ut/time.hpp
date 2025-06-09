@@ -335,10 +335,11 @@ namespace chrono_wrapper
         M_DECL constexpr duration& operator /= (cnt_t cnt) { value /= cnt; return *this; }
     };
 
-    /// convenience class for tracking time for profiling and real-time applications (e.g. games)
+    /// a simple time tracking class for profiling and real-time applications (e.g. games)
     class timer
     {
     public:
+        /// an RAII-style object for updating a duration object with the time elapsed since its creation
         struct scope_guard
         {
             scope_guard(scope_guard const&)=delete;
@@ -352,9 +353,12 @@ namespace chrono_wrapper
             now_t           m_now;
         };
 
+        /// reset the timer object with the current time. 
         M_DECL void reset()
         { m_now = getnow(); }
 
+        /// reset the timer object with the current time, and return the time elapsed since its previous reset. 
+        /// \return the time elapsed since its previous reset.
         M_DECL duration next()
         {
             auto now = getnow();
@@ -363,6 +367,7 @@ namespace chrono_wrapper
             return next;
         }
 
+        
         M_DECL bool nextIf(duration max_duration)
         {
             if (peek() > max_duration)

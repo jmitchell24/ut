@@ -145,6 +145,10 @@
 
 namespace ut::esc
 {
+    inline static std::ostream& reset(std::ostream& os) { return os << TERM_RESET; }
+
+    inline static std::ostream& rendl(std::ostream& os) { return os << TERM_RESET << std::endl; }
+
 #define DECL_COLOR(_x, _y, _z) \
 inline static std::ostream& _x(std::ostream& os) { return os << _y; } \
 inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }

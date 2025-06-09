@@ -12,16 +12,17 @@
 namespace ut::tests \
 { \
     struct I_##_line { \
-        static void run(TestState& ts); \
+        static void run(TestCase& tc, TestState& ts); \
         I_##_line() { ut::Tester::instance().add({_label_text, _line, &run}); } \
     } static i_##_line; \
 } \
-void ut::tests::I_##_line::run(TestState& ts)
+void ut::tests::I_##_line::run(TestCase& tc, TestState& ts)
 
 #define ut_test_expansion_1(_line, _label_text) ut_test_expansion_2(_line, _label_text)
 #define ut_test(_label_text) ut_test_expansion_1(__LINE__, _label_text)
 
-#define ut_require(_expression) { if (!(_expression)) return ts.fail(__LINE__, #_expression);  }
+#define ut_require(_expression) { ts.init(__LINE__, #_expression); } \
+    { if (!(_expression)) return ts.fail(); }
 
 #define ut_tester ( ut::Tester::instance() )
 
@@ -40,8 +41,11 @@ namespace ut
         inline char const* expr() const
         { return m_expr; }
 
-        inline void fail(int line, char const* expr)
-        { m_line = line; m_passed = false; m_expr = expr; }
+        inline void init(int line, char const* expr)
+        { m_line = line; m_expr = expr; m_passed = true; }
+
+        inline void fail()
+        { m_passed = false; }
 
     private:
         bool m_passed = true;
@@ -51,7 +55,7 @@ namespace ut
 
     struct TestCase
     {
-        using fn_type = void(*)(TestState& tc);
+        using fn_type = void(*)(TestCase&, TestState&);
 
         std::string name;
         size_t      line;

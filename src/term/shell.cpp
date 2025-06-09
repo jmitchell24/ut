@@ -78,7 +78,7 @@ bool Shell::getLine()
     ut_term << TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE;
 
     // reprint prompt (move cursor to beginning of buffer)
-    ut_term << prompt << TERM_RESET;
+    ut_term << TERM_RESET << prompt << TERM_RESET;
 
     size_t prompt_loc   = ut_term.getCursorPosition().first;
     size_t buffer_loc   = 0;

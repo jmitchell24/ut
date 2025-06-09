@@ -29,29 +29,23 @@ void Tester::require(TestCase const& tc, char const* expr)
 void Tester::runTests()
 {
 
-    if (tui::beginTable("testlist", 3, 0))
+    for (size_t i = 0; i < m_testlist.size(); ++i)
     {
-        for (size_t i = 0; i < m_testlist.size(); ++i)
+        auto&& it = m_testlist[i];
+
+        TestState ts;
+        it.fn(it, ts);
+
+        if (ts.passed())
         {
-            auto&& it = m_testlist[i];
-            tui::tableCell(0, i, "%d", i);
-            tui::tableCell(1, i, "%s", it.name.c_str());
-
-            TestState ts;
-            it.fn(ts);
-
-            if (ts.passed())
-            {
-                tui::tableCell(2, i, "PASSED");
-            }
-            else
-            {
-                auto s = ut_printer(
-                    "FAILED @ line %d: '%s'", ts.line(), ts.expr());
-                tui::tableCell(2, i, s.c_str());
-            }
+            tui::tableCell(2, i, "PASSED");
         }
-        tui::endTable();
+        else
+        {
+            auto s = ut_printer(
+                "FAILED @ line %d: '%s'", ts.line(), ts.expr());
+            tui::tableCell(2, i, s.c_str());
+        }
     }
 }
 
