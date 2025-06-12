@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(
     ut
-    VERSION "25.5.16"
+    VERSION "25.6.12"
     DESCRIPTION "ut, my personal c++ code library"
     LANGUAGES CXX
 )
@@ -26,11 +26,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
 # Create the library
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS}
-        include/ut/term/spinner.hpp
-        src/term/spinner.cpp
-        include/ut/term/spinners.hpp
-        testing/utest_strview.cpp)
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Include directories
 target_include_directories(${PROJECT_NAME}
