@@ -173,14 +173,14 @@ bool Shell::getLine()
             case KEY_NEWLINE:
             case KEY_CARRIAGE_RETURN:
                 m_line = buffer;
-                ut_term << TERM_CURSOR_NEXT_LINE(1);
                 ut_term.disable();
+                printf("\n");
                 return true;
 
             case KEY_CTRL_C:
                 m_line = buffer;
-                ut_term << TERM_CURSOR_NEXT_LINE(1);
                 ut_term.disable();
+                printf("\n");
                 return false;
             default:break;
             }
@@ -189,6 +189,7 @@ bool Shell::getLine()
     }
 
     ut_term.disable();
+    printf("\n");
     return false;
 }
 

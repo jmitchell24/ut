@@ -29,7 +29,8 @@ file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS}
         include/ut/term/spinner.hpp
         src/term/spinner.cpp
-        include/ut/term/spinners.hpp)
+        include/ut/term/spinners.hpp
+        testing/utest_strview.cpp)
 
 # Include directories
 target_include_directories(${PROJECT_NAME}

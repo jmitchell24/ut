@@ -38,13 +38,24 @@ void Tester::runTests()
 
         if (ts.passed())
         {
-            tui::tableCell(2, i, "PASSED");
+            cout
+                << "line=" << it.line
+                << " name=" << it.name
+                << TERM_FG_BRIGHT_GREEN " passed" TERM_RESET
+                << endl;
         }
         else
         {
             auto s = ut_printer(
                 "FAILED @ line %d: '%s'", ts.line(), ts.expr());
-            tui::tableCell(2, i, s.c_str());
+            cout << s << endl;
+
+            cout
+                << "line=" << it.line
+                << "name=" << it.name
+                << TERM_FG_BRIGHT_RED "failed" TERM_RESET
+                << endl;
+
         }
     }
 }
