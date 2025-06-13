@@ -6,7 +6,7 @@
 //
 // ut
 //
-#include "ut/check.hpp" 
+#include "ut/check.hpp"
 
 //
 // std
@@ -23,8 +23,8 @@
 #include <climits>
 
 #define SUPPORTS_STD_FORMAT          ( __cplusplus >= 202002L )
-#define M_DECL_PURE             [[nodiscard]] inline constexpr
-#define M_DECL                  inline constexpr
+#define M_DECL_PURE                 [[nodiscard]] inline constexpr
+#define M_DECL                      inline constexpr
 
 #if SUPPORTS_STD_FORMAT
 #include <format>
@@ -41,35 +41,65 @@ namespace ut
     class basic_strview
     {
     public:
-        using char_type             = Char;
-        using traits_type           = Traits;
-        using pointer_type          = char_type const*;
-        using unique_pointer_type   = std::unique_ptr<char_type[]>;
-        using shared_pointer_type   = std::shared_ptr<char_type[]>;
-        using size_type             = std::size_t;
-        using string_type           = std::basic_string     <char_type,traits_type>;
-        using ostream_type          = std::basic_ostream    <char_type,traits_type>;
-        using string_view_type      = std::basic_string_view<char_type,traits_type>;
-        using strview_nstr_type     = basic_strview         <char_type,traits_type, false>;
-        using strview_cstr_type     = basic_strview         <char_type,traits_type, true>;
-        using strview_type          = basic_strview         <char_type,traits_type, NullTerminated>;
+        #pragma region Types
 
+        /// \brief The type of the characters in the string.
+        using char_type = Char;
+
+        /// \brief The traits of the characters in the string.
+        using traits_type = Traits;
+
+        /// \brief The type of pointer to the characters in the string.
+        using pointer_type = char_type const*;
+
+        /// \brief The type of unique pointer to the characters in the string.
+        using unique_pointer_type = std::unique_ptr<char_type[]>;
+
+        /// \brief The type of shared pointer to the characters in the string.
+        using shared_pointer_type = std::shared_ptr<char_type[]>;
+
+        /// \brief The type of string, given the char_type and traits_type.
+        using string_type = std::basic_string<char_type,traits_type>;
+
+        /// \brief The type of ostream, given the char_type and traits_type.
+        using ostream_type = std::basic_ostream <char_type,traits_type>;
+
+        /// \brief The type of string_view, given the char_type and traits_type.
+        using string_view_type = std::basic_string_view<char_type,traits_type>;
+
+        /// \brief The type of strview, given the char_type and traits_type, not null-terminated.
+        using strview_nstr_type = basic_strview<char_type,traits_type, false>;
+
+        /// \brief The type of strview, given the char_type and traits_type, null-terminated.
+        using strview_cstr_type = basic_strview<char_type,traits_type, true>;
+
+        /// \brief The type of strview, given the char_type and traits_type
+        using strview_type = basic_strview<char_type,traits_type, NullTerminated>;
+
+        /// \brief A struct that contains a unique pointer to the characters in the string and a view of the string.
         struct unique_copy { unique_pointer_type ptr; strview_cstr_type view; };
+
+        /// \brief A struct that contains a shared pointer to the characters in the string and a view of the string.
         struct shared_copy { shared_pointer_type ptr; strview_cstr_type view; };
 
+        #pragma endregion Types
+
+        /// \brief A static constant that indicates if the string is null-terminated.
         inline constexpr static bool NULL_TERMINATED = NullTerminated;
+
+        #pragma region Constructors
 
         M_DECL basic_strview(strview_type&&) noexcept =default;
         M_DECL basic_strview(strview_type const&)=default;
         M_DECL basic_strview& operator=(strview_type&&) noexcept =default;
         M_DECL basic_strview& operator=(strview_type const&)=default;
 
-        /// Construct with default string ("")
+        /// \brief Construct with default string ("")
         M_DECL basic_strview()
             : m_begin{""}, m_end{m_begin}
         {}
 
-        /// Construct with an STL basic_string
+        /// \brief Construct with an STL basic_string
         M_DECL basic_strview(string_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
@@ -78,7 +108,7 @@ namespace ut
             check(m_begin <= m_end);
         }
 
-        /// Construct with an STL basic_string_view
+        /// \brief Construct with an STL basic_string_view
         M_DECL basic_strview(string_view_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
@@ -87,8 +117,8 @@ namespace ut
             check(m_begin <= m_end);
         }
 
-        
-        /// Construct with a begin and end pointer
+
+        /// \brief Construct with a begin and end pointer
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(pointer_type begin, pointer_type end)
             : m_begin{begin}, m_end{end}
@@ -99,15 +129,15 @@ namespace ut
         }
 
 
-        /// Construct with a begin pointer and length
+        /// \brief Construct with a begin pointer and length
         ENABLE_IF_NOT_NULL_TERMINATED
-        M_DECL_PURE explicit basic_strview(pointer_type begin, size_type sz)
+        M_DECL_PURE explicit basic_strview(pointer_type begin, size_t sz)
             : m_begin{begin}, m_end{m_begin+sz}
         { check(m_begin != nullptr); }
 
 
-        /// Construct with a begin pointer and length. Will dereference to check null-terminated.
-        M_DECL_PURE basic_strview(pointer_type begin, size_type sz, basic_strview_cstr_tag)
+        /// \brief Construct with a begin pointer and length. Will dereference to check null-terminated.
+        M_DECL_PURE basic_strview(pointer_type begin, size_t sz, basic_strview_cstr_tag)
                 : m_begin{begin}, m_end{m_begin+sz}
         {
             check(m_begin != nullptr);
@@ -117,7 +147,7 @@ namespace ut
         }
 
 
-        /// Construct with a null-terminated stringview
+        /// \brief Construct with a null-terminated stringview
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL basic_strview(strview_cstr_type const& s)
             : m_begin{s.begin()}, m_end{s.end()}
@@ -128,8 +158,7 @@ namespace ut
         }
 
 
-        /// Construct with a null-terminated string
-        ENABLE_IF_NULL_TERMINATED
+        /// \brief Construct with a null-terminated string
         M_DECL basic_strview(pointer_type p)
             : m_begin{p}, m_end{p+traits_type::length(p)}
         {
@@ -137,6 +166,8 @@ namespace ut
             check(m_end   != nullptr);
             check(m_begin <= m_end);
         }
+
+        #pragma endregion Constructors
 
 
         /// Returns a pointer to the first char of the string. Equivalent to \a begin()
@@ -165,7 +196,7 @@ namespace ut
 
         /// Returns the length of the string, in number of chars.
         /// \return     The number of chars in the string.
-        M_DECL_PURE size_type size() const { return m_end - m_begin; }
+        M_DECL_PURE size_t size() const { return m_end - m_begin; }
 
 
         /// Returns whether the string is empty
@@ -177,7 +208,7 @@ namespace ut
         /// \param i    The index of the character to access.
         /// \return     The character at the specified position.
         /// \throw      std::out_of_range if \a i is out of range.
-        M_DECL_PURE char_type at(size_type i) const
+        M_DECL_PURE char_type at(size_t i) const
         {
             if (i < size())
                 return m_begin[i];
@@ -195,11 +226,11 @@ namespace ut
         }
 
 
-        /// Returns an stl shared_ptr copy of the string. 
+        /// Returns a stl shared_ptr copy of the string.
         /// \return     A shared_ptr copy of the string. 
         M_DECL_PURE shared_copy shared_ptr_copy() const
         {
-            size_type sz = size();
+            size_t sz = size();
             auto ptr = new char_type[sz+1];
             ::strncpy(ptr, m_begin, sz);
             *(ptr+sz) = 0;
@@ -207,11 +238,11 @@ namespace ut
         }
 
 
-        /// Returns an stl unique_ptr copy of the string. 
+        /// Returns a stl unique_ptr copy of the string.
         /// \return     A unique_ptr copy of the string. 
         M_DECL_PURE unique_copy unique_ptr_copy() const
         {
-            size_type sz = size();
+            size_t sz = size();
             auto ptr = new char_type[sz+1];
             ::strncpy(ptr, m_begin, sz);
             *(ptr+sz) = 0;
@@ -304,7 +335,7 @@ namespace ut
         /// Returns a view of substring [begin(), begin()+size]. Equivalent to takeBegin().
         /// \param size     Requested view size
         /// \return         View of the substring [begin(), begin()+size]
-        M_DECL_PURE strview_nstr_type take(size_type size) const
+        M_DECL_PURE strview_nstr_type take(size_t size) const
         { return takeBegin(size); }
 
 
@@ -319,44 +350,44 @@ namespace ut
         /// Returns a view of substring [begin(), begin()+size].
         /// \param size     Requested view size
         /// \return         View of the substring [begin(), begin()+size]
-        M_DECL_PURE strview_nstr_type takeBegin(size_type size) const
+        M_DECL_PURE strview_nstr_type takeBegin(size_t size) const
         { return with(m_begin, m_begin+size); }
 
 
         /// Returns a view of substring [end()-size, end()].
         /// \param size     Requested view size.
         /// \return         View of the substring [end()-size, end()].
-        M_DECL_PURE strview_nstr_type takeEnd(size_type size) const
+        M_DECL_PURE strview_nstr_type takeEnd(size_t size) const
         { return with(m_end-size, m_end); }
 
 
         /// Returns a view of substring [end()-size, end()]. Equivalent to \a skipBegin()
         /// \param size     Requested view size.
         /// \return         View of the substring [end()-size, end()].
-        M_DECL_PURE strview_nstr_type skip(size_type size) const
+        M_DECL_PURE strview_nstr_type skip(size_t size) const
         { return skipBegin(size); }
 
 
         /// Returns a view of the substring [ \a begin()+size, \a end() ].
         /// \param size     Requested view size.
         /// \return         View of the substring [ \a begin()+size, \a end() ].
-        M_DECL_PURE strview_nstr_type skipBegin(size_type size) const
+        M_DECL_PURE strview_nstr_type skipBegin(size_t size) const
         { return with(m_begin+size, m_end); }
 
 
         /// Returns a view of the substring [ \a begin(), \a end()-size ].
         /// \param size     Requested view size.
         /// \return         View of the substring [ \a begin(), \a end()-size ].
-        M_DECL_PURE strview_nstr_type skipEnd(size_type size) const
+        M_DECL_PURE strview_nstr_type skipEnd(size_t size) const
         { return with(m_begin, m_end-size); }
 
         /// Returns a pointer to the first occurrence of \a s in this view.
         /// \param s        String to search for.
         /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
-        M_DECL_PURE pointer_type find(strview_type const& s, size_type n=0) const
+        M_DECL_PURE pointer_type find(strview_type const& s, size_t n=0) const
         {
-            size_type sz = s.size();
+            size_t sz = s.size();
             if (sz > this->size())
                 return m_end;
 
@@ -370,7 +401,7 @@ namespace ut
         /// \param c        Character to search for.
         /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type find(char_type c, size_type n=0) const
+        M_DECL_PURE pointer_type find(char_type c, size_t n=0) const
         {
             for (pointer_type i = m_begin+n; i < m_end; ++i)
                 if (traits_type::eq(*i, c))
@@ -382,21 +413,21 @@ namespace ut
         /// \param s        String to search for.
         /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a s, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirst(strview_type const& s, size_type n=0) const
+        M_DECL_PURE pointer_type findFirst(strview_type const& s, size_t n=0) const
         { return find(s, n); }
 
         /// Returns a pointer to the first occurrence of \a c in this view.
         /// \param c        Character to search for.
         /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirst(char_type c, size_type n=0) const
+        M_DECL_PURE pointer_type findFirst(char_type c, size_t n=0) const
         { return find(c, n); }
 
         /// Returns a pointer to the first occurence of a character not equal to \a c in this view.
         /// \param c        Character to search for.
         /// \param n        Position to start searching from. Defaults to 0.
         /// \return         Pointer to the first occurrence of a character not equal to \a c, or \a end() if not found.
-        M_DECL_PURE pointer_type findFirstNot(char_type c, size_type n=0) const
+        M_DECL_PURE pointer_type findFirstNot(char_type c, size_t n=0) const
         {
             for (pointer_type i = m_begin+n; i < m_end; ++i)
                 if (!traits_type::eq(*i, c))
@@ -410,7 +441,7 @@ namespace ut
         /// \return         Pointer to the last occurrence of \a s, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(strview_type const& s) const
         {
-            size_type sz = s.size();
+            size_t sz = s.size();
             if (sz > size())
                 return m_end;
             for(pointer_type i = m_end-s.size(); i > m_begin-1; --i)
@@ -518,10 +549,10 @@ namespace ut
         M_DECL_PURE bool isRtrim() const { return empty() || ( !std::isspace(last()) ); }
 
         ///
-        M_DECL_PURE size_type ltrimLength() const { return trimBegin() - m_begin; }
+        M_DECL_PURE size_t ltrimLength() const { return trimBegin() - m_begin; }
 
         ///
-        M_DECL_PURE size_type rtrimLength() const { return m_end - trimEnd(); }
+        M_DECL_PURE size_t rtrimLength() const { return m_end - trimEnd(); }
 
 
         M_DECL_PURE std::string trimMargin(strview_cstr_type margin_prefix = "|") const
@@ -738,7 +769,7 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
         M_DECL_PURE bool contains(char_type c) const
         { return find(c) != nullptr; }
 
-        M_DECL_PURE char_type operator[] (size_type i) const
+        M_DECL_PURE char_type operator[] (size_t i) const
         { return *(m_begin+i); }
 
 #if defined(UT_VIEW_CSTR_CONVERSION)
@@ -776,7 +807,7 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
         { return os.write(s.begin(), s.end() - s.begin()); }
 
         /// make a cstrview from ptr+sz, dereference m_end to verify null-termination (assert).
-        M_DECL_PURE static strview_cstr_type make_cstrview(pointer_type begin, size_type sz)
+        M_DECL_PURE static strview_cstr_type make_cstrview(pointer_type begin, size_t sz)
         { return strview_cstr_type(begin, sz, basic_strview_cstr_tag{}); }
 
     private:

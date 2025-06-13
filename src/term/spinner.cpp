@@ -25,7 +25,7 @@ using namespace std;
 void SpinnerRunner::spin(Spinner const& spinner, task_param task)
 {
     atomic_bool done = false;
-    int i = 0;
+    m_frame = 0;
 
     thread spin_thread([&]
     {
@@ -35,14 +35,14 @@ void SpinnerRunner::spin(Spinner const& spinner, task_param task)
         {
             cout
                 << TERM_CURSOR_COLUMN(0) TERM_CLEAR_LINE
-                << prefix.str()
-                << spinner.frames[i]
+                << prefix()
+                << spinner.frames[m_frame]
                 << TERM_RESET " "
-                << suffix.str()
+                << suffix()
                 << TERM_RESET
                 << flush;
 
-            i = (i + 1) % spinner.frames.size();
+            m_frame = (m_frame + 1) % spinner.frames.size();
 
             timer::sleep(duration::milliseconds(spinner.interval));
         }

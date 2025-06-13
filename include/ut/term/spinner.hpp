@@ -23,30 +23,35 @@ namespace ut
     class SpinnerRunner
     {
     public:
-        struct Affix
-        {
-            template <typename T>
-            inline Affix& operator<< (T&& t)
-            { std::scoped_lock sl(mut); oss << std::forward<T>(t); return *this;}
-
-            inline std::string str() const
-            { std::scoped_lock sl(mut); return oss.str(); }
-
-            inline Affix& reset()
-            { std::scoped_lock sl(mut); oss.str(""); oss.clear(); return *this; }
-
-
-
-            std::ostringstream oss;
-            mutable std::mutex mut;
-        };
-
-        Affix prefix;
-        Affix suffix;
-
         using task_param = std::function<void(SpinnerRunner&)> const&;
 
+        inline std::string prefix() const
+        { std::scoped_lock sl(m_mutex); return m_prefix; }
+
+        inline std::string suffix() const
+        { std::scoped_lock sl(m_mutex); return m_suffix; }
+
+        inline Spinner spinner() const
+        { std::scoped_lock sl(m_mutex); return m_spinner; }
+
+        inline void prefix(strparam s)
+        { std::scoped_lock sl(m_mutex); m_prefix = s.str(); }
+
+        inline void suffix(strparam s)
+        { std::scoped_lock sl(m_mutex); m_suffix = s.str(); }
+
+        inline void spinner(Spinner const& spinner)
+        { std::scoped_lock sl(m_mutex); m_spinner = spinner; m_frame=0; }
+
         void spin(Spinner const& spinner, task_param task);
+
+    private:
+        int m_frame=0;
+        std::string m_prefix;
+        std::string m_suffix;
+        Spinner m_spinner;
+
+        mutable std::mutex m_mutex;
     };
 
     inline static void spin(SpinnerRunner::task_param task)
