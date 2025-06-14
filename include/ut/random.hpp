@@ -52,8 +52,12 @@ namespace ut
         { return data + nextu(size); }
 
         template <typename It>
-        auto choose(It first, It last)
+        M_DECL auto choose(It first, It last)
         { return *( first + nextu(std::distance(first, last)) ); }
+
+        template <typename It>
+        M_DECL void shuffle(It first, It last)
+        { std::shuffle(first, last, m_rng); }
 
     private:
         std::random_device  m_dev;
