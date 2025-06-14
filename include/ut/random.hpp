@@ -51,12 +51,20 @@ namespace ut
         M_DECL T const* choosePtr(T const* data, size_t size)
         { return data + nextu(size); }
 
-        template <typename It>
-        M_DECL auto choose(It first, It last)
-        { return *( first + nextu(std::distance(first, last)) ); }
+        template <typename T>
+        M_DECL auto choose(T&& t)
+        { return chooseRange(begin(t), end(t)); }
 
         template <typename It>
-        M_DECL void shuffle(It first, It last)
+        M_DECL auto chooseRange(It first, It last)
+        { return *( first + nextu(std::distance(first, last)) ); }
+
+        template <typename T>
+        M_DECL auto shuffle(T&& t)
+        { return shuffleRange(begin(std::forward<T>(t)), end(std::forward<T>(t))); }
+
+        template <typename It>
+        M_DECL void shuffleRange(It first, It last)
         { std::shuffle(first, last, m_rng); }
 
     private:
