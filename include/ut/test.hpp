@@ -17,12 +17,18 @@ namespace ut::tests \
     } static i_##_line; \
 } \
 void ut::tests::I_##_line::run(TestCase& tc, TestState& ts)
-
 #define ut_test_expansion_1(_line, _label_text) ut_test_expansion_2(_line, _label_text)
+
+
 #define ut_test(_label_text) ut_test_expansion_1(__LINE__, _label_text)
+
+
+#define ut_test_section(...) // placeholder
+
 
 #define ut_require(_expression) { ts.init(__LINE__, #_expression); } \
     { if (!(_expression)) return ts.fail(); }
+
 
 #define ut_tester ( ut::Tester::instance() )
 

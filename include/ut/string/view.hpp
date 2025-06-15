@@ -41,6 +41,8 @@ namespace ut
     class basic_strview
     {
     public:
+
+
         #pragma region Types
 
         /// \brief The type of the characters in the string.
@@ -82,6 +84,22 @@ namespace ut
         /// \brief A struct that contains a shared pointer to the characters in the string and a view of the string.
         struct shared_copy { shared_pointer_type ptr; strview_cstr_type view; };
 
+        /// \brief A struct that contains indices representing the beginning and end of a strview.
+        struct indices
+        {
+            size_t begin, end;
+
+            explicit indices(size_t begin, size_t end)
+                : begin{begin}, end{end}
+            { check(end >= begin); }
+
+            inline size_t size() const
+            { return end - begin; }
+
+            friend inline ostream_type& operator<<(ostream_type& os, indices const& i)
+            { return os << '[' << i.begin << ", " << i.size() << ']'; }
+        };
+
         #pragma endregion Types
 
         /// \brief A static constant that indicates if the string is null-terminated.
@@ -97,6 +115,11 @@ namespace ut
         /// \brief Construct with default string ("")
         M_DECL basic_strview()
             : m_begin{""}, m_end{m_begin}
+        {}
+
+        /// \brief Construct with indices to an enclosing string.
+        M_DECL basic_strview(strview_type const& s, indices const& i)
+            : m_begin{s.m_begin + i.begin }, m_end{s.m_begin + i.end}
         {}
 
         /// \brief Construct with an STL basic_string
@@ -184,6 +207,15 @@ namespace ut
         /// \return     Pointer to the past-the-end of the string.
         M_DECL_PURE pointer_type end() const { return m_end; }
 
+        /// Returns indices of this view within an enclosing string.
+        /// \param s    The enclosing string.
+        /// \return     A struct containing the indices.
+        M_DECL_PURE indices asIndices(strview_type const& s) const
+        {
+            check(isEnclosed(s));
+            return indices( m_begin - s.m_begin, m_end - s.m_begin );
+        }
+
         /// Returns the first char of the string.
         /// \return     The first char of the string.
         M_DECL_PURE char_type first() const { check(m_begin != m_end); return *m_begin; }
@@ -202,6 +234,20 @@ namespace ut
         /// Returns whether the string is empty
         /// \return     \a true if the string length is 0, \a false otherwise.
         M_DECL_PURE bool empty() const { return m_begin == m_end; }
+
+
+        /// Returns \a true if the specified view is within the bounds of this view (inclusive).
+        /// \param s    The (presumed) enclosed string.
+        /// \return     \a true if specified view is within the bounds of this view (inclusive).
+        M_DECL_PURE bool encloses(strview_type const& s) const
+        { return m_begin <= s.m_begin && m_end >= s.m_end; }
+
+
+        /// Returns \a true if this view is within the bounds of the specified view (inclusive).
+        /// \param s    The (presumed) enclosing string.
+        /// \return     \a true if this view is within the bounds of the specified view (inclusive).
+        M_DECL_PURE bool isEnclosed(strview_type const& s) const
+        { return s.encloses(*this); }
 
 
         /// Returns the character at a given position.
@@ -345,6 +391,10 @@ namespace ut
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type withIndices(size_t beg_idx, size_t end_idx) const
         { return with(m_begin+beg_idx, m_begin+end_idx); }
+
+
+        M_DECL_PURE strview_nstr_type withIndices(indices const& i) const
+        { return withIndices(i.begin, i.end); }
 
 
         /// Returns a view of substring [begin(), begin()+size].
