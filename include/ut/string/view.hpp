@@ -209,6 +209,13 @@ namespace ut
         /// \return     Pointer to the past-the-end of the string.
         M_DECL_PURE pointer_type end() const { return m_end; }
 
+
+        /// Returns indices for the entire range of this view.
+        /// \return     A struct containing the indices.
+        M_DECL_PURE indices asIndices() const
+        { return indices(m_begin, m_end - m_begin); }
+
+
         /// Returns indices of this view within an enclosing string.
         /// \param s    The enclosing string.
         /// \return     A struct containing the indices.
