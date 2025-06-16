@@ -87,9 +87,11 @@ namespace ut
         /// \brief A struct that contains indices representing the beginning and end of a strview.
         struct indices
         {
-            size_t begin, end;
+            size_t begin=0, end=0;
 
-            explicit indices(size_t begin, size_t end)
+            indices()=default;
+
+            indices(size_t begin, size_t end)
                 : begin{begin}, end{end}
             { check(end >= begin); }
 
@@ -97,7 +99,7 @@ namespace ut
             { return end - begin; }
 
             friend inline ostream_type& operator<<(ostream_type& os, indices const& i)
-            { return os << '[' << i.begin << ", " << i.size() << ']'; }
+            { return os << '[' << i.begin << ", " << i.end << ']'; }
         };
 
         #pragma endregion Types

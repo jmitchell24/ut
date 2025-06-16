@@ -12,7 +12,7 @@
 #include <ut/check.hpp>
 
 #define UT_NAME         "ut"
-#define UT_VERSION      "25.6.14"
+#define UT_VERSION      "25.6.16"
 
 namespace ut
 { }
