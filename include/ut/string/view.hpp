@@ -98,6 +98,9 @@ namespace ut
             inline size_t size() const
             { return end - begin; }
 
+            inline strview_nstr_type view(strview_type const& s) const
+            { return s.with(*this); }
+
             friend inline ostream_type& operator<<(ostream_type& os, indices const& i)
             { return os << '[' << i.begin << ", " << i.end << ']'; }
         };
@@ -359,6 +362,13 @@ namespace ut
 
             return strview_nstr_type{begin, end};
         }
+
+
+        /// Returns a view of the substring specified by indices.
+        /// \param indices  Indices object that specifies substring
+        /// \return         View of the substring defined by indices.
+        M_DECL_PURE strview_nstr_type with(indices const& i) const
+        { return with(m_begin+i.begin, m_begin+i.end); }
 
 
         /// Returns a view of substring [begin, end], where begin >= begin() and end <= end().
