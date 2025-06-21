@@ -175,12 +175,14 @@ bool Shell::getLine()
                 m_line = buffer;
                 ut_term.disable();
                 printf("\n");
+                fflush(stdout);
                 return true;
 
             case KEY_CTRL_C:
                 m_line = buffer;
                 ut_term.disable();
                 printf("\n");
+                fflush(stdout);
                 return false;
             default:break;
             }
