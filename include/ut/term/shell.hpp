@@ -7,6 +7,7 @@
 //
 // ut
 //
+#include <ut/term/escapes.hpp>
 #include <ut/string.hpp>
 
 //
@@ -21,7 +22,7 @@
     TERM_FG_BRIGHT_RED      "~" \
     TERM_FG_BRIGHT_YELLOW   "~" \
     TERM_FG_BRIGHT_GREEN    "~" \
-    TERM_FG_BRIGHT_CYAN     "> "_sv
+    TERM_FG_BRIGHT_CYAN     "> "
 
 namespace ut
 {
@@ -31,7 +32,7 @@ namespace ut
         using hint_type = std::function<void(strparam)>;
         hint_type hint = {};
 
-        std::string prompt;
+        std::string prompt = DEFAULT_PROMPT;
 
         Shell();
 
