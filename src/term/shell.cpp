@@ -48,26 +48,6 @@ void Shell::putHint(strparam s)
     }
 }
 
-
-
-void Shell::putLineRefresh(strparam buffer, size_t buffer_loc) const
-{
-    // reset cursor, clear line
-    ut_term << TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE;
-
-    // reprint prompt (move cursor to beginning of buffer)
-    ut_term << prompt << TERM_RESET;
-
-    // get cursor column
-    auto col = ut_term.getCursorPosition().first;
-
-    // reprint buffer, with cursor save/load
-    ut_term << buffer;
-
-    // move cursor to correct position
-    ut_term << esc::termCursorColumn(col + buffer_loc);
-}
-
 #define REPOSITION_CURSOR ( ut_term << esc::termCursorColumn(prompt_loc.first + buffer_loc) )
 
 bool Shell::getLine()
@@ -78,7 +58,7 @@ bool Shell::getLine()
     ut_term << TERM_CURSOR_COLUMN(1) TERM_CLEAR_LINE;
 
     // reprint prompt (move cursor to beginning of buffer)
-    ut_term << TERM_RESET << prompt << TERM_RESET;
+    ut_term << TERM_RESET << prompt() << TERM_RESET;
 
     size_t prompt_loc   = ut_term.getCursorPosition().first;
     size_t buffer_loc   = 0;
@@ -197,7 +177,7 @@ bool Shell::getLine()
 
 string Shell::runInteractiveHint(hint_type hint, cstrparam prompt)
 {
-    this->prompt = prompt.str();
+    setPromptString(prompt);
     this->hint = hint;
 
     getLine();

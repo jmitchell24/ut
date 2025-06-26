@@ -903,6 +903,8 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
 #undef ENABLE_IF_NOT_NULL_TERMINATED
 
     using strview  = basic_strview<char, std::char_traits<char>, false>;
+
+
     using cstrview = basic_strview<char, std::char_traits<char>, true>;
 
     using strparam  = strview;
