@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ut/options.hpp>
 #include <ut/algo.hpp>
 #include <ut/math.hpp>
 #include <ut/container.hpp>
@@ -13,6 +14,8 @@
 
 #define UT_NAME         "@PROJECT_NAME@"
 #define UT_VERSION      "@PROJECT_VERSION@"
+
+#define UT_CLOWN_MODE
 
 namespace ut
 { }

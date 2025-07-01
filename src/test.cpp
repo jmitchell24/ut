@@ -5,6 +5,7 @@
 #include <ut/test.hpp>
 #include <ut/term.hpp>
 using namespace ut;
+using namespace ut::test;
 
 //
 // std
@@ -13,57 +14,147 @@ using namespace ut;
 using namespace std;
 
 //
-// Tester -> Implementation
+// Suite -> Implementation
 //
 
-void Tester::add(TestCase const& tc)
+void Suite::printPretty(ostream& os) const
 {
-    m_testlist.push_back(tc);
-}
+    char const* indent = "  ";
 
-void Tester::require(TestCase const& tc, char const* expr)
-{
-    cout << TERM_RESET << TERM_FG_BRIGHT_RED << expr << TERM_RESET << endl;
-}
 
-void Tester::runTests()
-{
+    os << TERM_FG_BRIGHT_BLUE "UT" TERM_RESET " unit test results: \n";
 
-    for (size_t i = 0; i < m_testlist.size(); ++i)
+    if (tests.empty())
     {
-        auto&& it = m_testlist[i];
 
-        TestState ts;
-        it.fn(it, ts);
+        os << indent << TERM_DIM "no test results available" TERM_RESET;
+        return;
+    }
 
-        if (ts.passed())
+
+    for (auto&& test: tests)
+    {
+        os
+            <<
+            TERM_FG_BRIGHT_BLUE "TEST"
+            TERM_RESET " '"
+            TERM_FG_BRIGHT_YELLOW
+            << test.name
+            << TERM_RESET "': \n";
+
+        for (auto&& req: test.reqs)
         {
-            cout
-                << "line=" << it.line
-                << " name=" << it.name
-                << TERM_FG_BRIGHT_GREEN " passed" TERM_RESET
-                << endl;
+
         }
-        else
+
+        for (auto&& sec: test.secs)
         {
-            auto s = ut_printer(
-                "FAILED @ line %d: '%s'", ts.line(), ts.expr());
-            cout << s << endl;
+            os
+                << indent <<
+                TERM_FG_BRIGHT_BLUE "SECTION "
+                TERM_RESET " '"
+                TERM_FG_BRIGHT_YELLOW
+                << sec.name
+                << TERM_RESET "': \n";
 
-            cout
-                << "line=" << it.line
-                << "name=" << it.name
-                << TERM_FG_BRIGHT_RED "failed" TERM_RESET
-                << endl;
+            for (auto&& req: sec.reqs)
+            {
+                if (req.passed())
+                {
+                    os
+                        << indent << indent <<
+                        TERM_FG_BRIGHT_MAGENTA << setw(4) << setfill(' ') << req.line <<
+                        TERM_FG_BRIGHT_GREEN " PASSED"
+                        << TERM_RESET "\n";
+                }
 
+                if (req.failed())
+                {
+                    os
+                        << indent << indent <<
+                        TERM_FG_BRIGHT_MAGENTA << setw(4) << setfill(' ') << req.line <<
+                        TERM_FG_BRIGHT_RED " FAILED"
+                        TERM_RESET " '"
+                        TERM_FG_BRIGHT_YELLOW
+                        << req.expr
+                        << TERM_RESET << "'\n";
+                }
+
+                if (req.skipped())
+                {
+                    os
+                        << indent << indent <<
+                        TERM_FG_BRIGHT_YELLOW "SKIPPED"
+                        TERM_RESET " '"
+                        TERM_FG_BRIGHT_YELLOW
+                        << req.expr
+                        << TERM_RESET << "': \n";
+                }
+            }
         }
     }
+
+    return;
+}
+
+void Suite::printJunitXml(std::ostream& os) const
+{
+
 }
 
 
-Tester& Tester::instance()
+
+
+
+
+
+Suite::Stats Suite::getTestStats(const Test& test) const
 {
-    static Tester x;
-    return x;
+    Stats stats;
+
+    // Count test-level requirements
+    for (auto&& req : test.reqs)
+    {
+        stats.total++;
+        switch (req.state)
+        {
+            case Require::PASSED: stats.passed++; break;
+            case Require::FAILED: stats.failed++; break;
+            case Require::SKIPPED: stats.skipped++; break;
+        }
+    }
+
+    // Count section requirements
+    for (auto&& sec : test.secs)
+    {
+        for (auto&& req : sec.reqs)
+        {
+            stats.total++;
+            switch (req.state)
+            {
+                case Require::PASSED: stats.passed++; break;
+                case Require::FAILED: stats.failed++; break;
+                case Require::SKIPPED: stats.skipped++; break;
+            }
+        }
+    }
+
+    return stats;
+}
+
+Suite::Stats Suite::getSuiteStats() const
+{
+    Stats stats;
+
+    for (auto&& test : tests)
+    {
+        Stats testStats = getTestStats(test);
+        stats.total += testStats.total;
+        stats.passed += testStats.passed;
+        stats.failed += testStats.failed;
+        stats.skipped += testStats.skipped;
+    }
+
+    return stats;
 }
 
