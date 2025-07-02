@@ -92,16 +92,14 @@ namespace ut::test
     {
         int line=0;
         char const* name=nullptr;
+
+        secslist_type secs;
         reqslist_type reqs;
     };
 
-    struct Test
+    struct Test : Section
     {
-        int line=0;
         char const* file=nullptr;
-        char const* name=nullptr;
-        secslist_type secs;
-        reqslist_type reqs;
     };
 
     struct Suite
@@ -115,6 +113,15 @@ namespace ut::test
 
         void printPretty(std::ostream& os) const;
         void printJunitXml(std::ostream& os) const;
+
+    private:
+
+        void printSuite(std::ostream& os, Suite const& sut, std::string prefix, bool is_last) const;
+        void printTest(std::ostream& os, Test const& tst, std::string prefix, bool is_last) const;
+        void printSection(std::ostream& os, Section const& seq, std::string prefix, bool is_last) const;
+        void printRequire(std::ostream& os, Require const& req, std::string prefix, bool is_last) const;
+        void printRequireState(std::ostream& os, Require::State state) const;
+
     };
 
 
@@ -138,17 +145,13 @@ namespace impl
 
         void addRun(int line, char const* file, char const* name, runfunc_type fn)
         {
-            m_runlist.push_back
-            ({
-                Test
-                {
-                    .line=line,
-                    .file=file,
-                    .name=name,
-                    .secs={},
-                    .reqs={}
-                }, fn
-            });
+            Test t;
+            t.file = file;
+            t.line = line;
+            t.name = name;
+            t.secs = { };
+            t.reqs = { };
+            m_runlist.push_back({ t, fn });
         }
 
     private:
@@ -176,41 +179,50 @@ namespace impl
 
         void require(int line, char const* expr, bool pass)
         {
-            auto r = Require
-            {
-                .line=line,
-                .expr=expr,
-                .state=pass ? Require::PASSED : Require::FAILED
-            };
+            Require r;
+            r.line = line;
+            r.expr = expr;
+            r.state = pass ? Require::PASSED : Require::FAILED;
 
-            auto& reqs = m_idx_seq < 0 ? m_test.reqs : m_test.secs[m_idx_seq].reqs;
-            reqs.push_back(r);
+            auto& parent = getTopSec();
+            parent.reqs.push_back(r);
         }
 
         SectionScopeGuard section(int line, char const* name)
         {
-            auto s = Section
-            {
-                .line=line,
-                .name=name,
-                .reqs={}
-            };
+            Section s;
+            s.line = line;
+            s.name = name;
+            s.reqs = { };
 
             return SectionScopeGuard(s, *this);
         }
 
         void pushSection(Section const& s)
         {
-            m_test.secs.push_back(s);
-            m_idx_seq = m_test.secs.size()-1;
+            auto& parent = getTopSec();
+
+            m_indices.push_back(parent.secs.size());
+            parent.secs.push_back(s);
         }
 
         void popSection()
-        { --m_idx_seq; }
+        {
+            if (!m_indices.empty())
+                m_indices.pop_back();
+        }
 
     private:
-        int m_idx_seq=-1;
+        std::vector<int> m_indices;
         Test m_test;
+
+        Section& getTopSec()
+        {
+            Section* ptr = &m_test;
+            for (auto&& it: m_indices)
+                ptr = &ptr->secs[it];
+            return *ptr;
+        }
     };
 }
 

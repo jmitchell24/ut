@@ -2,6 +2,8 @@
 //
 // ut
 //
+#include "ut/test.hpp"
+
 #include <ut/test.hpp>
 #include <ut/term.hpp>
 using namespace ut;
@@ -19,82 +21,7 @@ using namespace std;
 
 void Suite::printPretty(ostream& os) const
 {
-    char const* indent = "  ";
-
-
-    os << TERM_FG_BRIGHT_BLUE "UT" TERM_RESET " unit test results: \n";
-
-    if (tests.empty())
-    {
-
-        os << indent << TERM_DIM "no test results available" TERM_RESET;
-        return;
-    }
-
-
-    for (auto&& test: tests)
-    {
-        os
-            <<
-            TERM_FG_BRIGHT_BLUE "TEST"
-            TERM_RESET " '"
-            TERM_FG_BRIGHT_YELLOW
-            << test.name
-            << TERM_RESET "': \n";
-
-        for (auto&& req: test.reqs)
-        {
-
-        }
-
-        for (auto&& sec: test.secs)
-        {
-            os
-                << indent <<
-                TERM_FG_BRIGHT_BLUE "SECTION "
-                TERM_RESET " '"
-                TERM_FG_BRIGHT_YELLOW
-                << sec.name
-                << TERM_RESET "': \n";
-
-            for (auto&& req: sec.reqs)
-            {
-                if (req.passed())
-                {
-                    os
-                        << indent << indent <<
-                        TERM_FG_BRIGHT_MAGENTA << setw(4) << setfill(' ') << req.line <<
-                        TERM_FG_BRIGHT_GREEN " PASSED"
-                        << TERM_RESET "\n";
-                }
-
-                if (req.failed())
-                {
-                    os
-                        << indent << indent <<
-                        TERM_FG_BRIGHT_MAGENTA << setw(4) << setfill(' ') << req.line <<
-                        TERM_FG_BRIGHT_RED " FAILED"
-                        TERM_RESET " '"
-                        TERM_FG_BRIGHT_YELLOW
-                        << req.expr
-                        << TERM_RESET << "'\n";
-                }
-
-                if (req.skipped())
-                {
-                    os
-                        << indent << indent <<
-                        TERM_FG_BRIGHT_YELLOW "SKIPPED"
-                        TERM_RESET " '"
-                        TERM_FG_BRIGHT_YELLOW
-                        << req.expr
-                        << TERM_RESET << "': \n";
-                }
-            }
-        }
-    }
-
-    return;
+    printSuite(os, *this, "", false);
 }
 
 void Suite::printJunitXml(std::ostream& os) const
@@ -157,4 +84,108 @@ Suite::Stats Suite::getSuiteStats() const
 
     return stats;
 }
+
+#define INDENT "    "
+
+void Suite::printSuite(ostream& os, Suite const& sut, string prefix, bool is_last) const
+{
+    os
+    << prefix
+    << TERM_FG_BLUE "SUITE " TERM_RESET
+    << "\n";
+
+    if (!sut.tests.empty())
+    {
+        size_t sz = sut.tests.size()-1;
+        for (size_t i = 0; i < sz; ++i)
+            printTest(os, sut.tests[i], prefix, false);
+        printTest(os, sut.tests[sz], prefix, true);
+    }
+
+}
+
+void Suite::printTest(ostream& os, Test const& tst, string prefix, bool is_last) const
+{
+    os
+    << prefix
+    << TERM_FG_BLUE "TEST" TERM_RESET
+    << " : "
+    << TERM_FG_BRIGHT_YELLOW << tst.name << TERM_RESET
+    << " : "
+    << TERM_FG_BRIGHT_CYAN << tst.file << TERM_RESET
+    << "\n";
+
+    if (!tst.reqs.empty())
+    {
+        size_t sz = tst.reqs.size()-1;
+        for (size_t i = 0; i < sz; ++i)
+            printRequire(os, tst.reqs[i], prefix + "  ", false);
+        printRequire(os, tst.reqs[sz], prefix + "  ", true);
+    }
+
+    if (!tst.secs.empty())
+    {
+        size_t sz = tst.secs.size()-1;
+        for (size_t i = 0; i < sz; ++i)
+            printSection(os, tst.secs[i], prefix + "  ", false);
+        printSection(os, tst.secs[sz], prefix + "  ", true);
+    }
+}
+
+void Suite::printSection(ostream& os, Section const& seq, string prefix, bool is_last) const
+{
+    os
+    << TERM_FG_BRIGHT_MAGENTA << setw(4) << seq.line << TERM_RESET " "
+    << prefix;
+
+    os
+    << TERM_FG_BLUE "SECTION" TERM_RESET
+    << " : "
+    << TERM_FG_BRIGHT_YELLOW << seq.name << TERM_RESET
+    << "\n";
+
+
+    if (!seq.reqs.empty())
+    {
+        size_t sz = seq.reqs.size()-1;
+        for (size_t i = 0; i < sz; ++i)
+            printRequire(os, seq.reqs[i], prefix + "  ", false);
+        printRequire(os, seq.reqs[sz], prefix + "  ", true);
+    }
+
+    if (!seq.secs.empty())
+    {
+        size_t sz = seq.secs.size()-1;
+        for (size_t i = 0; i < sz; ++i)
+            printSection(os, seq.secs[i], prefix + "  ", false);
+        printSection(os, seq.secs[sz], prefix + "  ", true);
+    }
+}
+
+void Suite::printRequire(ostream& os, Require const& req, string prefix, bool is_last) const
+{
+    os
+    << TERM_FG_BRIGHT_MAGENTA << setw(4) << req.line << TERM_RESET " "
+    << prefix;
+
+    printRequireState(os, req.state);
+
+    os
+    << " : "
+    << req.expr
+    << "\n";
+}
+
+void Suite::printRequireState(ostream& os, Require::State state) const
+{
+    switch (state)
+    {
+        case Require::FAILED: os << TERM_FG_BRIGHT_RED "FAILED" TERM_RESET; break;
+        case Require::PASSED: os << TERM_FG_BRIGHT_GREEN "PASSED" TERM_RESET; break;
+        case Require::SKIPPED: os << TERM_FG_BRIGHT_YELLOW "SKIPPED" TERM_RESET; break;
+        default:nopath_case(Require::State);
+    }
+}
+
+
 
