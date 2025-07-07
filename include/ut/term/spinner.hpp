@@ -26,7 +26,7 @@ namespace ut
     {
     public:
         using task_param = std::function<void(SpinnerRunner&)> const&;
-        using task_param_multi = std::function<void(SpinnerRunner&, size_t, size_t)>;
+        using task_param_multi = std::function<void(SpinnerRunner&, size_t)>;
 
         using runnerlist_type = std::vector<std::unique_ptr<SpinnerRunner>>;
 

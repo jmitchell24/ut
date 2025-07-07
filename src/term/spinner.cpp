@@ -35,39 +35,39 @@ using namespace std;
 
 void SpinnerRunner::spin(task_param task)
 {
-
     atomic_bool done = false;
-    m_frame = 0;
 
-    thread spin_thread([&]
+    thread task_thread([&]
     {
-        cout << endl << TERM_CURSOR_HIDE << flush;
-
-        while (!done)
-        {
-            cout
-                << TERM_CURSOR_COLUMN(0) TERM_CLEAR_LINE
-                << prefix()
-                << m_spinner.frames[m_frame]
-                << TERM_RESET " "
-                << suffix()
-                << TERM_RESET
-                << flush;
-
-            m_frame = (m_frame + 1) % m_spinner.frames.size();
-
-            timer::sleep(duration::milliseconds(m_spinner.interval));
-        }
-        // Clear the spinner character when done
-        cout << TERM_CURSOR_SHOW TERM_CURSOR_COLUMN(0) TERM_CLEAR_LINE << flush;
+        task(*this);
+        done = true;
     });
 
-    task(*this);
+    cout << flush;
+    ut_term.enable();
 
-    done = true;
+    ut_term << TERM_CURSOR_HIDE TERM_CURSOR_NEXT_LINE(1) TERM_CURSOR_SAVE;
 
-    if (spin_thread.joinable())
-        spin_thread.join();
+    {
+        while (!done)
+        {
+            ut_term << TERM_CURSOR_RESTORE;
+            advanceFrame();
+            if (ut_term.getAbortRequested())
+                break;
+            timer::sleep(duration::milliseconds(m_spinner.interval));
+        }
+
+        ut_term << TERM_CURSOR_RESTORE;
+        m_frame=0;
+        advanceFrame();
+    }
+
+    ut_term << TERM_CURSOR_SHOW TERM_RESET;
+    ut_term.disable();
+
+    if (task_thread.joinable())
+        task_thread.join();
 }
 
 void SpinnerRunner::advanceFrame()
@@ -101,7 +101,7 @@ void SpinnerRunner::spinMulti(runnerlist_type& runners, task_param_multi task)
 
         task_threads.emplace_back([&done, task, i, cnt, ptr]
         {
-            task(*ptr, i, cnt);
+            task(*ptr, i);
             ++done;
         });
     }
@@ -142,5 +142,6 @@ void SpinnerRunner::spinMulti(runnerlist_type& runners, task_param_multi task)
 
 
     for (auto&& it: task_threads)
-        it.join();
+        if (it.joinable())
+            it.join();
 }
