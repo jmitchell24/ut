@@ -53,16 +53,21 @@ namespace ut
 
     struct RawTermChar
     {
-        using var_type = std::variant<char, Key>;
+        using var_type = std::variant<
+            std::monostate,
+            char,
+            Key
+        >;
 
-        inline bool isChar() const { return data.index()==0; }
-        inline bool isKey() const { return data.index()==1; }
+        inline bool isEmpty() const { return data.index()==0; }
+        inline bool isChar() const { return data.index()==1; }
+        inline bool isKey() const { return data.index()==2; }
 
-        inline char asChar() const { check(isChar()); return std::get<0>(data); }
-        inline Key asKey() const { check(isKey()); return std::get<1>(data); }
+        inline char asChar() const { check(isChar()); return std::get<1>(data); }
+        inline Key asKey() const { check(isKey()); return std::get<2>(data); }
 
-        inline bool keyIf(Key k) const { check(isKey()); return asKey() == k; }
-        inline bool charIf(char c) const { check(isChar()); return asChar() == c; }
+        inline bool keyIf(Key k) const { return isKey() && asKey() == k; }
+        inline bool charIf(char c) const { return isChar() && asChar() == c; }
 
         var_type data;
     };
@@ -72,6 +77,13 @@ namespace ut
     public:
         inline bool enabled() const
         { return m_enabled; }
+
+
+        /// \brief  Poll for input, then read and check for a user abort request (Ctrl-C).
+        ///         Useful for long prints, when the only relevant user input is an abort.
+        /// \return True if user abort has been requested.
+        inline bool getAbortRequested()
+        { return pollc().keyIf(KEY_CTRL_C); }
 
         void enable();
         void disable();
@@ -90,6 +102,10 @@ namespace ut
         inline RawTerm& operator<< (char c) { return putc(c); }
 
         RawTermChar getc();
+        RawTermChar pollc();
+
+
+
         void sync();
 
         std::pair<int,int> getWindowSize();

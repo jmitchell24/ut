@@ -17,44 +17,7 @@ using namespace ut::tui;
 //
 #include <iostream>
 #include <iomanip>
-#include <cstdarg>
 using namespace std;
-
-// void draw_box(int width, int height, BoxChars box_chars = {})
-// {
-//     if (width < 2 || height < 2)
-//     {
-//         printf("Box dimensions must be at least 2x2\n");
-//         return;
-//     }
-//
-//     // Box drawing characters
-//
-//
-//     // Draw top border
-//     printf("%s", box_chars.tl);
-//     for (int i = 0; i < width - 2; i++)
-//     {
-//         printf("%s", box_chars.hz);
-//     }
-//     printf("%s\n", box_chars.tr);
-//
-//     // Draw middle rows
-//     for (int i = 0; i < height - 2; i++) {
-//         printf("%s", box_chars.vt);
-//         for (int j = 0; j < width - 2; j++) {
-//             printf(" ");
-//         }
-//         printf("%s\n", box_chars.vt);
-//     }
-//
-//     // Draw bottom border
-//     printf("%s", box_chars.bl);
-//     for (int i = 0; i < width - 2; i++) {
-//         printf("%s", box_chars.hz);
-//     }
-//     printf("%s\n", box_chars.br);
-// }
 
 void Table::setCell(size_t x, size_t y, std::string const& text, char const* styles)
 {

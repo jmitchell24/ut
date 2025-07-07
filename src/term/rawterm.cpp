@@ -22,6 +22,7 @@ using namespace std;
 //
 #include <unistd.h>
 #include <termio.h>
+#include <poll.h>
 
 #define check_raw_mode { check_msg(m_enabled, "raw mode should be enabled"); }
 
@@ -67,6 +68,20 @@ static char rawGetChar()
     if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
         rawErrorExit("read");
     return c;
+}
+
+static bool rawCharAvailable()
+{
+    pollfd pfd;
+    pfd.fd = STDIN_FILENO;
+    pfd.events = POLLIN;
+
+    int res = poll(&pfd, 1, 0);
+
+    if (res < 0)
+        rawErrorExit("poll");
+
+    return res != 0;
 }
 
 static void rawPuts(char const* s, size_t n)
@@ -222,6 +237,13 @@ struct EscScanner
             buf[sz-3] == c1;
     }
 };
+
+RawTermChar RawTerm::pollc()
+{
+    if (rawCharAvailable())
+        return getc();
+    return {};
+}
 
 RawTermChar RawTerm::getc()
 {

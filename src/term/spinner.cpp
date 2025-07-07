@@ -93,41 +93,41 @@ void SpinnerRunner::spinMulti(runnerlist_type& runners, task_param_multi task)
     vector<thread> task_threads;
     for (size_t i = 0; i < cnt; ++i)
     {
-        auto&& it = *runners[i];
+        auto&& ptr = runners[i].get();
 
-        it.m_frame=0;
-        if (auto it_delay = it.m_spinner.interval; it_delay < delay)
+        ptr->m_frame = static_cast<int>(i % ptr->m_spinner.frames.size());
+        if (auto it_delay = ptr->m_spinner.interval; it_delay < delay)
             delay = it_delay;
 
-        task_threads.emplace_back([&]
+        task_threads.emplace_back([&done, task, i, cnt, ptr]
         {
-            task(it, i, cnt);
+            task(*ptr, i, cnt);
             ++done;
         });
     }
 
+    cout << flush;
     ut_term.enable();
 
+    ut_term << TERM_CURSOR_HIDE TERM_CURSOR_NEXT_LINE(1) TERM_CURSOR_SAVE;
+
     {
-        ut_term.puts(TERM_CURSOR_HIDE TERM_CURSOR_SAVE);
-
-
-
         while (done < runners.size())
         {
-            ut_term.puts(TERM_CURSOR_RESTORE);
-
+            ut_term << TERM_CURSOR_RESTORE;
             for (size_t i = 0; i < runners.size(); ++i)
             {
                 auto&& it = *runners[i];
                 it.advanceFrame();
             }
 
+            if (ut_term.getAbortRequested())
+                break;
+
             timer::sleep(duration::milliseconds(delay));
         }
 
-        ut_term.puts(TERM_CURSOR_RESTORE);
-
+        ut_term << TERM_CURSOR_RESTORE;
         for (size_t i = 0; i < runners.size(); ++i)
         {
             auto&& it = *runners[i];
@@ -136,13 +136,10 @@ void SpinnerRunner::spinMulti(runnerlist_type& runners, task_param_multi task)
         }
     }
 
+    ut_term << TERM_CURSOR_SHOW TERM_RESET;
     ut_term.disable();
 
-    for (size_t i = 0; i < runners.size(); ++i)
-    {
-        auto&& it = *runners[i];
-        it.advanceFrame();
-    }
+
 
     for (auto&& it: task_threads)
         it.join();

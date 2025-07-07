@@ -2,7 +2,19 @@
 // Created by james on 07/07/25.
 //
 
-#ifndef PROGRESS_HPP
-#define PROGRESS_HPP
+//
+// ut
+//
+#include "ut/string.hpp"
 
-#endif //PROGRESS_HPP
+//
+// std
+//
+
+namespace ut
+{
+    class ProgressRunner
+    {
+
+    };
+}
