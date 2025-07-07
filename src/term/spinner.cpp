@@ -10,6 +10,7 @@
 #include <atomic>
 
 #include "ut/term/escapes.hpp"
+#include "ut/term/rawterm.hpp"
 #include "ut/time.hpp"
 using namespace ut;
 
@@ -22,8 +23,19 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
-void SpinnerRunner::spin(Spinner const& spinner, task_param task)
+//
+// Threadpool
+//
+
+
+
+//
+// SpinnerRunner Implementation
+//
+
+void SpinnerRunner::spin(task_param task)
 {
+
     atomic_bool done = false;
     m_frame = 0;
 
@@ -36,15 +48,15 @@ void SpinnerRunner::spin(Spinner const& spinner, task_param task)
             cout
                 << TERM_CURSOR_COLUMN(0) TERM_CLEAR_LINE
                 << prefix()
-                << spinner.frames[m_frame]
+                << m_spinner.frames[m_frame]
                 << TERM_RESET " "
                 << suffix()
                 << TERM_RESET
                 << flush;
 
-            m_frame = (m_frame + 1) % spinner.frames.size();
+            m_frame = (m_frame + 1) % m_spinner.frames.size();
 
-            timer::sleep(duration::milliseconds(spinner.interval));
+            timer::sleep(duration::milliseconds(m_spinner.interval));
         }
         // Clear the spinner character when done
         cout << TERM_CURSOR_SHOW TERM_CURSOR_COLUMN(0) TERM_CLEAR_LINE << flush;
@@ -56,4 +68,82 @@ void SpinnerRunner::spin(Spinner const& spinner, task_param task)
 
     if (spin_thread.joinable())
         spin_thread.join();
+}
+
+void SpinnerRunner::advanceFrame()
+{
+    ut_term
+        << TERM_CLEAR_LINE
+        << prefix()
+        << m_spinner.frames[m_frame]
+        << TERM_RESET " "
+        << suffix()
+        << TERM_RESET TERM_CURSOR_NEXT_LINE(1);
+
+    m_frame = (m_frame + 1) % m_spinner.frames.size();
+}
+
+void SpinnerRunner::spinMulti(runnerlist_type& runners, task_param_multi task)
+{
+    atomic_uint done = 0;
+
+    size_t cnt = runners.size();
+    size_t delay = 99999;
+
+    vector<thread> task_threads;
+    for (size_t i = 0; i < cnt; ++i)
+    {
+        auto&& it = *runners[i];
+
+        it.m_frame=0;
+        if (auto it_delay = it.m_spinner.interval; it_delay < delay)
+            delay = it_delay;
+
+        task_threads.emplace_back([&]
+        {
+            task(it, i, cnt);
+            ++done;
+        });
+    }
+
+    ut_term.enable();
+
+    {
+        ut_term.puts(TERM_CURSOR_HIDE TERM_CURSOR_SAVE);
+
+
+
+        while (done < runners.size())
+        {
+            ut_term.puts(TERM_CURSOR_RESTORE);
+
+            for (size_t i = 0; i < runners.size(); ++i)
+            {
+                auto&& it = *runners[i];
+                it.advanceFrame();
+            }
+
+            timer::sleep(duration::milliseconds(delay));
+        }
+
+        ut_term.puts(TERM_CURSOR_RESTORE);
+
+        for (size_t i = 0; i < runners.size(); ++i)
+        {
+            auto&& it = *runners[i];
+            it.m_frame=0;
+            it.advanceFrame();
+        }
+    }
+
+    ut_term.disable();
+
+    for (size_t i = 0; i < runners.size(); ++i)
+    {
+        auto&& it = *runners[i];
+        it.advanceFrame();
+    }
+
+    for (auto&& it: task_threads)
+        it.join();
 }

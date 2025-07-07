@@ -15,43 +15,46 @@ using namespace ut::tui;
 //
 // std
 //
+#include <iostream>
+#include <iomanip>
+#include <cstdarg>
 using namespace std;
 
-void draw_box(int width, int height, BoxChars box_chars = {})
-{
-    if (width < 2 || height < 2)
-    {
-        printf("Box dimensions must be at least 2x2\n");
-        return;
-    }
-
-    // Box drawing characters
-
-
-    // Draw top border
-    printf("%s", box_chars.tl);
-    for (int i = 0; i < width - 2; i++)
-    {
-        printf("%s", box_chars.hz);
-    }
-    printf("%s\n", box_chars.tr);
-
-    // Draw middle rows
-    for (int i = 0; i < height - 2; i++) {
-        printf("%s", box_chars.vt);
-        for (int j = 0; j < width - 2; j++) {
-            printf(" ");
-        }
-        printf("%s\n", box_chars.vt);
-    }
-
-    // Draw bottom border
-    printf("%s", box_chars.bl);
-    for (int i = 0; i < width - 2; i++) {
-        printf("%s", box_chars.hz);
-    }
-    printf("%s\n", box_chars.br);
-}
+// void draw_box(int width, int height, BoxChars box_chars = {})
+// {
+//     if (width < 2 || height < 2)
+//     {
+//         printf("Box dimensions must be at least 2x2\n");
+//         return;
+//     }
+//
+//     // Box drawing characters
+//
+//
+//     // Draw top border
+//     printf("%s", box_chars.tl);
+//     for (int i = 0; i < width - 2; i++)
+//     {
+//         printf("%s", box_chars.hz);
+//     }
+//     printf("%s\n", box_chars.tr);
+//
+//     // Draw middle rows
+//     for (int i = 0; i < height - 2; i++) {
+//         printf("%s", box_chars.vt);
+//         for (int j = 0; j < width - 2; j++) {
+//             printf(" ");
+//         }
+//         printf("%s\n", box_chars.vt);
+//     }
+//
+//     // Draw bottom border
+//     printf("%s", box_chars.bl);
+//     for (int i = 0; i < width - 2; i++) {
+//         printf("%s", box_chars.hz);
+//     }
+//     printf("%s\n", box_chars.br);
+// }
 
 void Table::setCell(size_t x, size_t y, std::string const& text, char const* styles)
 {
@@ -89,29 +92,33 @@ size_t Table::getCellWidthsSum() const
 }
 
 
-void Table::print() const
+void Table::print(ostream& os) const
 {
     // draw title
 
     if (!title.empty() )
     {
-
         auto sz = m_cell_widths.empty() ? 0 : getCellWidthsSum() + m_cell_widths.size()*3 - 1;
-        puts(box_chars.tl);
-        for (size_t i = 0; i < sz; ++i)
-            puts(box_chars.hz);
-        puts(box_chars.tr);
-        puts("\n");
 
-        puts(box_chars.vt);
-        printf(" %*s", 1-(int)sz, title.c_str());
-        puts(box_chars.vt);
-        printf("\n");
-        puts(box_chars.vtr);
+        os << box_chars.tl;
+
+        for (size_t i = 0; i < sz; ++i)
+            os << box_chars.hz;
+
+        os
+            << box_chars.tr
+            << "\n"
+            << box_chars.vt
+            << left
+            << setw(sz)
+            << title
+            << box_chars.vt
+            << "\n"
+            << box_chars.vtr;
     }
     else
     {
-        puts(box_chars.tl);
+        os << box_chars.tl;
     }
 
     // draw top border
@@ -119,41 +126,55 @@ void Table::print() const
     for (auto&& it: m_cell_widths)
     {
         for (size_t i = 0; i < it; ++i)
-            puts(box_chars.hz);
-        puts(box_chars.hz);
-        puts(box_chars.hz);
-        puts(box_chars.hzd);
+            os << (box_chars.hz);
+
+        os
+            << box_chars.hz
+            << box_chars.hz
+            << box_chars.hzd;
     }
-    printf("\b%s\n", title.empty() ? box_chars.tr : box_chars.vtl);
+
+    os
+        << "\b"
+        << ( title.empty() ? box_chars.tr : box_chars.vtl )
+        << "\n";
 
 
     // draw cells
 
     for (size_t j = 0; j < m_height; ++j)
     {
-        puts(box_chars.vt);
+        os << box_chars.vt;
         for (size_t i = 0; i < m_width; ++i)
         {
             auto&& it = cell(i, j);
-            printf(" %s%*s %s" TERM_RESET,
-                it.styles.c_str(),
-                static_cast<int>(m_cell_widths[i]),
-                it.text.c_str(),
-                box_chars.vt);
+
+            os
+                << " " TERM_RESET
+                << it.styles
+                << left
+                << setw(m_cell_widths[i])
+                << it.text
+                << " " TERM_RESET
+                << box_chars.vt;
         }
-        puts("\n");
+        os << "\n";
     }
 
     // draw bottom border
 
-    puts(box_chars.bl);
+    os << (box_chars.bl);
     for (auto&& it: m_cell_widths)
     {
         for (size_t i = 0; i < it; ++i)
-            puts(box_chars.hz);
-        puts(box_chars.hz);
-        puts(box_chars.hz);
-        puts(box_chars.hzu);
+            os << (box_chars.hz);
+        os << (box_chars.hz);
+        os << (box_chars.hz);
+        os << (box_chars.hzu);
     }
-    printf("\b%s\n", box_chars.br);
+
+    os
+        << "\b"
+        << box_chars.br
+        << "\n";
 }

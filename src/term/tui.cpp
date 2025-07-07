@@ -9,6 +9,7 @@ using namespace ut;
 //
 // std
 //
+#include <iostream>
 using namespace std;
 
 
@@ -42,7 +43,7 @@ void ut::tui::endTable()
 {
     if (g_table_flag)
     {
-        g_table.print();
+        g_table.print(cout);
         g_table_flag = false;
     }
 }

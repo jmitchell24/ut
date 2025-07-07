@@ -13,6 +13,7 @@
 //
 // std
 //
+#include <ostream>
 #include <string>
 
 namespace ut::tui
@@ -60,7 +61,7 @@ namespace ut::tui
         void setCell(size_t x, size_t y, std::string const& text, char const* styles = TERM_RESET);
         TableCell const& cell(size_t x, size_t y) const;
 
-        void print() const;
+        void print(std::ostream& os) const;
 
     private:
         size_t                  m_width=0;
@@ -69,5 +70,7 @@ namespace ut::tui
         std::vector<size_t>     m_cell_widths;
 
         size_t getCellWidthsSum() const;
+
+
     };
 }

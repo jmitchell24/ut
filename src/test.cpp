@@ -6,6 +6,8 @@
 
 #include <ut/test.hpp>
 #include <ut/term.hpp>
+#include <ut/term/spinner.hpp>
+
 using namespace ut;
 using namespace ut::test;
 
@@ -14,6 +16,34 @@ using namespace ut::test;
 //
 #include <iostream>
 using namespace std;
+
+//
+// runAllTests -> Implementation
+//
+
+Suite ut::test::runAllTests()
+{
+    auto&& reg = impl::Registry::instance();
+    auto runlist = reg.runlist();
+
+    cout << "\nRunning All tests...\n";
+
+
+    Suite s;
+    for (auto&& it: runlist)
+    {
+        spin([&](auto&& task)
+        {
+            task.suffix((string)"running test: " + it.test.name);
+
+            auto rc = impl::RunContext(it.test);
+            it.fn(rc);
+            s.tests.push_back(rc.test());
+        });
+    }
+
+    return s;
+}
 
 //
 // Suite -> Implementation
