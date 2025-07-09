@@ -13,6 +13,7 @@
 //
 // std
 //
+#include <atomic>
 #include <sstream>
 #include <string>
 #include <functional>
@@ -26,7 +27,7 @@ namespace ut
     {
     public:
         using task_param = std::function<void(SpinnerRunner&)> const&;
-        using task_param_multi = std::function<void(SpinnerRunner&, size_t)>;
+        using task_param_multi = std::function<void(SpinnerRunner&, size_t)> const&;
 
         using runnerlist_type = std::vector<std::unique_ptr<SpinnerRunner>>;
 
@@ -44,6 +45,8 @@ namespace ut
         SpinnerRunner(SpinnerRunner&&)=delete;
         SpinnerRunner& operator=(SpinnerRunner&&)=delete;
 
+        inline bool abortRequested() const
+        { std::scoped_lock sl(m_mutex); return m_abort_flag; }
 
         inline std::string prefix() const
         { std::scoped_lock sl(m_mutex); return m_prefix; }
@@ -69,14 +72,16 @@ namespace ut
         void spin(task_param task);
 
         /// \brief Executes task on new threads, for each specified runner, and prints to the main thread.
-        static void spinMulti(runnerlist_type& runners, task_param_multi task);
+        static void spinParallel(runnerlist_type& runners, task_param_multi task);
 
     private:
         Spinner m_spinner;
         std::string m_prefix;
         std::string m_suffix;
+
         int m_frame=0;
 
+        std::atomic_bool m_abort_flag=false;
         mutable std::mutex m_mutex;
 
         void advanceFrame();
@@ -96,7 +101,7 @@ namespace ut
         sr.spin(task);
     }
 
-    inline static void spinMulti(size_t n, SpinnerRunner::task_param_multi task)
+    inline static void spinParallel(size_t n, SpinnerRunner::task_param_multi task)
     {
         if (n < 1)
             return;
@@ -104,10 +109,10 @@ namespace ut
         SpinnerRunner::runnerlist_type runners;
         for (size_t i = 0; i < n; ++i)
             runners.emplace_back(new SpinnerRunner());
-        SpinnerRunner::spinMulti(runners, task);
+        SpinnerRunner::spinParallel(runners, task);
     }
 
-    inline static void spinMulti(size_t n, Spinner const& s, SpinnerRunner::task_param_multi task)
+    inline static void spinParallel(size_t n, Spinner const& s, SpinnerRunner::task_param_multi task)
     {
         if (n < 1)
             return;
@@ -115,6 +120,6 @@ namespace ut
         SpinnerRunner::runnerlist_type runners;
         for (size_t i = 0; i < n; ++i)
             runners.emplace_back(new SpinnerRunner(s));
-        SpinnerRunner::spinMulti(runners, task);
+        SpinnerRunner::spinParallel(runners, task);
     }
 }

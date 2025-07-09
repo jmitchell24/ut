@@ -1,11 +1,7 @@
 //
-// Created by james on 16/05/25.
+// Created by james on 08/07/25.
 //
-
-//
-// ut
-//
-#include "ut/term/spinner.hpp"
+#include "ut/term/progress.hpp"
 
 #include <atomic>
 
@@ -20,14 +16,10 @@ using namespace ut;
 #include <iostream>
 using namespace std;
 
-
-//
-// SpinnerRunner Implementation
-//
-
-void SpinnerRunner::spin(task_param task)
+void ProgressRunner::progress(task_param task)
 {
     atomic_bool done = false;
+    size_t delay = 50;
 
     thread task_thread([&]
     {
@@ -44,14 +36,13 @@ void SpinnerRunner::spin(task_param task)
         while (!done)
         {
             ut_term << TERM_CURSOR_RESTORE;
-            advanceFrame();
-            timer::sleep(duration::milliseconds(m_spinner.interval));
+            print();
+            timer::sleep(duration::milliseconds(delay));
             m_abort_flag = ut_term.getAbortRequested();
         }
 
         ut_term << TERM_CURSOR_RESTORE;
-        m_frame=0;
-        advanceFrame();
+        print();
     }
 
     ut_term << TERM_CURSOR_SHOW TERM_RESET;
@@ -61,33 +52,17 @@ void SpinnerRunner::spin(task_param task)
         task_thread.join();
 }
 
-void SpinnerRunner::advanceFrame()
-{
-    ut_term
-        << TERM_CLEAR_LINE
-        << prefix()
-        << m_spinner.frames[m_frame]
-        << TERM_RESET " "
-        << suffix()
-        << TERM_RESET TERM_CURSOR_NEXT_LINE(1);
-
-    m_frame = (m_frame + 1) % m_spinner.frames.size();
-}
-
-void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task)
+void ProgressRunner::progressParallel(runnerlist_type& runners, task_param_multi task)
 {
     atomic_uint done = 0;
-    size_t delay = 99999;
+
+    size_t delay = 50;
+
 
     vector<thread> task_threads;
     for (size_t i = 0; i < runners.size(); ++i)
     {
         auto&& ptr = runners[i].get();
-
-        ptr->m_frame = static_cast<int>(i % ptr->m_spinner.frames.size());
-        if (auto it_delay = ptr->m_spinner.interval; it_delay < delay)
-            delay = it_delay;
-
         task_threads.emplace_back([&done, task, i, ptr]
         {
             task(*ptr, i);
@@ -102,6 +77,7 @@ void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task
 
     {
         bool abort_requested = false;
+
         while (done < runners.size())
         {
 
@@ -110,7 +86,7 @@ void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task
             for (size_t i = 0; i < runners.size(); ++i)
             {
                 auto&& it = *runners[i];
-                it.advanceFrame();
+                it.print();
                 it.m_abort_flag = abort_requested;
             }
 
@@ -120,19 +96,69 @@ void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task
 
         ut_term << TERM_CURSOR_RESTORE;
         for (size_t i = 0; i < runners.size(); ++i)
-        {
-            auto&& it = *runners[i];
-            it.m_frame=0;
-            it.advanceFrame();
-        }
+            runners[i]->print();
     }
 
     ut_term << TERM_CURSOR_SHOW TERM_RESET;
     ut_term.disable();
 
-
-
     for (auto&& it: task_threads)
         if (it.joinable())
             it.join();
+}
+
+double rangeHelper(double old_min, double old_max, double new_min, double new_max, double value)
+{
+    double old_range = old_max - old_min;
+    double new_range = new_max - new_min;
+    return ((value - old_min) / old_range) * new_range + new_min;
+}
+
+void ProgressRunner::print()
+{
+
+    size_t bar_size = 50;
+    size_t bar_size_on;
+    size_t bar_size_off;
+
+
+    int pv = progressValue();
+    bar_size_on = rangeHelper(1, 100, 0, bar_size, pv);
+    bar_size_off = bar_size - bar_size_on;
+
+
+    ostringstream oss;
+
+    oss << m_bar.start << TERM_RESET;
+
+    if (bar_size_on == 0)
+    {
+        for (size_t i = 0; i < bar_size; ++i) oss << m_bar.off;
+    }
+    else if (bar_size_on == bar_size)
+    {
+        for (size_t i = 0; i < bar_size; ++i) oss << m_bar.on;
+    }
+    else
+    {
+        for (size_t i = 0; i < bar_size_on-1; ++i) oss << m_bar.on;
+        oss << TERM_RESET << m_bar.tip << TERM_RESET;
+        for (size_t i = 0; i < bar_size_off; ++i) oss << m_bar.off;
+    }
+
+    oss << TERM_RESET << m_bar.end;
+
+    string text = oss.str();
+    string pre = prefix();
+    string suf = suffix();
+
+    ut_term
+        << TERM_CLEAR_LINE
+        << pre
+        << TERM_RESET " "
+        << text
+        << TERM_RESET " "
+        << suf
+        << TERM_RESET TERM_CURSOR_NEXT_LINE(1);
+
 }
