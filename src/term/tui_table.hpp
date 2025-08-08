@@ -16,23 +16,21 @@
 #include <ostream>
 #include <string>
 
-namespace ut::tui
+namespace ut
 {
-    enum TableFlags { TBL_NONE };
-
     struct BoxChars
     {
-        char const* tl = "┌";
-        char const* tr = "┐";
-        char const* bl = "└";
-        char const* br = "┘";
-        char const* hz = "─";
-        char const* vt = "│";
-
-        char const* hzd = "┬";
-        char const* hzu = "┴";
-        char const* vtl = "┤";
-        char const* vtr = "├";
+        std::string tl = "┌";  // top left
+        std::string tr = "┐";  // top right
+        std::string bl = "└";  // bottom left
+        std::string br = "┘";  // bottom right
+        std::string hz = "─";  // horizontal
+        std::string vt = "│";  // vertical
+        std::string hzd = "┬"; // horizontal down (T-junction)
+        std::string hzu = "┴"; // horizontal up (inverted T)
+        std::string vtl = "┤"; // vertical left (right T)
+        std::string vtr = "├"; // vertical right (left T)
+        std::string cross = "┼"; // cross junction
     };
 
     struct TableCell
@@ -44,33 +42,45 @@ namespace ut::tui
     class Table
     {
     public:
-        using cells_type = std::vector<TableCell>;
-
         std::string title;
         BoxChars box_chars;
-
-        Table(std::string const& title="", size_t width=0)
-            : title{title}, m_width{width}, m_height{}, m_cells{}
-        {}
 
         inline size_t width() const { return m_width; }
         inline size_t height() const { return m_height; }
 
+        TableCell& getCell(size_t x, size_t y);
+        std::string& getHeader(size_t x);
 
+        /// Sets cell content with optional styling
+        void setCell(size_t x, size_t y, std::string const& text, std::string const& styles = TERM_RESET);
 
-        void setCell(size_t x, size_t y, std::string const& text, char const* styles = TERM_RESET);
-        TableCell const& cell(size_t x, size_t y) const;
+        /// Sets header content
+        void setHeader(size_t x, std::string const& text);
 
+        /// Prints the table to output stream
         void print(std::ostream& os) const;
 
     private:
-        size_t                  m_width=0;
-        size_t                  m_height=0;
-        std::vector<TableCell>  m_cells;
-        std::vector<size_t>     m_cell_widths;
+        using clist_type = std::vector<TableCell>;
+        using wlist_type = std::vector<size_t>;
+        using hlist_type = std::vector<std::string>;
 
+        size_t m_width = 0;
+        size_t m_height = 0;
+        clist_type m_cells;
+        wlist_type m_widths;
+        hlist_type m_headers;
+
+        /// Gets the index for a cell in the flat vector
+        size_t getCellIndex(size_t x, size_t y) const;
+
+        /// Calculates and updates column widths
+        void updateColumnWidths();
+
+        /// Gets sum of all column widths
         size_t getCellWidthsSum() const;
 
-
+        /// Expands internal storage to accommodate given coordinates
+        void expandTo(size_t width, size_t height);
     };
 }

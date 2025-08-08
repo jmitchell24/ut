@@ -4,10 +4,13 @@
 
 #pragma once
 
-namespace ut::tui
+#include "ut/string.hpp"
+namespace ut
 {
-    bool beginTable(char const* name, int column_count, int table_flags);
+    bool beginTable(strparam title = ""_sv);
     void endTable();
-    void tableHeader(char const* name, int index);
+
+    void tableHeader(int x, strparam text);
     void tableCell(int x, int y, char const* fmt, ...);
+    void tableStyle(char const* style);
 }

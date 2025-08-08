@@ -63,15 +63,30 @@ void SpinnerRunner::spin(task_param task)
 
 void SpinnerRunner::advanceFrame()
 {
-    ut_term
+    int frame = m_frame;
+
+    if (frame < 0)
+    {
+        ut_term
+            << TERM_CLEAR_LINE
+            << prefix()
+            << m_spinner.frames[0]
+            << TERM_RESET " "
+            << suffix()
+            << TERM_RESET TERM_CURSOR_NEXT_LINE(1);
+    }
+    else
+    {
+        ut_term
         << TERM_CLEAR_LINE
         << prefix()
-        << m_spinner.frames[m_frame]
+        << m_spinner.frames[frame]
         << TERM_RESET " "
         << suffix()
         << TERM_RESET TERM_CURSOR_NEXT_LINE(1);
 
-    m_frame = (m_frame + 1) % m_spinner.frames.size();
+        m_frame = (frame + 1) % m_spinner.frames.size();
+    }
 }
 
 void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task)
@@ -91,6 +106,7 @@ void SpinnerRunner::spinParallel(runnerlist_type& runners, task_param_multi task
         task_threads.emplace_back([&done, task, i, ptr]
         {
             task(*ptr, i);
+            ptr->m_frame = -1;
             ++done;
         });
     }

@@ -30,17 +30,19 @@ Suite ut::test::runAllTests()
 
 
     Suite s;
-    for (auto&& it: runlist)
-    {
-        spin([&](auto&& task)
-        {
-            task.suffix((string)"running test: " + it.test.name);
 
-            auto rc = impl::RunContext(it.test);
-            it.fn(rc);
-            s.tests.push_back(rc.test());
-        });
-    }
+    spinParallel(runlist.size(), [&](SpinnerRunner& sr, size_t i)
+    {
+        auto&& it = runlist[i];
+        sr.prefix("running...");
+        sr.suffix(it.test.name);
+
+        auto rc = impl::RunContext(it.test);
+        it.fn(rc);
+        s.tests.push_back(rc.test());
+
+        sr.prefix("done      ");
+    });
 
     return s;
 }

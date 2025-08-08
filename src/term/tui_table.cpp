@@ -10,7 +10,7 @@
 using namespace ut;
 
 #include "tui_table.hpp"
-using namespace ut::tui;
+using namespace ut;
 
 //
 // std
@@ -19,125 +19,212 @@ using namespace ut::tui;
 #include <iomanip>
 using namespace std;
 
-void Table::setCell(size_t x, size_t y, std::string const& text, char const* styles)
+
+
+
+size_t Table::getCellIndex(size_t x, size_t y) const
 {
-    check_msg(x < m_width, "x is too big");
-
-    if (y >= m_height)
-    {
-        m_height = y+1;
-        m_cells.resize(m_width * m_height);
-        m_cell_widths.resize(m_width);
-    }
-
-    auto&& it = m_cells[y * m_width + x];
-    it.text = text;
-    it.styles = styles;
-
-    if (auto&& sz = m_cell_widths[x]; sz < it.text.size())
-        sz = it.text.size();
+    return y * m_width + x;
 }
 
-TableCell const& Table::cell(size_t x, size_t y) const
+void Table::expandTo(size_t width, size_t height)
 {
-    check_msg(x < m_width, "x is too big");
-    check_msg(y < m_height, "y is too big");
+    if (width <= m_width && height <= m_height)
+        return;
 
-    return m_cells[y * m_width + x];
+    size_t new_width = max(width, m_width);
+    size_t new_height = max(height, m_height);
+
+    // Create new cell vector
+    clist_type new_cells(new_width * new_height);
+
+    // Copy existing cells
+    for (size_t y = 0; y < m_height; ++y)
+    {
+        for (size_t x = 0; x < m_width; ++x)
+        {
+            size_t old_idx = y * m_width + x;
+            size_t new_idx = y * new_width + x;
+            new_cells[new_idx] = m_cells[old_idx];
+        }
+    }
+
+    // Update dimensions and cells
+    m_width = new_width;
+    m_height = new_height;
+    m_cells = move(new_cells);
+
+    // Expand widths and headers vectors
+    m_widths.resize(m_width, 0);
+    m_headers.resize(m_width, "");
+}
+
+TableCell& Table::getCell(size_t x, size_t y)
+{
+    expandTo(x + 1, y + 1);
+    return m_cells[getCellIndex(x, y)];
+}
+
+string& Table::getHeader(size_t x)
+{
+    if (x >= m_headers.size())
+    {
+        m_headers.resize(x + 1, "");
+        m_widths.resize(x + 1, 0);
+        m_width = max(m_width, x + 1);
+    }
+    return m_headers[x];
+}
+
+void Table::setCell(size_t x, size_t y, string const& text, string const& styles)
+{
+    auto& cell = getCell(x, y);
+    cell.text = text;
+    cell.styles = styles;
+    updateColumnWidths();
+}
+
+void Table::setHeader(size_t x, string const& text)
+{
+    getHeader(x) = text;
+    updateColumnWidths();
+}
+
+void Table::updateColumnWidths()
+{
+    // Reset widths
+    fill(m_widths.begin(), m_widths.end(), 0);
+
+    // Check header widths
+    for (size_t x = 0; x < m_headers.size(); ++x)
+    {
+        if (x < m_widths.size())
+            m_widths[x] = max(m_widths[x], m_headers[x].length());
+    }
+
+    // Check cell widths
+    for (size_t y = 0; y < m_height; ++y)
+    {
+        for (size_t x = 0; x < m_width; ++x)
+        {
+            const auto& cell = m_cells[getCellIndex(x, y)];
+            m_widths[x] = max(m_widths[x], cell.text.length());
+        }
+    }
 }
 
 size_t Table::getCellWidthsSum() const
 {
-    size_t acc=0;
-    for (auto&& it: m_cell_widths)
-        acc+=it;
+    size_t acc = 0;
+    for (const auto& width : m_widths)
+        acc += width;
     return acc;
 }
 
-
 void Table::print(ostream& os) const
 {
-    // draw title
-
-    if (!title.empty() )
+    if (m_width == 0 || (m_height == 0 && m_headers.empty()))
     {
-        auto sz = m_cell_widths.empty() ? 0 : getCellWidthsSum() + m_cell_widths.size()*3 - 1;
+        // Empty table
+        os << box_chars.tl << box_chars.tr << "\n"
+           << box_chars.bl << box_chars.br << "\n";
+        return;
+    }
 
+    // Calculate total table width (content + borders + padding)
+    size_t content_width = getCellWidthsSum() + (m_width > 0 ? (m_width - 1) * 3 + 4 : 0);
+
+    // Draw title if present
+    if (!title.empty())
+    {
         os << box_chars.tl;
-
-        for (size_t i = 0; i < sz; ++i)
+        for (size_t i = 0; i < content_width - 2; ++i)
             os << box_chars.hz;
+        os << box_chars.tr << "\n";
 
-        os
-            << box_chars.tr
-            << "\n"
-            << box_chars.vt
-            << left
-            << setw(sz)
-            << title
-            << box_chars.vt
-            << "\n"
-            << box_chars.vtr;
+        os << box_chars.vt << " " << left << setw(content_width - 4) << title
+           << " " << box_chars.vt << "\n";
+
+        // Title separator
+        os << box_chars.vtr;
+        for (size_t i = 0; i < m_width; ++i)
+        {
+            for (size_t j = 0; j < m_widths[i] + 2; ++j)
+                os << box_chars.hz;
+            if (i < m_width - 1)
+                os << box_chars.hzd;
+        }
+        os << box_chars.vtl << "\n";
     }
     else
     {
+        // Top border
         os << box_chars.tl;
+        for (size_t i = 0; i < m_width; ++i)
+        {
+            for (size_t j = 0; j < m_widths[i] + 2; ++j)
+                os << box_chars.hz;
+            if (i < m_width - 1)
+                os << box_chars.hzd;
+        }
+        os << box_chars.tr << "\n";
     }
 
-    // draw top border
-
-    for (auto&& it: m_cell_widths)
+    // Draw headers if present
+    bool has_headers = false;
+    for (const auto& header : m_headers)
     {
-        for (size_t i = 0; i < it; ++i)
-            os << (box_chars.hz);
-
-        os
-            << box_chars.hz
-            << box_chars.hz
-            << box_chars.hzd;
+        if (!header.empty())
+        {
+            has_headers = true;
+            break;
+        }
     }
 
-    os
-        << "\b"
-        << ( title.empty() ? box_chars.tr : box_chars.vtl )
-        << "\n";
-
-
-    // draw cells
-
-    for (size_t j = 0; j < m_height; ++j)
+    if (has_headers)
     {
         os << box_chars.vt;
         for (size_t i = 0; i < m_width; ++i)
         {
-            auto&& it = cell(i, j);
+            os << " " << left << setw(m_widths[i])
+               << (i < m_headers.size() ? m_headers[i] : "")
+               << " " << box_chars.vt;
+        }
+        os << "\n";
 
-            os
-                << " " TERM_RESET
-                << it.styles
-                << left
-                << setw(m_cell_widths[i])
-                << it.text
-                << " " TERM_RESET
-                << box_chars.vt;
+        // Header separator
+        os << box_chars.vtr;
+        for (size_t i = 0; i < m_width; ++i)
+        {
+            for (size_t j = 0; j < m_widths[i] + 2; ++j)
+                os << box_chars.hz;
+            if (i < m_width - 1)
+                os << box_chars.cross;
+        }
+        os << box_chars.vtl << "\n";
+    }
+
+    // Draw data rows
+    for (size_t y = 0; y < m_height; ++y)
+    {
+        os << box_chars.vt;
+        for (size_t x = 0; x < m_width; ++x)
+        {
+            const auto& cell = m_cells[getCellIndex(x, y)];
+            os << " " << cell.styles << left << setw(m_widths[x])
+               << cell.text << TERM_RESET << " " << box_chars.vt;
         }
         os << "\n";
     }
 
-    // draw bottom border
-
-    os << (box_chars.bl);
-    for (auto&& it: m_cell_widths)
+    // Bottom border
+    os << box_chars.bl;
+    for (size_t i = 0; i < m_width; ++i)
     {
-        for (size_t i = 0; i < it; ++i)
-            os << (box_chars.hz);
-        os << (box_chars.hz);
-        os << (box_chars.hz);
-        os << (box_chars.hzu);
+        for (size_t j = 0; j < m_widths[i] + 2; ++j)
+            os << box_chars.hz;
+        if (i < m_width - 1)
+            os << box_chars.hzu;
     }
-
-    os
-        << "\b"
-        << box_chars.br
-        << "\n";
+    os << box_chars.br << "\n";
 }

@@ -3,6 +3,7 @@
 //
 // ut
 //
+#include <ut/random.hpp>
 #include <ut/time.hpp>
 
 //
@@ -227,7 +228,7 @@ namespace impl
             auto& parent = getTopSec();
             parent.reqs.push_back(r);
 
-            timer::sleep(50_milliseconds);
+            timer::sleep(duration::milliseconds(ut_rng.nexti(100)));
         }
 
         SectionScopeGuard section(int line, char const* name, int /* sec_tick */)

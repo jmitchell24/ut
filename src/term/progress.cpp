@@ -114,6 +114,11 @@ double rangeHelper(double old_min, double old_max, double new_min, double new_ma
     return ((value - old_min) / old_range) * new_range + new_min;
 }
 
+void foo(int bar)
+{
+
+}
+
 void ProgressRunner::print()
 {
 

@@ -66,6 +66,7 @@ namespace ut
         inline void spinner(Spinner const& spinner)
         { std::scoped_lock sl(m_mutex); m_spinner = spinner; m_frame=0; }
 
+
         /// \brief Executes task on calling thread, prints spinner on new thread.
         /// \param spinner  The spinner to use.
         /// \param task     The task to execute while spinning.
@@ -79,8 +80,7 @@ namespace ut
         std::string m_prefix;
         std::string m_suffix;
 
-        int m_frame=0;
-
+        std::atomic_int m_frame=0;
         std::atomic_bool m_abort_flag=false;
         mutable std::mutex m_mutex;
 
