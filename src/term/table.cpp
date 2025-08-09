@@ -316,8 +316,8 @@ TableBuilder& TableBuilder::content(strparam text, strparam styles)
     return *this;
 }
 
-TableBuilder& TableBuilder::cell(int x, int y) { m_x = x; m_y = y; return *this; }
-TableBuilder& TableBuilder::column(int x) { m_x = x; return *this; }
-TableBuilder& TableBuilder::row(int y) { m_y = y; return *this; }
-TableBuilder& TableBuilder::nextColumn(){ ++m_x; return *this; }
-TableBuilder& TableBuilder::nextRow() { m_x=-1; ++m_y; return *this; }
+TableBuilder& TableBuilder::cellIndex(int x, int y) { m_x = x; m_y = y; return *this; }
+TableBuilder& TableBuilder::columnIndex(int x) { m_x = x; return *this; }
+TableBuilder& TableBuilder::rowIndex(int y) { m_y = y; return *this; }
+TableBuilder& TableBuilder::column(){ ++m_x; return *this; }
+TableBuilder& TableBuilder::row() { m_x=-1; ++m_y; return *this; }

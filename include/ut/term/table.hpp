@@ -94,11 +94,13 @@ namespace ut
         TableBuilder& title(strparam text, strparam styles = TERM_RESET);
         TableBuilder& header(int x, strparam text, strparam style = TERM_RESET);
 
-        TableBuilder& cell(int x, int y);
-        TableBuilder& column(int x);
-        TableBuilder& row(int y);
-        TableBuilder& nextColumn();
-        TableBuilder& nextRow();
+        TableBuilder& cellIndex(int x, int y);
+        TableBuilder& rowIndex(int y);
+        TableBuilder& columnIndex(int x);
+        TableBuilder& row();
+        TableBuilder& column();
+        inline TableBuilder& rowColumn()
+        { return row().column(); }
 
         TableBuilder& content(strparam text, strparam styles = TERM_RESET);
 
