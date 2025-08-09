@@ -297,24 +297,27 @@ void TableBuilder::reset()
     m_y=-1;
 }
 
-void TableBuilder::title(strparam text, strparam styles)
+TableBuilder& TableBuilder::title(strparam text, strparam styles)
 {
     m_table.title = {text.str(),styles.str()};
+    return *this;
 }
 
-void TableBuilder::header(int x, strparam text, strparam styles)
+TableBuilder& TableBuilder::header(int x, strparam text, strparam styles)
 {
     m_table.setHeader(x, {text.str(), styles.str()});
+    return *this;
 }
 
-void TableBuilder::content(strparam text, strparam styles)
+TableBuilder& TableBuilder::content(strparam text, strparam styles)
 {
-    if (m_x < 0 || m_y < 0) return;
+    if (m_x < 0 || m_y < 0) return *this;
     m_table.setCell(m_x, m_y, {text.str(), styles.str()});
+    return *this;
 }
 
-void TableBuilder::cell(int x, int y) { m_x = x; m_y = y; }
-void TableBuilder::column(int x) { m_x = x; }
-void TableBuilder::row(int y) { m_y = y;  }
-void TableBuilder::nextColumn(){ ++m_x; }
-void TableBuilder::nextRow() { m_x=-1; ++m_y; }
+TableBuilder& TableBuilder::cell(int x, int y) { m_x = x; m_y = y; return *this; }
+TableBuilder& TableBuilder::column(int x) { m_x = x; return *this; }
+TableBuilder& TableBuilder::row(int y) { m_y = y; return *this; }
+TableBuilder& TableBuilder::nextColumn(){ ++m_x; return *this; }
+TableBuilder& TableBuilder::nextRow() { m_x=-1; ++m_y; return *this; }

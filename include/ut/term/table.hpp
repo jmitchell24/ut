@@ -91,23 +91,23 @@ namespace ut
     public:
         void reset();
 
-        void title(strparam text, strparam styles = TERM_RESET);
-        void header(int x, strparam text, strparam style = TERM_RESET);
+        TableBuilder& title(strparam text, strparam styles = TERM_RESET);
+        TableBuilder& header(int x, strparam text, strparam style = TERM_RESET);
 
-        void cell(int x, int y);
-        void column(int x);
-        void row(int y);
-        void nextColumn();
-        void nextRow();
+        TableBuilder& cell(int x, int y);
+        TableBuilder& column(int x);
+        TableBuilder& row(int y);
+        TableBuilder& nextColumn();
+        TableBuilder& nextRow();
 
-        void content(strparam text, strparam styles = TERM_RESET);
+        TableBuilder& content(strparam text, strparam styles = TERM_RESET);
 
-        inline void label(strparam text) { content(text, TERM_FG_BRIGHT_CYAN); }
-        inline void text(strparam text) { content(text, TERM_FG_BRIGHT_YELLOW); }
-        inline void integer(int i) { content(std::to_string(i), TERM_FG_BRIGHT_MAGENTA); }
-        inline void decimal(double d) { content(std::to_string(d), TERM_FG_BRIGHT_MAGENTA); }
-        inline void boolean(bool b, strparam t="true", strparam f="false")
-        { content(b ? t : f, b ? TERM_FG_BRIGHT_GREEN : TERM_FG_BRIGHT_RED); }
+        inline TableBuilder& label(strparam text) { return content(text, TERM_FG_BRIGHT_CYAN); }
+        inline TableBuilder& text(strparam text) { return content(text, TERM_FG_BRIGHT_YELLOW); }
+        inline TableBuilder& integer(int i) { return content(std::to_string(i), TERM_FG_BRIGHT_MAGENTA); }
+        inline TableBuilder& decimal(double d) { return content(std::to_string(d), TERM_FG_BRIGHT_MAGENTA); }
+        inline TableBuilder& boolean(bool b, strparam t="true", strparam f="false")
+        { return content(b ? t : f, b ? TERM_FG_BRIGHT_GREEN : TERM_FG_BRIGHT_RED); }
 
         void print(std::ostream& os, BoxChars const& box_chars = box_chars::regular) const
         { m_table.print(os, box_chars); }
