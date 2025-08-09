@@ -16,14 +16,7 @@ using namespace std;
 #include "ut/term/table.hpp"
 using namespace ut;
 
-string sanitize(strparam s)
-{
-    string res;
-    for (auto&& it: s)
-        if (isprint(it))
-            res += it;
-    return res;
-}
+
 
 //
 // Table -> Implementation
@@ -290,6 +283,15 @@ void Table::print(ostream& os, BoxChars const& box_chars) const
 // TableBuilder -> Implementation
 //
 
+string sanitize(strparam s)
+{
+    string res;
+    for (auto&& it: s)
+        if (isprint(it))
+            res += it;
+    return res;
+}
+
 void TableBuilder::reset()
 {
     m_table.reset();
@@ -299,20 +301,20 @@ void TableBuilder::reset()
 
 TableBuilder& TableBuilder::title(strparam text, strparam styles)
 {
-    m_table.title = {text.str(),styles.str()};
+    m_table.title = {sanitize(text),styles.str()};
     return *this;
 }
 
 TableBuilder& TableBuilder::header(int x, strparam text, strparam styles)
 {
-    m_table.setHeader(x, {text.str(), styles.str()});
+    m_table.setHeader(x, {sanitize(text), styles.str()});
     return *this;
 }
 
 TableBuilder& TableBuilder::content(strparam text, strparam styles)
 {
     if (m_x < 0 || m_y < 0) return *this;
-    m_table.setCell(m_x, m_y, {text.str(), styles.str()});
+    m_table.setCell(m_x, m_y, {sanitize(text), styles.str()});
     return *this;
 }
 
