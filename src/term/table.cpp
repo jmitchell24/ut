@@ -13,8 +13,7 @@ using namespace ut;
 #include <iomanip>
 using namespace std;
 
-#include "ut/term/tui.hpp"
-#include "tui_table.hpp"
+#include "ut/term/table.hpp"
 using namespace ut;
 
 string sanitize(strparam s)
