@@ -17,66 +17,99 @@ using namespace std;
 using namespace ut;
 
 Table g_table;
-bool g_table_flag=false;
-std::string g_table_cell_style = TERM_RESET;
 
-string sanitize(char const* s, size_t n)
+struct TableState
+{
+    std::ostream* os = nullptr;
+    bool enabled=false;
+    int x=-1;
+    int y=-1;
+    std::string style;
+} g_state;
+
+#define _enable_guard if (!g_state.enabled) { return; }
+
+string sanitize(strparam s)
 {
     string res;
-    for (size_t i = 0; i < n; ++i)
-        if (isprint(s[i]))
-            res += s[i];
+    for (auto&& it: s)
+        if (isprint(it))
+            res += it;
     return res;
 }
 
-bool ut::beginTable(strparam name)
+bool table::begin()
 {
-    if (g_table_flag)
+    if (g_state.enabled)
         return false;
 
     g_table = Table();
-    g_table.title = name.str();
-    g_table_flag = true;
+    g_state = TableState();
+    g_state.enabled = true;
     return true;
 }
 
-void ut::endTable()
+
+
+void table::end()
 {
-    if (g_table_flag)
-    {
-        g_table.print(cout);
-        g_table_flag = false;
-    }
+    _enable_guard
+
+    g_table.print(cout);
+    g_state.enabled=false;
 }
 
-void ut::tableHeader(int x, strparam text)
+void table::title(strparam title)
 {
-    if (g_table_flag)
-    {
-        g_table.setHeader(x, text.str());
-    }
+    _enable_guard
+
+    g_table.title = title.str();
 }
 
-void ut::tableCell(int x, int y, char const* fmt, ...)
+void table::header(strparam text, int x)
 {
-    if (g_table_flag)
-    {
-        array<char, 1000> buffer{};
+    _enable_guard
 
-        va_list args;
-        va_start(args, fmt);
-
-        int res = vsnprintf(buffer.data(), buffer.size(), fmt, args);
-        check_msg(res >= 0 && res < static_cast<int>(buffer.size()), "format failed, this is YOUR fault!");
-
-        va_end(args);
-
-        g_table.setCell(x, y, sanitize(buffer.data(), res), g_table_cell_style);
-        g_table_cell_style = TERM_RESET;
-    }
+    g_table.setHeader(x, text.str());
 }
 
-void ut::tableStyle(char const* style)
+void table::cell(strparam text)
 {
-    g_table_cell_style = style;
+    _enable_guard
+
+    if (g_state.x < 0 || g_state.y < 0) return;
+
+    g_table.setCell(g_state.x, g_state.y, sanitize(text), g_state.style);
+}
+
+
+
+void table::style(char const* style)
+{
+    _enable_guard
+
+    g_state.style = style;
+}
+
+void table::setCur(int x, int y)
+{
+    _enable_guard
+
+    if (x >= 0) g_state.x = x;
+    if (y >= 0) g_state.y = y;
+}
+
+void table::nextColumn()
+{
+    _enable_guard
+
+    ++g_state.x;
+}
+
+void table::nextRow()
+{
+    _enable_guard
+
+    ++g_state.y;
+    g_state.x = -1;
 }
