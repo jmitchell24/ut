@@ -111,6 +111,18 @@ namespace ut
         inline TableBuilder& boolean(bool b, strparam t="true", strparam f="false")
         { return content(b ? t : f, b ? TERM_FG_BRIGHT_GREEN : TERM_FG_BRIGHT_RED); }
 
+        inline TableBuilder& propText(strparam label, strparam text)
+        { return row().column().label(label).column().text(text); }
+
+        inline TableBuilder& propInteger(strparam label, int i)
+        { return row().column().label(label).column().integer(i); }
+
+        inline TableBuilder& propDecimal(strparam label, double d)
+        { return row().column().label(label).column().decimal(d); }
+
+        inline TableBuilder& propBoolean(strparam label, bool b, strparam t="true", strparam f="false")
+        { return row().column().label(label).column().boolean(b, t, f); }
+
         void print(std::ostream& os, BoxChars const& box_chars = box_chars::regular) const
         { m_table.print(os, box_chars); }
 
