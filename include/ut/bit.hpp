@@ -68,6 +68,16 @@ namespace ut
 
     inline constexpr b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
     inline constexpr b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
+    inline constexpr b64 make64(b32 lo, b32 hi) { return b64((b32(lo))|((b64(b32(hi)))<<32)); }
+
+    inline constexpr b32 make32(b8 b0, b8 b1, b8 b2, b8 b3)
+    { return b32(b8(b0)) | (b32(b8(b1)) << 8) | (b32(b8(b2)) << 16) | (b32(b8(b3)) << 24); }
+
+    inline constexpr b64 make64(b8 b0, b8 b1, b8 b2, b8 b3, b8 b4, b8 b5, b8 b6, b8 b7)
+    {
+        return b64(b8(b0)) | (b64(b8(b1)) << 8)  | (b64(b8(b2)) << 16) | (b64(b8(b3)) << 24) |
+               (b64(b8(b4)) << 32) | (b64(b8(b5)) << 40) | (b64(b8(b6)) << 48) | (b64(b8(b7)) << 56);
+    }
 
     inline constexpr b8  fold8 (b16 x) { return lo8(x) ^ hi8(x); }
     inline constexpr b16 fold16(b32 x) { return lo16(x) ^ hi16(x); }
