@@ -41,10 +41,49 @@ namespace ut
     using b32 = std::uint32_t;
     using b64 = std::uint64_t;
 
-    inline constexpr b8 u32_byte0(b32 x) { return (x >> (0 * 8)) & 0xFF; }
-    inline constexpr b8 u32_byte1(b32 x) { return (x >> (1 * 8)) & 0xFF; }
-    inline constexpr b8 u32_byte2(b32 x) { return (x >> (2 * 8)) & 0xFF; }
-    inline constexpr b8 u32_byte3(b32 x) { return (x >> (3 * 8)) & 0xFF; }
+    using byte_t = b8;
+    using word_t = b16;
+    using dword_t = b32;
+    using qword_t = b64;
+
+    inline constexpr b8 byteNybl0(b8 x) { return (x >> (0 * 4)) & 0x0F; }
+    inline constexpr b8 byteNybl1(b8 x) { return (x >> (1 * 4)) & 0x0F; }
+
+    inline constexpr b8 wordByte0(b16 x) { return (x >> (0 * 8)) & 0xFF; }
+    inline constexpr b8 wordByte1(b16 x) { return (x >> (1 * 8)) & 0xFF; }
+
+    inline constexpr b8 dwordByte0(b32 x) { return (x >> (0 * 8)) & 0xFF; }
+    inline constexpr b8 dwordByte1(b32 x) { return (x >> (1 * 8)) & 0xFF; }
+    inline constexpr b8 dwordByte2(b32 x) { return (x >> (2 * 8)) & 0xFF; }
+    inline constexpr b8 dwordByte3(b32 x) { return (x >> (3 * 8)) & 0xFF; }
+
+    inline constexpr b8 qwordByte0(b64 x) { return (x >> (0 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte1(b64 x) { return (x >> (1 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte2(b64 x) { return (x >> (2 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte3(b64 x) { return (x >> (3 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte4(b64 x) { return (x >> (4 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte5(b64 x) { return (x >> (5 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte6(b64 x) { return (x >> (6 * 8)) & 0xFF; }
+    inline constexpr b8 qwordByte7(b64 x) { return (x >> (7 * 8)) & 0xFF; }
+
+    inline constexpr b16 dwordWord0(b32 x) { return (x >> (0 * 16)) & 0xFFFF; }
+    inline constexpr b16 dwordWord1(b32 x) { return (x >> (1 * 16)) & 0xFFFF; }
+
+    inline constexpr b16 qwordWord0(b64 x) { return (x >> (0 * 16)) & 0xFFFF; }
+    inline constexpr b16 qwordWord1(b64 x) { return (x >> (1 * 16)) & 0xFFFF; }
+    inline constexpr b16 qwordWord2(b64 x) { return (x >> (2 * 16)) & 0xFFFF; }
+    inline constexpr b16 qwordWord3(b64 x) { return (x >> (3 * 16)) & 0xFFFF; }
+
+    inline constexpr b32 qwordDword0(b64 x) { return (x >> (0 * 32)) & 0xFFFFFFFF; }
+    inline constexpr b32 qwordDword1(b64 x) { return (x >> (1 * 32)) & 0xFFFFFFFF; }
+
+    inline constexpr b8 byte(b8 n0, b8 n1) { return (n0 & 0x0F) | ((n1 & 0x0F) << 4); }
+    inline constexpr b16 word(b8 b0, b8 b1) { return b0 | (b16(b1) << 8); }
+    inline constexpr b32 dword(b8 b0, b8 b1, b8 b2, b8 b3) { return b0 | (b32(b1) << 8) | (b32(b2) << 16) | (b32(b3) << 24); }
+    inline constexpr b64 qword(b8 b0, b8 b1, b8 b2, b8 b3, b8 b4, b8 b5, b8 b6, b8 b7) { return b0 | (b64(b1) << 8) | (b64(b2) << 16) | (b64(b3) << 24) | (b64(b4) << 32) | (b64(b5) << 40) | (b64(b6) << 48) | (b64(b7) << 56); }
+    inline constexpr b32 dword(b16 w0, b16 w1) { return w0 | (b32(w1) << 16); }
+    inline constexpr b64 qword(b16 w0, b16 w1, b16 w2, b16 w3) { return w0 | (b64(w1) << 16) | (b64(w2) << 32) | (b64(w3) << 48); }
+    inline constexpr b64 qword(b32 d0, b32 d1) { return d0 | (b64(d1) << 32); }
 
     enum Endianness  { ENDIAN_BIG, ENDIAN_LITTLE };
 
@@ -66,22 +105,22 @@ namespace ut
     inline constexpr b16 lo32(b64 x) { return x & 0xffffffff;         }
     inline constexpr b16 hi32(b64 x) { return (x >> 32) & 0xffffffff; }
 
-    inline constexpr b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
-    inline constexpr b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
-    inline constexpr b64 make64(b32 lo, b32 hi) { return b64((b32(lo))|((b64(b32(hi)))<<32)); }
+    // inline constexpr b16 make16(b8  lo, b8  hi) { return b16((b8 (lo))|((b16(b8 (hi)))<<8 )); }
+    // inline constexpr b32 make32(b16 lo, b16 hi) { return b32((b16(lo))|((b32(b16(hi)))<<16)); }
+    // inline constexpr b64 make64(b32 lo, b32 hi) { return b64((b32(lo))|((b64(b32(hi)))<<32)); }
+    //
+    // inline constexpr b32 make32(b8 b0, b8 b1, b8 b2, b8 b3)
+    // { return b32(b8(b0)) | (b32(b8(b1)) << 8) | (b32(b8(b2)) << 16) | (b32(b8(b3)) << 24); }
+    //
+    // inline constexpr b64 make64(b8 b0, b8 b1, b8 b2, b8 b3, b8 b4, b8 b5, b8 b6, b8 b7)
+    // {
+    //     return b64(b8(b0)) | (b64(b8(b1)) << 8)  | (b64(b8(b2)) << 16) | (b64(b8(b3)) << 24) |
+    //            (b64(b8(b4)) << 32) | (b64(b8(b5)) << 40) | (b64(b8(b6)) << 48) | (b64(b8(b7)) << 56);
+    // }
 
-    inline constexpr b32 make32(b8 b0, b8 b1, b8 b2, b8 b3)
-    { return b32(b8(b0)) | (b32(b8(b1)) << 8) | (b32(b8(b2)) << 16) | (b32(b8(b3)) << 24); }
-
-    inline constexpr b64 make64(b8 b0, b8 b1, b8 b2, b8 b3, b8 b4, b8 b5, b8 b6, b8 b7)
-    {
-        return b64(b8(b0)) | (b64(b8(b1)) << 8)  | (b64(b8(b2)) << 16) | (b64(b8(b3)) << 24) |
-               (b64(b8(b4)) << 32) | (b64(b8(b5)) << 40) | (b64(b8(b6)) << 48) | (b64(b8(b7)) << 56);
-    }
-
-    inline constexpr b8  fold8 (b16 x) { return lo8(x) ^ hi8(x); }
-    inline constexpr b16 fold16(b32 x) { return lo16(x) ^ hi16(x); }
-    inline constexpr b32 fold32(b64 x) { return lo32(x) ^ hi32(x); }
+    // inline constexpr b8  fold8 (b16 x) { return lo8(x) ^ hi8(x); }
+    // inline constexpr b16 fold16(b32 x) { return lo16(x) ^ hi16(x); }
+    // inline constexpr b32 fold32(b64 x) { return lo32(x) ^ hi32(x); }
 
 namespace bit
 {
