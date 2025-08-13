@@ -480,6 +480,9 @@ namespace ut
         [[nodiscard]] inline hsluv  toHSLUV()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
         [[nodiscard]] inline hsluv  toHSLUV(b8 a) const { return withA(a).toHSLUV(); }
 
+        [[nodiscard]] std::string toTrueColorFgTermString() const;
+        [[nodiscard]] std::string toTrueColorBgTermString() const;
+
         M_DECL_PURE color inv()    const { return color(255-r,255-g,255-b,255-a); }
         M_DECL_PURE color invRGB() const { return color(255-r,255-g,255-b, a); }
 

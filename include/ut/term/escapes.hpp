@@ -2,6 +2,8 @@
 // Created by james on 4/19/25.
 //
 
+#pragma once
+
 // ESC character and common sequence beginnings
 #define ESC                     "\033"  // ASCII escape character
 #define CSI                     ESC "[" // Control Sequence Introducer
@@ -138,7 +140,16 @@
 #define TERM_INFO              TERM_FG_CYAN      // Informational messages
 #define TERM_HIGHLIGHT         TERM_FG_MAGENTA   // Highlighted text
 #define TERM_NEWLINE           "\r\n"
-#pragma once
+
+//
+// ut
+//
+
+#include "ut/color.hpp"
+
+//
+// std
+//
 
 #include <ostream>
 #include <sstream>
@@ -146,8 +157,22 @@
 namespace ut::esc
 {
     inline static std::ostream& reset(std::ostream& os) { return os << TERM_RESET; }
-
     inline static std::ostream& rendl(std::ostream& os) { return os << TERM_RESET << std::endl; }
+
+    struct TrueColorFg{ color c; };
+    inline static TrueColorFg trueColorFg(color const& c) { return TrueColorFg{c}; }
+    inline static std::ostream& operator<< (std::ostream& os, TrueColorFg const& tc)
+    { os << tc.c.toTrueColorFgTermString(); return os; }
+
+    struct TrueColorBg{ color c; };
+    inline static TrueColorBg trueColorBg(color const& c) { return TrueColorBg{c}; }
+    inline static std::ostream& operator<< (std::ostream& os, TrueColorBg const& tc)
+    { os << tc.c.toTrueColorBgTermString(); return os; }
+
+    struct TrueColor{ color fg, bg; };
+    inline static TrueColor trueColor(color const& fg, color const& bg) { return TrueColor{fg, bg}; }
+    inline static std::ostream& operator<< (std::ostream& os, TrueColor const& tc)
+    { os << tc.fg.toTrueColorFgTermString() << tc.bg.toTrueColorBgTermString(); return os; }
 
 #define DECL_COLOR(_x, _y, _z) \
 inline static std::ostream& _x(std::ostream& os) { return os << _y; } \
@@ -172,6 +197,18 @@ inline static std::ostream& _x##Bg(std::ostream& os) { return os << _z; }
     DECL_COLOR(brightCyan,      TERM_FG_BRIGHT_CYAN,    TERM_BG_BRIGHT_CYAN)
     DECL_COLOR(brightWhite,     TERM_FG_BRIGHT_WHITE,   TERM_BG_BRIGHT_WHITE)
 #undef DECL_COLOR
+
+    //
+    // True Color
+    //
+namespace tc
+{
+#define TRUE_COLORS(_x, _y) \
+    inline static std::ostream& _x(std::ostream& os) { return os << ut::esc::trueColorFg(ut::colors::_x); } \
+    inline static std::ostream& _x##Bg(std::ostream& os) { return os << ut::esc::trueColorBg(ut::colors::_x); }
+UT_EXPAND_COLORS(TRUE_COLORS)
+#undef TRUE_COLORS
+}
 
 #define DECL_ESC_INT(_name, _suffix) \
     inline static std::string _name(unsigned arg) \
