@@ -23,13 +23,7 @@ using namespace std;
 Shell::Shell()
 {}
 
-Shell& Shell::instance()
-{
-    static Shell x;
-    return x;
-}
-
-void Shell::putHint(strparam s)
+void Shell::putHint(strparam s) const
 {
     if (hint != nullptr)
     {
@@ -52,6 +46,8 @@ void Shell::putHint(strparam s)
 
 bool Shell::getLine()
 {
+    check(!ut_term.enabled());
+
     ut_term.enable();
 
     // reset cursor, clear line

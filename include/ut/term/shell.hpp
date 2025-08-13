@@ -62,12 +62,9 @@ namespace ut
 
         std::string runInteractiveHint(hint_type hint, cstrparam prompt);
 
-
-        static Shell& instance();
-
     private:
         std::string m_line;
 
-        void putHint(strparam s);
+        void putHint(strparam s) const;
     };
 }
