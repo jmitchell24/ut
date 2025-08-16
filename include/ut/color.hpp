@@ -430,6 +430,7 @@ namespace ut
 
             }
 
+
             template <size_t Count>
             [[nodiscard]] inline std::array<hsluv, Count> gradient(hsluv const& c) const
             {
