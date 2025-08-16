@@ -95,12 +95,7 @@ bool color::tryParseRGBA(char const* s, color& c) { return try_parse(s, c.r, c.g
 color color::parseARGB(char const* s) { color c; try_parse(s, c.a, c.r, c.g, c.b); return c; }
 bool color::tryParseARGB(char const* s, color& c) { return try_parse(s, c.a, c.r, c.g, c.b); }
 
-string rgbToEscString(int r, int g, int b)
-{
-    return "\033[38;2;" + to_string(r) + ";" + to_string(g) + ";" + to_string(b) + "m";
-}
-
-string color::toTrueColorFgTermString() const
+string color::toFgEscCode() const
 {
     return
         "\033[38;2;"
@@ -110,9 +105,11 @@ string color::toTrueColorFgTermString() const
         + ";"
         + std::to_string(b)
         + "m";
+
+
 }
 
-string color::toTrueColorBgTermString() const
+string color::toBgEscCode() const
 {
     return
         "\033[48;2;"

@@ -18,8 +18,6 @@
 //
 #include <functional>
 
-#define ut_shell ( ut::Shell::instance() )
-
 namespace ut
 {
     class Shell

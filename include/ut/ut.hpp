@@ -13,7 +13,7 @@
 #include <ut/check.hpp>
 
 #define UT_NAME         "ut"
-#define UT_VERSION      "25.8.10"
+#define UT_VERSION      "25.8.13"
 
 #define UT_CLOWN_MODE
 

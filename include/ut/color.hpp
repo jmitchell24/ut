@@ -430,10 +430,36 @@ namespace ut
 
             }
 
+            template <size_t Count>
+            [[nodiscard]] inline std::array<hsluv, Count> gradient(hsluv const& c) const
+            {
+                static_assert(Count > 1);
+
+                std::array<hsluv, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                {
+                    real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
+                    tmp[i] = gradient1(*this, c, t);
+                }
+
+                return tmp;
+            }
+
             [[nodiscard]] inline vec4   toVec4  () const { return { h,s,l,a }; }
             [[nodiscard]] inline vec3   toVec3  () const { return { h,s,l }; }
             [[nodiscard]] inline color  toColor () const { return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
             [[nodiscard]] inline normal toNormal() const { return HSLUVtoNORMAL(*this); }
+
+            [[nodiscard]] inline static hsluv gradient1(hsluv const& c1, hsluv const& c2, real_t x)
+            {
+                return
+                {
+                    c1.h + (c2.h - c1.h) * x,
+                    c1.s + (c2.s - c1.s) * x,
+                    c1.l + (c2.l - c1.l) * x,
+                    c1.a + (c2.a - c1.a) * x
+                };
+            }
         };
 
         using pack_type = b8[4];
@@ -480,8 +506,11 @@ namespace ut
         [[nodiscard]] inline hsluv  toHSLUV()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
         [[nodiscard]] inline hsluv  toHSLUV(b8 a) const { return withA(a).toHSLUV(); }
 
-        [[nodiscard]] std::string toTrueColorFgTermString() const;
-        [[nodiscard]] std::string toTrueColorBgTermString() const;
+        /// \brief      Create the background ANSI escape sequence for this color.
+        /// \return     A string of the escape sequence.
+        [[nodiscard]] std::string toFgEscCode() const;
+
+        [[nodiscard]] std::string toBgEscCode() const;
 
         M_DECL_PURE color inv()    const { return color(255-r,255-g,255-b,255-a); }
         M_DECL_PURE color invRGB() const { return color(255-r,255-g,255-b, a); }

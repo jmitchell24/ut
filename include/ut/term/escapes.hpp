@@ -162,17 +162,17 @@ namespace ut::esc
     struct TrueColorFg{ color c; };
     inline static TrueColorFg trueColorFg(color const& c) { return TrueColorFg{c}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColorFg const& tc)
-    { os << tc.c.toTrueColorFgTermString(); return os; }
+    { return os << tc.c.toFgEscCode(); }
 
     struct TrueColorBg{ color c; };
     inline static TrueColorBg trueColorBg(color const& c) { return TrueColorBg{c}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColorBg const& tc)
-    { os << tc.c.toTrueColorBgTermString(); return os; }
+    { return os << tc.c.toFgEscCode(); }
 
     struct TrueColor{ color fg, bg; };
     inline static TrueColor trueColor(color const& fg, color const& bg) { return TrueColor{fg, bg}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColor const& tc)
-    { os << tc.fg.toTrueColorFgTermString() << tc.bg.toTrueColorBgTermString(); return os; }
+    { return os << tc.fg.toFgEscCode() << tc.bg.toBgEscCode(); }
 
 #define DECL_COLOR(_x, _y, _z) \
 inline static std::ostream& _x(std::ostream& os) { return os << _y; } \
