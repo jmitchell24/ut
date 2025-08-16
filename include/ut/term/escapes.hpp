@@ -161,16 +161,25 @@ namespace ut::esc
 
     struct TrueColorFg{ color c; };
     inline static TrueColorFg trueColorFg(color const& c) { return TrueColorFg{c}; }
+    inline static TrueColorFg trueColorFg(color::hsv const& c) { return TrueColorFg{c.toColor()}; }
+    inline static TrueColorFg trueColorFg(color::hsluv const& c) { return TrueColorFg{c.toColor()}; }
+    inline static TrueColorFg trueColorFg(color::normal const& c) { return TrueColorFg{c.toColor()}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColorFg const& tc)
     { return os << tc.c.toFgEscCode(); }
 
     struct TrueColorBg{ color c; };
     inline static TrueColorBg trueColorBg(color const& c) { return TrueColorBg{c}; }
+    inline static TrueColorBg trueColorBg(color::hsv const& c) { return TrueColorBg{c.toColor()}; }
+    inline static TrueColorBg trueColorBg(color::hsluv const& c) { return TrueColorBg{c.toColor()}; }
+    inline static TrueColorBg trueColorBg(color::normal const& c) { return TrueColorBg{c.toColor()}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColorBg const& tc)
     { return os << tc.c.toFgEscCode(); }
 
     struct TrueColor{ color fg, bg; };
     inline static TrueColor trueColor(color const& fg, color const& bg) { return TrueColor{fg, bg}; }
+    inline static TrueColor trueColor(color::hsv const& fg, color::hsv const& bg) { return TrueColor{fg.toColor(), bg.toColor()}; }
+    inline static TrueColor trueColor(color::hsluv const& fg, color::hsluv const& bg) { return TrueColor{fg.toColor(), bg.toColor()}; }
+    inline static TrueColor trueColor(color::normal const& fg, color::normal const& bg) { return TrueColor{fg.toColor(), bg.toColor()}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColor const& tc)
     { return os << tc.fg.toFgEscCode() << tc.bg.toBgEscCode(); }
 
