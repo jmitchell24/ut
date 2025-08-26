@@ -182,6 +182,137 @@ namespace ut
         struct normal;
         struct hsv;
         struct hsluv;
+        struct oklch;
+
+        /// \brief https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+        ///
+        struct oklch
+        {
+            /// \brief Perceived lightness [ 0, 1 ]
+            real_t l;
+
+            /// \brief Chroma, gray to most saturated color [ 0, 1 ]
+            real_t c;
+
+            /// \brief Hue angle [ 0, 360 ]
+            real_t h;
+
+            /// \brief Opacity [ 0, 1 ]
+            real_t a;
+
+            inline constexpr oklch()
+                : l{ 0 }, c{ 0 }, h{ 0 }, a{ 0 }
+            {}
+
+            inline constexpr oklch(real_t l, real_t c, real_t h, real_t a = 1)
+                : l{ l }, c{ c }, h{ h }, a{ a }
+            { }
+
+            inline explicit oklch(vec3 const& v, real_t a = 1)
+                : oklch(v.x, v.y, v.z, a)
+            {}
+
+            inline explicit oklch(color const& c)
+                : oklch(RGBtoOKLCH(c))
+            {}
+
+            oklch(oklch const&)=default;
+            oklch(oklch&&) noexcept =default;
+
+            oklch& operator=(oklch const&)=default;
+            oklch& operator=(oklch&&) noexcept =default;
+
+            [[nodiscard]] inline bool clamped() const
+            {
+                return !(
+                    NCLAMPED(l, 0,1) ||
+                    NCLAMPED(c, 0,1) ||
+                    NCLAMPED(h, 0,360) ||
+                    NCLAMPED(a, 0,1) );
+            }
+
+            inline void clamp()
+            {
+                l = CLAMP(l, 0,1);
+                c = CLAMP(c, 0,1);
+                h = CLAMP(h, 0,360);
+                a = CLAMP(a, 0,1);
+            }
+
+            [[nodiscard]] inline oklch withL(real_t x) const { x = CLAMP(x, 0, 1);   return {x, c, h, a}; }
+            [[nodiscard]] inline oklch withC(real_t x) const { x = CLAMP(x, 0, 1);   return {l, x, h, a}; }
+            [[nodiscard]] inline oklch withH(real_t x) const { x = CLAMP(x, 0, 360); return {l, c, x, a}; }
+            [[nodiscard]] inline oklch withA(real_t x) const { x = CLAMP(x, 0, 1);   return {l, c, h, x}; }
+
+            [[nodiscard]] inline oklch opaque() const { return { l, c, h, 1.0f }; }
+
+            inline void rotate(real_t x)
+            { h = std::fmod(h + (x < 0 ? 360 + x : x), 360); }
+
+            template <size_t Count>
+            [[nodiscard]] inline std::array<oklch, Count> swatch() const
+            {
+                static_assert(Count > 0);
+
+                auto step = 100.0f / Count;
+
+                std::array<hsluv, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                    tmp[i] = withL(step * (i+1));
+
+                return tmp;
+            }
+
+            template <size_t Count>
+            [[nodiscard]] inline std::array<oklch, Count> scheme() const
+            {
+                static_assert(Count > 0);
+
+                auto step = 360.0f / Count;
+                oklch c = *this;
+
+                std::array<oklch, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                {
+                    tmp[i] = c;
+                    c.rotate(step);
+                }
+
+                return tmp;
+
+            }
+
+
+            template <size_t Count>
+            [[nodiscard]] inline std::array<oklch, Count> gradient(oklch const& c) const
+            {
+                static_assert(Count > 1);
+
+                std::array<oklch, Count> tmp;
+                for (size_t i = 0; i < Count; ++i)
+                {
+                    real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
+                    tmp[i] = gradient1(*this, c, t);
+                }
+
+                return tmp;
+            }
+
+            [[nodiscard]] inline vec4   toVec4  () const { return { l,c,h,a }; }
+            [[nodiscard]] inline vec3   toVec3  () const { return { l,c,h }; }
+            [[nodiscard]] inline color  toColor () const { return OKLCHtoRGB(*this); }
+
+            [[nodiscard]] inline static oklch gradient1(oklch const& c1, oklch const& c2, real_t x)
+            {
+                return
+                {
+                    c1.l + (c2.l - c1.l) * x,
+                    c1.c + (c2.c - c1.c) * x,
+                    c1.h + (c2.h - c1.h) * x,
+                    c1.a + (c2.a - c1.a) * x
+                };
+            }
+        };
 
         struct normal
         {
@@ -507,6 +638,9 @@ namespace ut
         [[nodiscard]] inline hsluv  toHSLUV()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
         [[nodiscard]] inline hsluv  toHSLUV(b8 a) const { return withA(a).toHSLUV(); }
 
+        [[nodiscard]] inline oklch toOKLCH()        const { return RGBtoOKLCH(*this); }
+        [[nodiscard]] inline oklch toOKLCH(b8 a)    const { return withA(a).toOKLCH(); }
+
         /// \brief      Create the background ANSI escape sequence for this color.
         /// \return     A string of the escape sequence.
         [[nodiscard]] std::string toFgEscCode() const;
@@ -634,6 +768,11 @@ namespace ut
 
         static color::normal HSLUVtoNORMAL(hsluv c);
         static color::hsluv  NORMALtoHSLUV(normal c);
+
+        static color::oklch RGBtoOKLCH(color c);
+        static color OKLCHtoRGB(color::oklch c);
+
+
     };
 
     constexpr bool less(color const& a, color const& b) { return a.i <  b.i; }
@@ -681,6 +820,7 @@ namespace ut
 
 #define COLOR_VAR(name_, i_) static constexpr color name_{i_};
 #define COLOR_HSLUV(name_, i_)  inline static color::hsluv  name_() { return color{i_}.toHSLUV(); }
+#define COLOR_OKLCH(name_, i_)  inline static color::oklch  name_() { return color{i_}.toOKLCH(); }
 #define COLOR_HSV(name_, i_)    inline static color::hsv    name_() { return color{i_}.toHSV(); }
 #define COLOR_NORMAL(name_, i_) inline static color::normal name_() { return color{i_}.toNormal(); }
 
@@ -691,12 +831,14 @@ namespace colors
     namespace hsluv     { UT_EXPAND_COLORS(COLOR_HSLUV)     }
     namespace hsv       { UT_EXPAND_COLORS(COLOR_HSV)       }
     namespace normal    { UT_EXPAND_COLORS(COLOR_NORMAL)    }
+    namespace oklch     { UT_EXPAND_COLORS(COLOR_OKLCH)     }
 }
 
 #undef COLOR_VAR
 #undef COLOR_HSLUV
 #undef COLOR_HSL
 #undef COLOR_NORMAL
+#undef COLOR_OKLCH
 
 }
 
