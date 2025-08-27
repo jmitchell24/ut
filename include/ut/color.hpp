@@ -180,8 +180,6 @@ namespace ut
     union color
     {
         struct normal;
-        struct hsv;
-        struct hsluv;
         struct oklch;
 
         /// \brief https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
@@ -200,21 +198,25 @@ namespace ut
             /// \brief Opacity [ 0, 1 ]
             real_t a;
 
-            inline constexpr oklch()
+            constexpr oklch()
                 : l{ 0 }, c{ 0 }, h{ 0 }, a{ 0 }
-            {}
+            { }
 
-            inline constexpr oklch(real_t l, real_t c, real_t h, real_t a = 1)
+            constexpr oklch(real_t l, real_t c, real_t h, real_t a = 1)
                 : l{ l }, c{ c }, h{ h }, a{ a }
             { }
 
-            inline explicit oklch(vec3 const& v, real_t a = 1)
+            explicit oklch(vec3 const& v, real_t a = 1)
                 : oklch(v.x, v.y, v.z, a)
-            {}
+            { }
 
-            inline explicit oklch(color const& c)
+            explicit oklch(vec4 const& v)
+                : oklch(v.x, v.y, v.z, v.w)
+            { }
+
+            explicit oklch(color const& c)
                 : oklch(RGBtoOKLCH(c))
-            {}
+            { }
 
             oklch(oklch const&)=default;
             oklch(oklch&&) noexcept =default;
@@ -222,7 +224,7 @@ namespace ut
             oklch& operator=(oklch const&)=default;
             oklch& operator=(oklch&&) noexcept =default;
 
-            [[nodiscard]] inline bool clamped() const
+            [[nodiscard]] bool clamped() const
             {
                 return !(
                     NCLAMPED(l, 0,1) ||
@@ -231,7 +233,7 @@ namespace ut
                     NCLAMPED(a, 0,1) );
             }
 
-            inline void clamp()
+            void clamp()
             {
                 l = CLAMP(l, 0,1);
                 c = CLAMP(c, 0,1);
@@ -239,32 +241,40 @@ namespace ut
                 a = CLAMP(a, 0,1);
             }
 
-            [[nodiscard]] inline oklch withL(real_t x) const { x = CLAMP(x, 0, 1);   return {x, c, h, a}; }
-            [[nodiscard]] inline oklch withC(real_t x) const { x = CLAMP(x, 0, 1);   return {l, x, h, a}; }
-            [[nodiscard]] inline oklch withH(real_t x) const { x = CLAMP(x, 0, 360); return {l, c, x, a}; }
-            [[nodiscard]] inline oklch withA(real_t x) const { x = CLAMP(x, 0, 1);   return {l, c, h, x}; }
+            [[nodiscard]] oklch withL(real_t x) const { x = CLAMP(x, 0, 1);   return {x, c, h, a}; }
+            [[nodiscard]] oklch withC(real_t x) const { x = CLAMP(x, 0, 1);   return {l, x, h, a}; }
+            [[nodiscard]] oklch withH(real_t x) const { x = CLAMP(x, 0, 360); return {l, c, x, a}; }
+            [[nodiscard]] oklch withA(real_t x) const { x = CLAMP(x, 0, 1);   return {l, c, h, x}; }
 
-            [[nodiscard]] inline oklch opaque() const { return { l, c, h, 1.0f }; }
+            [[nodiscard]] oklch invL() const { return {1.0f-l, c     , h       , a     }; }
+            [[nodiscard]] oklch invC() const { return {l     , 1.0f-c, h       , a     }; }
+            [[nodiscard]] oklch invH() const { return {l     , c     , 360.0f-h, a     }; }
+            [[nodiscard]] oklch invA() const { return {l     , c     , h       , 1.0f-a}; }
 
-            inline void rotate(real_t x)
+            [[nodiscard]] oklch inv   () const { return { 1.0f-l, 1.0f-c, 360.0f-h, 1.0f-a }; }
+            [[nodiscard]] oklch invLCH() const { return { 1.0f-l, 1.0f-c, 360.0f-h, a }; }
+            [[nodiscard]] oklch opaque() const { return { l, c, h, 1.0f }; }
+
+            [[nodiscard]] vec4   toVec4  () const { return { l,c,h,a }; }
+            [[nodiscard]] vec3   toVec3  () const { return { l,c,h }; }
+            [[nodiscard]] color  toColor () const { return OKLCHtoRGB(*this); }
+
+            void rotate(real_t x)
             { h = std::fmod(h + (x < 0 ? 360 + x : x), 360); }
 
             template <size_t Count>
-            [[nodiscard]] inline std::array<oklch, Count> swatch() const
+            [[nodiscard]] std::array<oklch, Count> swatch() const
             {
                 static_assert(Count > 0);
-
                 auto step = 100.0f / Count;
-
-                std::array<hsluv, Count> tmp;
+                std::array<oklch, Count> tmp;
                 for (size_t i = 0; i < Count; ++i)
                     tmp[i] = withL(step * (i+1));
-
                 return tmp;
             }
 
             template <size_t Count>
-            [[nodiscard]] inline std::array<oklch, Count> scheme() const
+            [[nodiscard]] std::array<oklch, Count> scheme() const
             {
                 static_assert(Count > 0);
 
@@ -279,12 +289,11 @@ namespace ut
                 }
 
                 return tmp;
-
             }
 
 
             template <size_t Count>
-            [[nodiscard]] inline std::array<oklch, Count> gradient(oklch const& c) const
+            [[nodiscard]] static std::array<oklch, Count> gradient(oklch const& left, oklch const& right)
             {
                 static_assert(Count > 1);
 
@@ -292,25 +301,47 @@ namespace ut
                 for (size_t i = 0; i < Count; ++i)
                 {
                     real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
-                    tmp[i] = gradient1(*this, c, t);
+                    tmp[i] = gradient1(left, right, t);
                 }
 
                 return tmp;
             }
 
-            [[nodiscard]] inline vec4   toVec4  () const { return { l,c,h,a }; }
-            [[nodiscard]] inline vec3   toVec3  () const { return { l,c,h }; }
-            [[nodiscard]] inline color  toColor () const { return OKLCHtoRGB(*this); }
+            template <size_t Width, size_t Height>
+            [[nodiscard]] static std::array<oklch, Width*Height> gradient(oklch const& tl, oklch const& tr, oklch const& br, oklch const& bl)
+            {
+                static_assert(Width*Height > 2);
 
-            [[nodiscard]] inline static oklch gradient1(oklch const& c1, oklch const& c2, real_t x)
+                std::array<oklch, Width*Height> tmp;
+                for (size_t y = 0; y < Height; ++y)
+                {
+                    for (size_t x = 0; x < Width; ++x)
+                    {
+                        real_t u = static_cast<real_t>(x) / static_cast<real_t>(Width - 1);
+                        real_t v = static_cast<real_t>(y) / static_cast<real_t>(Height - 1);
+                        tmp[y * Width + x] = gradient2(tl, tr, br, bl, u, v);
+                    }
+                }
+
+                return tmp;
+            }
+
+            [[nodiscard]] static oklch gradient1(oklch const& left, oklch const& right, real_t x)
             {
                 return
                 {
-                    c1.l + (c2.l - c1.l) * x,
-                    c1.c + (c2.c - c1.c) * x,
-                    c1.h + (c2.h - c1.h) * x,
-                    c1.a + (c2.a - c1.a) * x
+                    left.l + (right.l - left.l) * x,
+                    left.c + (right.c - left.c) * x,
+                    left.h + (right.h - left.h) * x,
+                    left.a + (right.a - left.a) * x
                 };
+            }
+
+            [[nodiscard]] static oklch gradient2(oklch const& tl, oklch const& tr, oklch const& br, oklch const& bl, real_t x, real_t y)
+            {
+                oklch t = gradient1(tl, tr, x); // top
+                oklch b = gradient1(bl, br, x); // bottom
+                return gradient1(t, b, y);
             }
         };
 
@@ -334,14 +365,6 @@ namespace ut
                 : r{ v.x }, g{ v.y }, b{ v.z }, a{ a }
             { }
 
-            inline explicit normal(hsv const& hsv)
-                : normal(HSVtoNORMAL(hsv))
-            {}
-
-            inline explicit normal(hsluv const& hsluv)
-                : normal(HSLUVtoNORMAL(hsluv))
-            {}
-
             inline explicit normal(color const& c)
                 : normal(RGBtoNORMAL(c))
             {}
@@ -352,7 +375,7 @@ namespace ut
             constexpr normal& operator=(normal const&)=default;
             constexpr normal& operator=(normal&&) noexcept =default;
 
-            [[nodiscard]] inline bool clamped() const
+            [[nodiscard]]  bool clamped() const
             {
                 return !(
                     NCLAMPED(r, 0,1) ||
@@ -361,7 +384,7 @@ namespace ut
                     NCLAMPED(a, 0,1) );
             }
 
-            inline void clamp()
+            void clamp()
             {
                 r = CLAMP(r, 0,1);
                 g = CLAMP(g, 0,1);
@@ -372,230 +395,14 @@ namespace ut
             [[nodiscard]] inline operator vec4() const { return toVec4(); }
             [[nodiscard]] inline operator vec3() const { return toVec3(); }
 
-            [[nodiscard]] inline explicit operator hsv  () const { return toHSV(); }
-            [[nodiscard]] inline explicit operator hsluv() const { return toHSLUV(); }
             [[nodiscard]] inline explicit operator color() const { return toColor(); }
 
             [[nodiscard]] inline vec4  toVec4 () const { return { r,g,b,a }; }
             [[nodiscard]] inline vec3  toVec3 () const { return { r,g,b }; }
             [[nodiscard]] inline color toColor() const { return NORMALtoRGB  (*this); }
-            [[nodiscard]] inline hsv   toHSV  () const { return NORMALtoHSV  (*this); }
-            [[nodiscard]] inline hsluv toHSLUV() const { return NORMALtoHSLUV(*this); }
-        };
-
-        struct hsv
-        {
-            real_t h,s,v,a;
-
-            inline constexpr hsv()
-                : h{ 0 }, s{ 0 }, v{ 0 }, a{ 0 }
-            {}
-
-            inline constexpr hsv(real_t h, real_t s, real_t v, real_t a = 1)
-                : h{ h }, s{ s }, v{ v }, a{ a }
-            { }
-
-            inline constexpr explicit hsv(vec4 const& v)
-                : hsv(v.x, v.y, v.z, v.w)
-            { }
-
-            inline constexpr hsv(vec3 const& v, real_t a = 1)
-                : hsv(v.x, v.y, v.z, a)
-            { }
-
-            inline explicit hsv(normal const& n)
-                : hsv(NORMALtoHSV(n))
-            { }
-
-            inline explicit hsv(color const& c)
-                : hsv(NORMALtoHSV(RGBtoNORMAL(c)))
-            {}
-
-            hsv(hsv const&)=default;
-            hsv(hsv&&) noexcept =default;
-
-            hsv& operator=(hsv const&)=default;
-            hsv& operator=(hsv&&) noexcept =default;
-
-            [[nodiscard]] inline bool clamped() const
-            {
-                return !(
-                    NCLAMPED(h, 0,1) ||
-                    NCLAMPED(s, 0,1) ||
-                    NCLAMPED(v, 0,1) ||
-                    NCLAMPED(a, 0,1) );
-            }
-
-            inline void clamp()
-            {
-                h = CLAMP(h, 0,1);
-                s = CLAMP(s, 0,1);
-                v = CLAMP(v, 0,1);
-                a = CLAMP(a, 0,1);
-            }
-
-            [[nodiscard]] inline hsv withH(real_t x) const { x=CLAMP(x, 0,1); return {x, s, v, a}; }
-            [[nodiscard]] inline hsv withS(real_t x) const { x=CLAMP(x, 0,1); return {h, x, v, a}; }
-            [[nodiscard]] inline hsv withV(real_t x) const { x=CLAMP(x, 0,1); return {h, s, x, a}; }
-            [[nodiscard]] inline hsv withA(real_t x) const { x=CLAMP(x, 0,1); return {h, s, v, x}; }
-
-            [[nodiscard]] inline hsv invH() const { return {1.0f-h, s, v, a}; }
-            [[nodiscard]] inline hsv invS() const { return {h, 1.0f-s, v, a}; }
-            [[nodiscard]] inline hsv invV() const { return {h, s, 1.0f-v, a}; }
-            [[nodiscard]] inline hsv invA() const { return {h, s, v, 1.0f-a}; }
-
-            [[nodiscard]] inline hsv inv   () const { return {1.0f-h, 1.0f-s, 1.0f-v, 1.0f-a }; }
-            [[nodiscard]] inline hsv invHSV() const { return {1.0f-h, 1.0f-s, 1.0f-v, a }; }
-            [[nodiscard]] inline hsv opaque() const { return { h, s, v, 1.0f }; }
-
-            [[nodiscard]] inline vec4   toVec4  () const { return { h,s,v,a }; }
-            [[nodiscard]] inline vec3   toVec3  () const { return { h,s,v }; }
-            [[nodiscard]] inline color  toColor () const { return NORMALtoRGB(HSVtoNORMAL(*this)); }
-            [[nodiscard]] inline normal toNormal() const { return HSVtoNORMAL(*this); }
-        };
-
-        struct hsluv
-        {
-            /// hue [ 0, 360 ]
-            real_t h;
-
-            /// saturation [ 0, 100 ]
-            real_t s;
-
-            /// lightness [ 0, 100 ]
-            real_t l;
-
-            /// alpha [ 0, 1 ]
-            real_t a;
-
-            inline constexpr hsluv()
-                : h{ 0 }, s{ 0 }, l{ 0 }, a{ 0 }
-            {}
-
-            inline constexpr hsluv(real_t h, real_t s, real_t l, real_t a = 1)
-                : h{ h }, s{ s }, l{ l }, a{ a }
-            { }
-
-            inline explicit hsluv(vec3 const& v, real_t a = 1)
-                : hsluv(v.x, v.y, v.z, a)
-            {}
-
-            inline explicit hsluv(normal const& n)
-                : hsluv(NORMALtoHSLUV(n))
-            {}
-
-            inline explicit hsluv(color const& c)
-                : hsluv(NORMALtoHSLUV(RGBtoNORMAL(c)))
-            {}
-
-            hsluv(hsluv const&)=default;
-            hsluv(hsluv&&) noexcept =default;
-
-            hsluv& operator=(hsluv const&)=default;
-            hsluv& operator=(hsluv&&) noexcept =default;
-
-            [[nodiscard]] inline bool clamped() const
-            {
-                return !(
-                    NCLAMPED(h, 0,360) ||
-                    NCLAMPED(s, 0,100) ||
-                    NCLAMPED(l, 0,100) ||
-                    NCLAMPED(a, 0,1) );
-            }
-
-            inline void clamp()
-            {
-                h = CLAMP(h, 0,360);
-                s = CLAMP(s, 0,100);
-                l = CLAMP(l, 0,100);
-                a = CLAMP(a, 0,1);
-            }
-
-            [[nodiscard]] inline hsluv withH(real_t x) const { x = CLAMP(x, 0, 360); return {x, s, l, a}; }
-            [[nodiscard]] inline hsluv withS(real_t x) const { x = CLAMP(x, 0, 100); return {h, x, l, a}; }
-            [[nodiscard]] inline hsluv withL(real_t x) const { x = CLAMP(x, 0, 100); return {h, s, x, a}; }
-            [[nodiscard]] inline hsluv withA(real_t x) const { x = CLAMP(x, 0, 1  ); return {h, s, l, x}; }
-
-            [[nodiscard]] inline hsluv invH() const { return {360.0f-h, s, l, a}; }
-            [[nodiscard]] inline hsluv invS() const { return {h, 100.0f-s, l, a}; }
-            [[nodiscard]] inline hsluv invL() const { return {h, s, 100.0f-l, a}; }
-            [[nodiscard]] inline hsluv invA() const { return {h, s, l, 1.0f-a}; }
-
-            [[nodiscard]] inline hsluv inv   () const { return {360.0f-h, 100.0f-s, 100.0f-l, 1.0f-a }; }
-            [[nodiscard]] inline hsluv invHSL() const { return {360.0f-h, 100.0f-s, 100.0f-l, a }; }
-            [[nodiscard]] inline hsluv opaque() const { return { h, s, l, 1.0f }; }
-
-            inline void rotate(real_t x)
-            { h = std::fmod(h + (x < 0 ? 360 + x : x), 360); }
-
-            template <size_t Count>
-            [[nodiscard]] inline std::array<hsluv, Count> swatch() const
-            {
-                static_assert(Count > 0);
-
-                auto step = 100.0f / Count;
-
-                std::array<hsluv, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                    tmp[i] = withL(step * (i+1));
-
-                return tmp;
-            }
-
-            template <size_t Count>
-            [[nodiscard]] inline std::array<hsluv, Count> scheme() const
-            {
-                static_assert(Count > 0);
-
-                auto step = 360.0f / Count;
-                hsluv c = *this;
-
-                std::array<hsluv, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                {
-                    tmp[i] = c;
-                    c.rotate(step);
-                }
-
-                return tmp;
-
-            }
-
-
-            template <size_t Count>
-            [[nodiscard]] inline std::array<hsluv, Count> gradient(hsluv const& c) const
-            {
-                static_assert(Count > 1);
-
-                std::array<hsluv, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                {
-                    real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
-                    tmp[i] = gradient1(*this, c, t);
-                }
-
-                return tmp;
-            }
-
-            [[nodiscard]] inline vec4   toVec4  () const { return { h,s,l,a }; }
-            [[nodiscard]] inline vec3   toVec3  () const { return { h,s,l }; }
-            [[nodiscard]] inline color  toColor () const { return NORMALtoRGB(HSLUVtoNORMAL(*this)); }
-            [[nodiscard]] inline normal toNormal() const { return HSLUVtoNORMAL(*this); }
-
-            [[nodiscard]] inline static hsluv gradient1(hsluv const& c1, hsluv const& c2, real_t x)
-            {
-                return
-                {
-                    c1.h + (c2.h - c1.h) * x,
-                    c1.s + (c2.s - c1.s) * x,
-                    c1.l + (c2.l - c1.l) * x,
-                    c1.a + (c2.a - c1.a) * x
-                };
-            }
         };
 
         using pack_type = b8[4];
-
 
         b32         i;
         pack_type   pack;
@@ -621,22 +428,12 @@ namespace ut
             : color{NORMALtoRGB(n)}
         {}
 
-        inline explicit color(hsv const& h)
-            : color{NORMALtoRGB(HSVtoNORMAL(h))}
-        {}
-
-        inline explicit color(hsluv const& h)
-            : color{NORMALtoRGB(HSLUVtoNORMAL(h))}
+        inline explicit color(oklch const& c)
+            : color{OKLCHtoRGB(c)}
         {}
 
         [[nodiscard]] inline normal toNormal()     const { return RGBtoNORMAL(*this); }
         [[nodiscard]] inline normal toNormal(b8 a) const { return withA(a).toNormal(); }
-
-        [[nodiscard]] inline hsv    toHSV()     const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
-        [[nodiscard]] inline hsv    toHSV(b8 a) const { return withA(a).toHSV(); }
-
-        [[nodiscard]] inline hsluv  toHSLUV()     const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
-        [[nodiscard]] inline hsluv  toHSLUV(b8 a) const { return withA(a).toHSLUV(); }
 
         [[nodiscard]] inline oklch toOKLCH()        const { return RGBtoOKLCH(*this); }
         [[nodiscard]] inline oklch toOKLCH(b8 a)    const { return withA(a).toOKLCH(); }
@@ -644,7 +441,6 @@ namespace ut
         /// \brief      Create the background ANSI escape sequence for this color.
         /// \return     A string of the escape sequence.
         [[nodiscard]] std::string toFgEscCode() const;
-
         [[nodiscard]] std::string toBgEscCode() const;
 
         M_DECL_PURE color inv()    const { return color(255-r,255-g,255-b,255-a); }
@@ -669,8 +465,8 @@ namespace ut
 
         M_DECL_PURE          explicit operator vec4b () const { return {r,g,b,a}; }
         [[nodiscard]] inline explicit operator normal() const { return RGBtoNORMAL(*this); }
-        [[nodiscard]] inline explicit operator hsv   () const { return NORMALtoHSV(RGBtoNORMAL(*this)); }
-        [[nodiscard]] inline explicit operator hsluv () const { return NORMALtoHSLUV(RGBtoNORMAL(*this)); }
+        [[nodiscard]] inline explicit operator oklch () const { return RGBtoOKLCH(*this); }
+
 
         M_DECL_PURE bool operator== (color const& c) const { return same(*this, c); }
         M_DECL_PURE bool operator!= (color const& c) const { return !(*this == c);  }
@@ -682,12 +478,6 @@ namespace ut
         M_DECL static color grayscale(b8 x) { return { x,x,x,x }; }
         M_DECL static color grayscale(b8 x, b8 a) { return { x,x,x,a }; }
 
-//        M_DECL static color fromNormal(normal const& n) { return NORMALtoRGB(n); }
-//        M_DECL static color fromNormal(real_t r, real_t g, real_t b, real_t a = 1.0f) { return fromNormal({r,g,b,a}); }
-
-//        M_DECL static color fromHSV(hsv const& hsv) { return NORMALtoRGB(HSVtoNORMAL(hsv)); }
-//        M_DECL static color fromHSV(real_t h, real_t s, real_t v, real_t a = 1.0f) { return fromHSV({h,s,v,a}); }
-
         static color   parseRGBA(char const* s);
         static bool tryParseRGBA(char const* s, color& c);
 
@@ -695,7 +485,7 @@ namespace ut
         static bool tryParseARGB(char const* s, color& c);
 
     private:
-        inline static color::normal RGBtoNORMAL(color c)
+        inline static normal RGBtoNORMAL(color c)
         {
             return {real_t(c.r) / 255, real_t(c.g) / 255, real_t(c.b) / 255, real_t(c.a) / 255 };
         }
@@ -706,73 +496,8 @@ namespace ut
             return { b8(n.r * 255), b8(n.g * 255), b8(n.b * 255), b8(n.a * 255)  };
         }
 
-        // Convert color3 floats ([0-1],[0-1],[0-1]) to hsv floats ([0-1],[0-1],[0-1]), from Foley & van Dam p592
-        // Optimized http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
-        inline static color::hsv NORMALtoHSV(normal c)
-        {
-            auto K = real_t(0);
-
-            c.clamp();
-
-            if (c.g < c.b)
-            {
-                std::swap(c.g, c.b);
-                K = -real_t(1);
-            }
-
-            if (c.r < c.g)
-            {
-                std::swap(c.r, c.g);
-                K = -real_t(2) / real_t(6) - K;
-            }
-
-            real_t const chroma = c.r - (c.g < c.b ? c.g : c.b);
-
-            return
-            {
-                std::fabs(K + (c.g - c.b) / (real_t(6) * chroma + real_t(1e-20))),
-                chroma / (c.r + real_t(1e-20)),
-                c.r,
-                c.a
-            };
-        }
-
-        // Convert hsv floats ([0-1],[0-1],[0-1]) to color3 floats ([0-1],[0-1],[0-1]), from Foley & van Dam p593
-        // also http://en.wikipedia.org/wiki/HSL_and_HSV
-        inline static color::normal HSVtoNORMAL(hsv c)
-        {
-            c.clamp();
-
-            if (c.s == real_t(0.0))
-            {
-                return { c.v, c.v, c.v, c.a };
-            }
-
-            c.h = std::fmod(c.h, real_t(1.0)) / (real_t(60.0) / real_t(360.0));
-            int    i = (int)c.h;
-            real_t f = c.h - (float)i;
-            real_t p = c.v * (real_t(1.0) - c.s);
-            real_t q = c.v * (real_t(1.0) - c.s * f);
-            real_t t = c.v * (real_t(1.0) - c.s * (real_t(1.0) - f));
-
-            switch (i)
-            {
-                case 0: return { c.v, t  , p  , c.a };
-                case 1: return { q  , c.v, p  , c.a };
-                case 2: return { p  , c.v, t  , c.a };
-                case 3: return { p  , q  , c.v, c.a };
-                case 4: return { t  , p  , c.v, c.a };
-                case 5: default: return { c.v, p, q, c.a };
-            }
-        }
-
-        static color::normal HSLUVtoNORMAL(hsluv c);
-        static color::hsluv  NORMALtoHSLUV(normal c);
-
-        static color::oklch RGBtoOKLCH(color c);
-        static color OKLCHtoRGB(color::oklch c);
-
-
+        static oklch RGBtoOKLCH(color c);
+        static color OKLCHtoRGB(oklch c);
     };
 
     constexpr bool less(color const& a, color const& b) { return a.i <  b.i; }
@@ -794,23 +519,6 @@ namespace ut
         return os;
     }
 
-    inline std::ostream& operator<<(std::ostream& os, color::hsluv const& c)
-    {
-        std::array<char, 128> buffer;
-
-        if (int res = snprintf(buffer.data(), buffer.size(), "hsluv(%.0fdeg %.0f%% %.0f%% / %.0f%%)",
-                               roundf(c.h), roundf(c.s), roundf(c.l), roundf(c.a*100)); res > 0)
-        {
-            int cnt = buffer.size()-1;
-            os.write(buffer.data(), res > cnt ? cnt : res);
-        }
-        else
-        {
-            os << "???";
-        }
-        return os;
-    }
-
     inline std::string to_string(color const& v)
     {
         std::ostringstream ss;
@@ -818,27 +526,23 @@ namespace ut
         return ss.str();
     }
 
-#define COLOR_VAR(name_, i_) static constexpr color name_{i_};
-#define COLOR_HSLUV(name_, i_)  inline static color::hsluv  name_() { return color{i_}.toHSLUV(); }
-#define COLOR_OKLCH(name_, i_)  inline static color::oklch  name_() { return color{i_}.toOKLCH(); }
-#define COLOR_HSV(name_, i_)    inline static color::hsv    name_() { return color{i_}.toHSV(); }
-#define COLOR_NORMAL(name_, i_) inline static color::normal name_() { return color{i_}.toNormal(); }
+#define COLOR_VAR(_name, _value) static constexpr color _name{_value};
+#define COLOR_OKLCH(_name, _value)  inline static color::oklch  _name() { return color{_value}.toOKLCH(); }
+#define COLOR_NORMAL(_name, _value) inline static color::normal _name() { return color{_value}.toNormal(); }
 
 namespace colors
 {
     UT_EXPAND_COLORS(COLOR_VAR)
 
-    namespace hsluv     { UT_EXPAND_COLORS(COLOR_HSLUV)     }
-    namespace hsv       { UT_EXPAND_COLORS(COLOR_HSV)       }
     namespace normal    { UT_EXPAND_COLORS(COLOR_NORMAL)    }
     namespace oklch     { UT_EXPAND_COLORS(COLOR_OKLCH)     }
+
+
 }
 
 #undef COLOR_VAR
-#undef COLOR_HSLUV
-#undef COLOR_HSL
-#undef COLOR_NORMAL
 #undef COLOR_OKLCH
+#undef COLOR_NORMAL
 
 }
 
