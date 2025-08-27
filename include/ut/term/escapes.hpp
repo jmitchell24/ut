@@ -171,7 +171,7 @@ namespace ut::esc
     inline static TrueColorBg trueColorBg(color::oklch const& c) { return TrueColorBg{c.toColor()}; }
     inline static TrueColorBg trueColorBg(color::normal const& c) { return TrueColorBg{c.toColor()}; }
     inline static std::ostream& operator<< (std::ostream& os, TrueColorBg const& tc)
-    { return os << tc.c.toFgEscCode(); }
+    { return os << tc.c.toBgEscCode(); }
 
     struct TrueColor{ color fg, bg; };
     inline static TrueColor trueColor(color const& fg, color const& bg) { return TrueColor{fg, bg}; }
