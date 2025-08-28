@@ -465,7 +465,7 @@ namespace ut
             for (size_t i = 0; i < Count; ++i)
             {
                 real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
-                tmp[i] = oklch::gradient1(cl, cr, t);
+                tmp[i] = oklch::gradient1(cl, cr, t).toColor();
             }
 
             return tmp;
