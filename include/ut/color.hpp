@@ -262,69 +262,7 @@ namespace ut
             void rotate(real_t x)
             { h = std::fmod(h + (x < 0 ? 360 + x : x), 360); }
 
-            template <size_t Count>
-            [[nodiscard]] std::array<oklch, Count> swatch() const
-            {
-                static_assert(Count > 0);
-                auto step = 100.0f / Count;
-                std::array<oklch, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                    tmp[i] = withL(step * (i+1));
-                return tmp;
-            }
 
-            template <size_t Count>
-            [[nodiscard]] std::array<oklch, Count> scheme() const
-            {
-                static_assert(Count > 0);
-
-                auto step = 360.0f / Count;
-                oklch c = *this;
-
-                std::array<oklch, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                {
-                    tmp[i] = c;
-                    c.rotate(step);
-                }
-
-                return tmp;
-            }
-
-
-            template <size_t Count>
-            [[nodiscard]] static std::array<oklch, Count> gradient(oklch const& left, oklch const& right)
-            {
-                static_assert(Count > 1);
-
-                std::array<oklch, Count> tmp;
-                for (size_t i = 0; i < Count; ++i)
-                {
-                    real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
-                    tmp[i] = gradient1(left, right, t);
-                }
-
-                return tmp;
-            }
-
-            template <size_t Width, size_t Height>
-            [[nodiscard]] static std::array<oklch, Width*Height> gradient(oklch const& tl, oklch const& tr, oklch const& br, oklch const& bl)
-            {
-                static_assert(Width*Height > 2);
-
-                std::array<oklch, Width*Height> tmp;
-                for (size_t y = 0; y < Height; ++y)
-                {
-                    for (size_t x = 0; x < Width; ++x)
-                    {
-                        real_t u = static_cast<real_t>(x) / static_cast<real_t>(Width - 1);
-                        real_t v = static_cast<real_t>(y) / static_cast<real_t>(Height - 1);
-                        tmp[y * Width + x] = gradient2(tl, tr, br, bl, u, v);
-                    }
-                }
-
-                return tmp;
-            }
 
             [[nodiscard]] static oklch gradient1(oklch const& left, oklch const& right, real_t x)
             {
@@ -399,7 +337,7 @@ namespace ut
 
             [[nodiscard]] inline vec4  toVec4 () const { return { r,g,b,a }; }
             [[nodiscard]] inline vec3  toVec3 () const { return { r,g,b }; }
-            [[nodiscard]] inline color toColor() const { return NORMALtoRGB  (*this); }
+            [[nodiscard]] inline color toColor() const { return NORMALtoRGB(*this); }
         };
 
         using pack_type = b8[4];
@@ -467,7 +405,6 @@ namespace ut
         [[nodiscard]] inline explicit operator normal() const { return RGBtoNORMAL(*this); }
         [[nodiscard]] inline explicit operator oklch () const { return RGBtoOKLCH(*this); }
 
-
         M_DECL_PURE bool operator== (color const& c) const { return same(*this, c); }
         M_DECL_PURE bool operator!= (color const& c) const { return !(*this == c);  }
         M_DECL_PURE bool operator<  (color const& c) const { return less(*this, c); }
@@ -483,6 +420,80 @@ namespace ut
 
         static color   parseARGB(char const* s);
         static bool tryParseARGB(char const* s, color& c);
+
+        template <size_t Count>
+        [[nodiscard]] static std::array<color, Count> swatch(color const& col)
+        {
+            static_assert(Count > 0);
+
+            auto step = 100.0f / Count;
+            auto c = col.toOKLCH();
+
+            std::array<color, Count> tmp;
+            for (size_t i = 0; i < Count; ++i)
+                tmp[i] = c.withL(step * (i+1));
+            return tmp;
+        }
+
+        template <size_t Count>
+        [[nodiscard]] static std::array<color, Count> scheme(color const& col)
+        {
+            static_assert(Count > 0);
+
+            auto step = 360.0f / Count;
+            auto c = col.toOKLCH();
+
+            std::array<color, Count> tmp;
+            for (size_t i = 0; i < Count; ++i)
+            {
+                tmp[i] = c.toColor();
+                c.rotate(step);
+            }
+
+            return tmp;
+        }
+
+        template <size_t Count>
+        [[nodiscard]] static std::array<color, Count> gradient(color const& left, color const& right)
+        {
+            static_assert(Count > 1);
+
+            auto cl=left.toOKLCH();
+            auto cr=right.toOKLCH();
+
+            std::array<color, Count> tmp;
+            for (size_t i = 0; i < Count; ++i)
+            {
+                real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
+                tmp[i] = oklch::gradient1(cl, cr, t);
+            }
+
+            return tmp;
+        }
+
+        template <size_t Width, size_t Height>
+        [[nodiscard]] static std::array<color, Width*Height> gradient(color const& tl, color const& tr, color const& br, color const& bl)
+        {
+            static_assert(Width*Height > 2);
+
+            auto ctl = tl.toOKLCH();
+            auto ctr = tr.toOKLCH();
+            auto cbl = bl.toOKLCH();
+            auto cbr = br.toOKLCH();
+
+            std::array<color, Width*Height> tmp;
+            for (size_t y = 0; y < Height; ++y)
+            {
+                for (size_t x = 0; x < Width; ++x)
+                {
+                    real_t u = static_cast<real_t>(x) / static_cast<real_t>(Width - 1);
+                    real_t v = static_cast<real_t>(y) / static_cast<real_t>(Height - 1);
+                    tmp[y * Width + x] = oklch::gradient2(ctl, ctr, cbl, cbr, u, v).toColor();
+                }
+            }
+
+            return tmp;
+        }
 
     private:
         inline static normal RGBtoNORMAL(color c)
@@ -527,22 +538,13 @@ namespace ut
     }
 
 #define COLOR_VAR(_name, _value) static constexpr color _name{_value};
-#define COLOR_OKLCH(_name, _value)  inline static color::oklch  _name() { return color{_value}.toOKLCH(); }
-#define COLOR_NORMAL(_name, _value) inline static color::normal _name() { return color{_value}.toNormal(); }
 
 namespace colors
 {
     UT_EXPAND_COLORS(COLOR_VAR)
-
-    namespace normal    { UT_EXPAND_COLORS(COLOR_NORMAL)    }
-    namespace oklch     { UT_EXPAND_COLORS(COLOR_OKLCH)     }
-
-
 }
 
 #undef COLOR_VAR
-#undef COLOR_OKLCH
-#undef COLOR_NORMAL
 
 }
 
