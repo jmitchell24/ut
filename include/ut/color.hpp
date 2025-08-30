@@ -264,7 +264,7 @@ namespace ut
 
 
 
-            [[nodiscard]] static oklch gradient1(oklch const& left, oklch const& right, real_t x)
+            [[nodiscard]] static oklch gradientX(oklch const& left, oklch const& right, real_t x)
             {
                 return
                 {
@@ -275,11 +275,11 @@ namespace ut
                 };
             }
 
-            [[nodiscard]] static oklch gradient2(oklch const& tl, oklch const& tr, oklch const& br, oklch const& bl, real_t x, real_t y)
+            [[nodiscard]] static oklch gradientXY(oklch const& tl, oklch const& tr, oklch const& br, oklch const& bl, real_t x, real_t y)
             {
-                oklch t = gradient1(tl, tr, x); // top
-                oklch b = gradient1(bl, br, x); // bottom
-                return gradient1(t, b, y);
+                oklch t = gradientX(tl, tr, x); // top
+                oklch b = gradientX(bl, br, x); // bottom
+                return gradientX(t, b, y);
             }
         };
 
@@ -453,6 +453,16 @@ namespace ut
             return tmp;
         }
 
+        [[nodiscard]] static color gradientX(color const& left, color const& right, real_t x)
+        {
+            return oklch::gradientX(left.toOKLCH(), right.toOKLCH(), x).toColor();
+        }
+
+        [[nodiscard]] static color gradientXY(color const& tl, color const& tr, color const& br, color const& bl, real_t x, real_t y)
+        {
+            return oklch::gradientXY(tl.toOKLCH(), tr.toOKLCH(), br.toOKLCH(), bl.toOKLCH(), x, y).toColor();
+        }
+
         template <size_t Count>
         [[nodiscard]] static std::array<color, Count> gradient(color const& left, color const& right)
         {
@@ -465,7 +475,7 @@ namespace ut
             for (size_t i = 0; i < Count; ++i)
             {
                 real_t t = static_cast<real_t>(i) / static_cast<real_t>(Count - 1);
-                tmp[i] = oklch::gradient1(cl, cr, t).toColor();
+                tmp[i] = oklch::gradientX(cl, cr, t).toColor();
             }
 
             return tmp;
@@ -488,7 +498,7 @@ namespace ut
                 {
                     real_t u = static_cast<real_t>(x) / static_cast<real_t>(Width - 1);
                     real_t v = static_cast<real_t>(y) / static_cast<real_t>(Height - 1);
-                    tmp[y * Width + x] = oklch::gradient2(ctl, ctr, cbl, cbr, u, v).toColor();
+                    tmp[y * Width + x] = oklch::gradientXY(ctl, ctr, cbl, cbr, u, v).toColor();
                 }
             }
 
