@@ -41,11 +41,6 @@ namespace ut
     using b32 = std::uint32_t;
     using b64 = std::uint64_t;
 
-    using byte_t = b8;
-    using word_t = b16;
-    using dword_t = b32;
-    using qword_t = b64;
-
     inline constexpr b8 byteNybl0(b8 x) { return (x >> (0 * 4)) & 0x0F; }
     inline constexpr b8 byteNybl1(b8 x) { return (x >> (1 * 4)) & 0x0F; }
 
