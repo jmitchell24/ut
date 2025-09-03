@@ -60,8 +60,8 @@ namespace ut::test
         constexpr BitType& operator|=(BitType const& x) { value |= x.value; return *this; }
         constexpr BitType& operator^=(BitType const& x) { value ^= x.value; return *this; }
 
-        constexpr BitType& operator<<=(int shift) { value <<= shift; return *this; }
-        constexpr BitType& operator>>=(int shift) { value >>= shift; return *this; }
+        constexpr BitType& operator<<=(int x) { value <<= x; return *this; }
+        constexpr BitType& operator>>=(int x) { value >>= x; return *this; }
 
         //
         // Comparison operators
@@ -235,7 +235,8 @@ namespace ut::test
 
         static constexpr Word fromBytes(Byte b0, Byte b1)
         {
-            return Word(b0.value | (std::uint16_t(b1.value) << 8));
+            return Word(b0.value
+                | (std::uint16_t(b1.value) << 8));
         }
     };
 
@@ -379,9 +380,7 @@ namespace ut::test
     template <typename IntType>
     inline std::string to_string(BitType<IntType> const& c)
     {
-        std::ostringstream ss;
-        ss << c.toBinString();
-        return ss.str();
+        return c.toBinString();
     }
 
 } // namespace ut
