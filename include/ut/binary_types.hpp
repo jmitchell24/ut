@@ -106,6 +106,32 @@ namespace ut::test
 
             return res;
         }
+
+        [[nodiscard]] std::string toDecString() const
+        {
+            if (value == 0) return "0";
+
+            constexpr int max_digits =
+                sizeof(IntType) == 1 ? 3 :   // 255
+                sizeof(IntType) == 2 ? 5 :   // 65535
+                sizeof(IntType) == 4 ? 10 :  // 4294967295
+                sizeof(IntType) == 8 ? 20 :  // 18446744073709551615
+                25; // fallback
+
+            char buffer[max_digits + 1]; // +1 for null terminator
+            int pos = max_digits;
+            buffer[pos] = '\0';
+
+            IntType temp = value;
+
+            do // Build digits from right to left
+            {
+                buffer[--pos] = '0' + (temp % 10);
+                temp /= 10;
+            } while (temp > 0);
+
+            return std::string(buffer + pos);
+        }
     };
 
     // Specialized bit manipulation classes
