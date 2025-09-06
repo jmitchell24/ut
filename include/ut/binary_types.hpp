@@ -20,7 +20,7 @@ namespace ut::test
         IntType value;
 
         constexpr BitType() : value(0) {}
-        constexpr explicit BitType(IntType x) : value(x) {}
+        constexpr BitType(IntType x) : value(x) {}
 
         constexpr operator IntType() const { return value; }
 
