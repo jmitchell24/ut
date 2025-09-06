@@ -21,7 +21,7 @@ namespace ut::test
 
 
         constexpr BitType() : value(0) {}
-        constexpr BitType(IntType x) : value(x) {}
+        constexpr explicit BitType(IntType x) : value(x) {}
 
         constexpr operator IntType() const { return value; }
 
@@ -368,6 +368,8 @@ namespace ut::test
         }
     };
 
+
+
     //
     // Endianness utilities
     //
@@ -393,6 +395,11 @@ namespace ut::test
     using b16 = Word;
     using b32 = DWord;
     using b64 = QWord;
+
+    [[nodiscard]] constexpr b8  operator ""_b8 (unsigned long long int i) noexcept { return b8 {static_cast<std::uint8_t>(i)}; }
+    [[nodiscard]] constexpr b16 operator ""_b16(unsigned long long int i) noexcept { return b16{static_cast<std::uint16_t>(i)}; }
+    [[nodiscard]] constexpr b32 operator ""_b32(unsigned long long int i) noexcept { return b32{static_cast<std::uint32_t>(i)}; }
+    [[nodiscard]] constexpr b64 operator ""_b64(unsigned long long int i) noexcept { return b64{static_cast<std::uint64_t>(i)}; }
 
     //
     // STL Compat
