@@ -19,7 +19,6 @@ namespace ut::test
 
         IntType value;
 
-
         constexpr BitType() : value(0) {}
         constexpr BitType(IntType x) : value(x) {}
 
