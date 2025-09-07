@@ -22,14 +22,12 @@ namespace ut::test
         constexpr BitType() : value(0) {}
         constexpr BitType(IntType x) : value(x) {}
 
-        constexpr operator IntType() const { return value; }
-
         //
         // Assignment
         //
 
-        constexpr BitType& operator=(IntType x) { value = x; return *this; }
         constexpr BitType& operator=(BitType const& x) { value = x.value; return *this; }
+        constexpr BitType& operator=(IntType x) { value = x; return *this; }
 
         //
         // Arithmetic operations
@@ -42,6 +40,8 @@ namespace ut::test
 
         constexpr BitType& operator+=(BitType const& x) { value += x.value; return *this; }
         constexpr BitType& operator-=(BitType const& x) { value -= x.value; return *this; }
+        constexpr BitType& operator*=(BitType const& x) { value *= x.value; return *this; }
+        constexpr BitType& operator/=(BitType const& x) { value /= x.value; return *this; }
 
         //
         // Bitwise operations
