@@ -12,67 +12,71 @@
 namespace ut::test
 {
 
-    template<typename IntType> class BitType
+    template<typename FinalType, typename IntType> class BitType
     {
     public:
         static_assert(std::is_integral_v<IntType>);
 
+        using bit_type = FinalType;
+        using int_type = IntType;
+
         IntType value;
 
         constexpr BitType() : value(0) {}
+        constexpr BitType(bit_type const& x) : value(x.value) { }
         constexpr BitType(IntType x) : value(x) {}
 
         //
         // Assignment
         //
 
-        constexpr BitType& operator=(BitType const& x) { value = x.value; return *this; }
-        constexpr BitType& operator=(IntType x) { value = x; return *this; }
+        constexpr bit_type& operator=(bit_type const& x) { value = x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator=(IntType x) { value = x; return *static_cast<bit_type*>(this); }
 
         //
         // Arithmetic operations
         //
 
-        constexpr BitType operator+ (BitType const& x) const { return BitType(value + x.value); }
-        constexpr BitType operator- (BitType const& x) const { return BitType(value - x.value); }
-        constexpr BitType operator* (BitType const& x) const { return BitType(value * x.value); }
-        constexpr BitType operator/ (BitType const& x) const { return BitType(value / x.value); }
+        constexpr bit_type operator+ (bit_type const& x) const { return bit_type(value + x.value); }
+        constexpr bit_type operator- (bit_type const& x) const { return bit_type(value - x.value); }
+        constexpr bit_type operator* (bit_type const& x) const { return bit_type(value * x.value); }
+        constexpr bit_type operator/ (bit_type const& x) const { return bit_type(value / x.value); }
 
-        constexpr BitType& operator+=(BitType const& x) { value += x.value; return *this; }
-        constexpr BitType& operator-=(BitType const& x) { value -= x.value; return *this; }
-        constexpr BitType& operator*=(BitType const& x) { value *= x.value; return *this; }
-        constexpr BitType& operator/=(BitType const& x) { value /= x.value; return *this; }
+        constexpr bit_type& operator+=(bit_type const& x) { value += x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator-=(bit_type const& x) { value -= x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator*=(bit_type const& x) { value *= x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator/=(bit_type const& x) { value /= x.value; return *static_cast<bit_type*>(this); }
 
         //
         // Bitwise operations
         //
 
-        constexpr BitType operator& (BitType const& x) const { return BitType(value & x.value); }
-        constexpr BitType operator| (BitType const& x) const { return BitType(value | x.value); }
-        constexpr BitType operator^ (BitType const& x) const { return BitType(value ^ x.value); }
+        constexpr bit_type operator& (bit_type const& x) const { return bit_type(value & x.value); }
+        constexpr bit_type operator| (bit_type const& x) const { return bit_type(value | x.value); }
+        constexpr bit_type operator^ (bit_type const& x) const { return bit_type(value ^ x.value); }
 
-        constexpr BitType operator~ () const { return BitType(~value); }
+        constexpr bit_type operator~ () const { return bit_type(~value); }
 
-        constexpr BitType operator<<(int shift) const { return BitType(value << shift); }
-        constexpr BitType operator>>(int shift) const { return BitType(value >> shift); }
+        constexpr bit_type operator<<(int shift) const { return bit_type(value << shift); }
+        constexpr bit_type operator>>(int shift) const { return bit_type(value >> shift); }
 
-        constexpr BitType& operator&=(BitType const& x) { value &= x.value; return *this; }
-        constexpr BitType& operator|=(BitType const& x) { value |= x.value; return *this; }
-        constexpr BitType& operator^=(BitType const& x) { value ^= x.value; return *this; }
+        constexpr bit_type& operator&=(bit_type const& x) { value &= x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator|=(bit_type const& x) { value |= x.value; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator^=(bit_type const& x) { value ^= x.value; return *static_cast<bit_type*>(this); }
 
-        constexpr BitType& operator<<=(int x) { value <<= x; return *this; }
-        constexpr BitType& operator>>=(int x) { value >>= x; return *this; }
+        constexpr bit_type& operator<<=(int x) { value <<= x; return *static_cast<bit_type*>(this); }
+        constexpr bit_type& operator>>=(int x) { value >>= x; return *static_cast<bit_type*>(this); }
 
         //
         // Comparison operators
         //
 
-        constexpr bool operator==    (BitType const& x) const { return value == x.value; }
-        constexpr bool operator!=    (BitType const& x) const { return value != x.value; }
-        constexpr bool operator<     (BitType const& x) const { return value <  x.value; }
-        constexpr bool operator>     (BitType const& x) const { return value >  x.value; }
-        constexpr bool operator<=    (BitType const& x) const { return value <= x.value; }
-        constexpr bool operator>=    (BitType const& x) const { return value >= x.value; }
+        constexpr bool operator==    (bit_type const& x) const { return value == x.value; }
+        constexpr bool operator!=    (bit_type const& x) const { return value != x.value; }
+        constexpr bool operator<     (bit_type const& x) const { return value <  x.value; }
+        constexpr bool operator>     (bit_type const& x) const { return value >  x.value; }
+        constexpr bool operator<=    (bit_type const& x) const { return value <= x.value; }
+        constexpr bool operator>=    (bit_type const& x) const { return value >= x.value; }
 
         //
         //
@@ -135,7 +139,7 @@ namespace ut::test
     };
 
     // Specialized bit manipulation classes
-    class Byte : public BitType<std::uint8_t>
+    class Byte : public BitType<Byte, std::uint8_t>
     {
     public:
         using BitType::BitType;
@@ -234,7 +238,7 @@ namespace ut::test
         }
     };
 
-    class Word : public BitType<std::uint16_t>
+    class Word : public BitType<Word, std::uint16_t>
     {
     public:
         using BitType::BitType;
@@ -266,7 +270,7 @@ namespace ut::test
         }
     };
 
-    class DWord : public BitType<std::uint32_t>
+    class DWord : public BitType<DWord, std::uint32_t>
     {
     public:
         using BitType::BitType;
@@ -306,7 +310,7 @@ namespace ut::test
         }
     };
 
-    class QWord : public BitType<std::uint64_t> {
+    class QWord : public BitType<QWord, std::uint64_t> {
     public:
         using BitType::BitType;
 
@@ -400,18 +404,23 @@ namespace ut::test
     [[nodiscard]] constexpr b32 operator ""_b32(unsigned long long int i) noexcept { return b32{static_cast<std::uint32_t>(i)}; }
     [[nodiscard]] constexpr b64 operator ""_b64(unsigned long long int i) noexcept { return b64{static_cast<std::uint64_t>(i)}; }
 
+    [[nodiscard]] constexpr b8  operator ""_byte (unsigned long long int i) noexcept { return b8 {static_cast<std::uint8_t>(i)}; }
+    [[nodiscard]] constexpr b16 operator ""_word (unsigned long long int i) noexcept { return b16{static_cast<std::uint16_t>(i)}; }
+    [[nodiscard]] constexpr b32 operator ""_dword(unsigned long long int i) noexcept { return b32{static_cast<std::uint32_t>(i)}; }
+    [[nodiscard]] constexpr b64 operator ""_qword(unsigned long long int i) noexcept { return b64{static_cast<std::uint64_t>(i)}; }
+
     //
     // STL Compat
     //
 
-    template <typename IntType>
-    inline std::ostream& operator<<(std::ostream& os, BitType<IntType> const& c)
+    template <typename FinalType, typename IntType>
+    inline std::ostream& operator<<(std::ostream& os, BitType<FinalType, IntType> const& c)
     {
         return os << c.toBinString();
     }
 
-    template <typename IntType>
-    inline std::string to_string(BitType<IntType> const& c)
+    template <typename FinalType, typename IntType>
+    inline std::string to_string(BitType<FinalType, IntType> const& c)
     {
         return c.toBinString();
     }
