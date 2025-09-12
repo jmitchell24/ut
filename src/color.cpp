@@ -13,7 +13,6 @@ extern "C"
 // std
 //
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 using namespace std;
 
@@ -21,6 +20,8 @@ using namespace std;
 // ut
 //
 using namespace ut;
+
+#define UT_PI 3.14159265358979323846
 
 //
 // oklch
@@ -102,7 +103,7 @@ void RGB_to_OKLCH(color c, color::oklch& out)
 
     // Convert OKLab to OKLCH
     out.c = sqrtf(lab_a * lab_a + lab_b * lab_b);
-    out.h = atan2f(lab_b, lab_a) * 180.0f / M_PI;
+    out.h = atan2f(lab_b, lab_a) * 180.0f / UT_PI;
     out.a = af;
 
     if (out.h < 0)
@@ -112,7 +113,7 @@ void RGB_to_OKLCH(color c, color::oklch& out)
 void OKLCH_to_RGB(color::oklch c, color& out)
 {
     // Convert OKLCH to OKLab
-    float h_rad = c.h * M_PI / 180.0f;
+    float h_rad = c.h * UT_PI / 180.0f;
     float lab_a = c.c * cosf(h_rad);
     float lab_b = c.c * sinf(h_rad);
 
