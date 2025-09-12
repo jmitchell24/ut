@@ -13,6 +13,7 @@ extern "C"
 // std
 //
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 using namespace std;
 
