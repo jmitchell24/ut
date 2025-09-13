@@ -431,7 +431,7 @@ namespace ut
 
             std::array<color, Count> tmp;
             for (size_t i = 0; i < Count; ++i)
-                tmp[i] = c.withL(step * (i+1));
+                tmp[i] = c.withL(step * (i+1)).toColor();
             return tmp;
         }
 
