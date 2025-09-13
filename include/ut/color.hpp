@@ -426,7 +426,7 @@ namespace ut
         {
             static_assert(Count > 0);
 
-            auto step = 100.0f / Count;
+            auto step = 1.0f / Count;
             auto c = col.toOKLCH();
 
             std::array<color, Count> tmp;
