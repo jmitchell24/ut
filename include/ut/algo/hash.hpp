@@ -27,6 +27,8 @@
 
 namespace ut
 {
+    /// \brief A utility struct for computing the FNV1 hash
+    /// @link  https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
     template <typename N, N O, N P>
     struct basic_digest
     {

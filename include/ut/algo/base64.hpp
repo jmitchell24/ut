@@ -8,13 +8,22 @@
 
 #pragma once
 
+//
+// ut
+//
+
+#include "ut/check.hpp"
+#include "ut/string/view.hpp"
+
+//
+// std
+//
+
 #include <string>
 #include <vector>
 #include <cstring>
 #include <cstdint>
 #include <cassert>
-
-#include "ut/check.hpp"
 
 namespace ut
 {
@@ -26,65 +35,119 @@ namespace ut
         static constexpr unsigned M2 = 63 << 12;
         static constexpr unsigned M3 = 63 << 6;
 
-        using string_type       = std::string;
-        using view_type         = std::string_view;
-        using vector_type       = std::vector<std::uint8_t>;
-        using size_type         = std::size_t;
+        // Helper function to get character index in CHAR_SET, returns 255 for invalid chars
+        static constexpr std::uint8_t char_to_index(char c)
+        {
+            if (c >= 'A' && c <= 'Z') return c - 'A';
+            if (c >= 'a' && c <= 'z') return c - 'a' + 26;
+            if (c >= '0' && c <= '9') return c - '0' + 52;
+            if (c == '+') return 62;
+            if (c == '/') return 63;
+            return 255; // Invalid character
+        }
 
-//        inline static vector_type decode(view_type const& str)   { return decode(str.data(), str.size()); }
-//        inline static vector_type decode(string_type const& str)        { return decode(str.data(), str.size()); }
-//        inline static vector_type decode(char const* str)               { return decode(str, strlen(str)); }
+        static std::vector<std::uint8_t> decode(std::string const& str)
+        {
+            return decode(str.c_str(), str.c_str() + str.size());
+        }
 
-//        static vector_type decode(char const* first, size_type size)
-//        {
-//            assert(first != nullptr);
-//            assert(size % 4 == 0); // "Error in size to the decode method"
-//
-//            auto it = first;
-//            auto end = first+size;
-//
-//            vector_type sink;
-//            while (it != end) {
-//                auto b1 = *it++;
-//                auto b2 = *it++;
-//                auto b3 = *it++;                // might be first padding byte
-//                auto b4 = *it++;                // might be first or second padding byte
-//
-//                auto i1 = findIndex(b1);
-//                auto i2 = findIndex(b2);
-//                auto acc = i1 << 2;             // six bits came from the first byte
-//                acc |= i2 >> 4;                 // two bits came from the first byte
-//
-//                sink.push_back(acc);            // output the first byte
-//
-//                if (b3 != '=')
-//                {
-//                    auto i3 = findIndex(b3);
-//
-//                    acc = (i2 & 0xF) << 4;      // four bits came from the second byte
-//                    acc |= i3 >> 2;             // four bits came from the second byte
-//
-//                    sink.push_back(acc);        // output the second byte
-//
-//                    if (b4 != '=')
-//                    {
-//                        auto i4 = findIndex(b4);
-//
-//                        acc = (i3 & 0x3) << 6;  // two bits came from the third byte
-//                        acc |= i4;              // six bits came from the third byte
-//
-//                        sink.push_back(acc);    // output the third byte
-//                    }
-//                }
-//            }
-//            return sink;
-//        }
+        static std::vector<std::uint8_t> decode(strparam sv)
+        {
+            return decode(sv.begin(), sv.end());
+        }
 
-        static string_type encode(void const* data, size_type size)
+        static std::vector<std::uint8_t> decode(char const* begin, char const* end = nullptr)
+        {
+            check_null(begin);
+
+            if (end == nullptr) {
+                end = begin + std::strlen(begin);
+            }
+
+            std::vector<std::uint8_t> result;
+            auto len = end - begin;
+
+            // Skip whitespace and calculate actual length
+            auto actual_len = 0;
+            for (auto i = 0; i < len; ++i) {
+                if (begin[i] != ' ' && begin[i] != '\t' && begin[i] != '\n' && begin[i] != '\r') {
+                    ++actual_len;
+                }
+            }
+
+            if (actual_len == 0) return result;
+
+            // Reserve space for efficiency
+            result.reserve((actual_len * 3) / 4 + 3);
+
+            auto d = 0u;
+            auto char_count = 0;
+            auto padding_count = 0;
+
+            for (auto i = 0; i < len; ++i) {
+                auto c = begin[i];
+
+                // Skip whitespace
+                if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+                    continue;
+                }
+
+                if (c == '=') {
+                    ++padding_count;
+                    d <<= 6; // Shift for padding
+                } else {
+                    auto idx = char_to_index(c);
+                    if (idx == 255) {
+                        // Invalid character - could throw or skip
+                        continue; // Skip invalid characters
+                    }
+                    d = (d << 6) | idx;
+                }
+
+                ++char_count;
+
+                // Process every 4 characters
+                if (char_count == 4) {
+                    // Extract 3 bytes from the 24-bit value
+                    result.push_back((d >> 16) & 0xFF);
+                    if (padding_count < 2) {
+                        result.push_back((d >> 8) & 0xFF);
+                    }
+                    if (padding_count < 1) {
+                        result.push_back(d & 0xFF);
+                    }
+
+                    d = 0;
+                    char_count = 0;
+                    padding_count = 0;
+                }
+            }
+
+            return result;
+        }
+
+        static std::string encode(std::string const& str)
+        {
+            return encode(str.c_str(), str.size());
+        }
+
+        template <typename T, size_t N>
+        static std::string encode(std::array<T, N> const& arr)
+        {
+            return encode(arr.data(), sizeof(T) * arr.size());
+        }
+
+        template <typename T>
+        static std::string encode(std::vector<T> const& vec)
+        {
+            return encode(vec.data(), sizeof(T) * vec.size());
+        }
+
+        static std::string encode(void const* data, size_t size)
         {
             check_null(data);
 
-            string_type res;
+            std::string res;
             auto d = 0u;
             auto a = 0u;
             auto l = static_cast<unsigned>(size);
