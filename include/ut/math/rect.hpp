@@ -1,55 +1,55 @@
 #pragma once
 
-#include "psize.hpp"
+#include "xywh.hpp"
 
 #define M_DECL_PURE             [[nodiscard]] inline constexpr
 #define M_DECL                  inline constexpr
 
 #define ENABLE_IF_INCLUSIVE     template <bool I_ = I, typename = std::enable_if_t<I>>
 
-#define UT_ENUM_RECT_ANCHORS \
-    CASE(TL, tl) \
-    CASE(TR, tr) \
-    CASE(BL, bl) \
-    CASE(BR, br) \
-    CASE(TC, tc) \
-    CASE(BC, bc) \
-    CASE(LC, lc) \
-    CASE(RC, rc) \
-    CASE(CC, cc)
+#define UT_EXPAND_RECT_ANCHORS \
+    X(TL, tl) \
+    X(TR, tr) \
+    X(BL, bl) \
+    X(BR, br) \
+    X(TC, tc) \
+    X(BC, bc) \
+    X(LC, lc) \
+    X(RC, rc) \
+    X(CC, cc)
 
-#define UT_ENUM_RECT_ALIGNMENTS \
-    CASE(TLtoTL) \
-    CASE(TLtoTR) \
-    CASE(TLtoBL) \
-    CASE(TLtoBR) \
+#define UT_EXPAND_RECT_ALIGNMENTS \
+    X(TLtoTL) \
+    X(TLtoTR) \
+    X(TLtoBL) \
+    X(TLtoBR) \
     \
-    CASE(TRtoTL) \
-    CASE(TRtoTR) \
-    CASE(TRtoBL) \
-    CASE(TRtoBR) \
+    X(TRtoTL) \
+    X(TRtoTR) \
+    X(TRtoBL) \
+    X(TRtoBR) \
     \
-    CASE(BLtoTL) \
-    CASE(BLtoTR) \
-    CASE(BLtoBL) \
-    CASE(BLtoBR) \
+    X(BLtoTL) \
+    X(BLtoTR) \
+    X(BLtoBL) \
+    X(BLtoBR) \
     \
-    CASE(BRtoTL) \
-    CASE(BRtoTR) \
-    CASE(BRtoBL) \
-    CASE(BRtoBR) \
+    X(BRtoTL) \
+    X(BRtoTR) \
+    X(BRtoBL) \
+    X(BRtoBR) \
     \
-    CASE(TCtoTC) \
-    CASE(TCtoBC) \
-    CASE(BCtoTC) \
-    CASE(BCtoBC) \
+    X(TCtoTC) \
+    X(TCtoBC) \
+    X(BCtoTC) \
+    X(BCtoBC) \
     \
-    CASE(LCtoLC) \
-    CASE(LCtoRC) \
-    CASE(RCtoLC) \
-    CASE(RCtoRC) \
+    X(LCtoLC) \
+    X(LCtoRC) \
+    X(RCtoLC) \
+    X(RCtoRC) \
     \
-    CASE(CCtoCC)
+    X(CCtoCC)
 
 
 namespace ut
@@ -70,7 +70,7 @@ namespace ut
         using scalar_type   = N;
         using real_type     = real_t;
         using rect_type     = rectx<N,I>;
-        using psize_type    = psizex<N>;
+        using xywh_type     = xywhx<N>;
         using point_type    = vec2x<N>;
         using split_type    = std::tuple<rect_type,rect_type>;
         //using fit_type    = std::tuple<scalar_type,scalar_type>;
@@ -104,8 +104,8 @@ namespace ut
             : left{min.x}, top{min.y}, right{max.x}, bottom{max.y}
         { }
 
-        M_DECL explicit rectx(psize_type const& psize)
-            : left{psize.minX()}, top{psize.minY()}, right{psize.maxX()}, bottom{psize.maxY()}
+        M_DECL explicit rectx(xywh_type const& xywh)
+            : left{xywh.minX()}, top{xywh.minY()}, right{xywh.maxX()}, bottom{xywh.maxY()}
         { }
 
         M_DECL rectx(rectx const&)=default;
@@ -114,7 +114,7 @@ namespace ut
         M_DECL rectx& operator=(rectx const&)=default;
         M_DECL rectx& operator=(rectx&&) noexcept =default;
 
-        M_DECL explicit operator psize_type() const { return psize(); }
+        M_DECL explicit operator xywh_type() const { return xywh(); }
 
         //
         // accessors
@@ -151,8 +151,10 @@ namespace ut
 
 
         template <typename T=N>
-        M_DECL_PURE psizex<T> psize() const
-        { return psizex<T>(static_cast<T>(width()), static_cast<T>(height()), static_cast<T>(min.x), static_cast<T>(min.y)); }
+        M_DECL_PURE xywhx<T> xywh() const
+        { return xywhx<T>(static_cast<T>(width()), static_cast<T>(height()), static_cast<T>(min.x), static_cast<T>(min.y)); }
+
+
 
         //
         // mutators
@@ -532,13 +534,11 @@ namespace ut
             auto cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
             auto ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
 
-            psize_type p
-            {
-                /* w */ scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad ),
-                /* h */ scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad ),
-                /* x */ scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  ),
-                /* y */ scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)  )
-            };
+            xywh_type p;
+            p.x = scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  );
+            p.y = scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)  );
+            p.w = scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad );
+            p.h = scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad );
 
             return rect_type{p};
         }
@@ -559,13 +559,11 @@ namespace ut
             auto cw = (width() - (w - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(w);
             auto ch = (height() - 2 * opt.outer_pad);
 
-            psize_type p
-            {
-                /* w */ scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad ),
-                /* h */ scalar_type( ch                                                               ),
-                /* x */ scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  ),
-                /* y */ scalar_type( pos().y + opt.outer_pad                                          )
-            };
+            xywh_type p;
+            p.x = scalar_type( pos().x + opt.outer_pad + scalar_type(x) * (cw + opt.inner_pad)  );
+            p.y = scalar_type( pos().y + opt.outer_pad                                          );
+            p.w = scalar_type( cw * scalar_type(opt.w) + scalar_type(opt.w - 1) * opt.inner_pad );
+            p.h = scalar_type( ch                                                               );
 
             return rect_type{p};
         }
@@ -594,13 +592,11 @@ namespace ut
             auto cw = (width() - 2 * opt.outer_pad);
             auto ch = (height() - (h - 1) * opt.inner_pad - 2 * opt.outer_pad) / scalar_type(h);
 
-            psize_type p
-            {
-                /* w */ scalar_type( cw                                                                 ),
-                /* h */ scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad   ),
-                /* x */ scalar_type( pos().x + opt.outer_pad                                            ),
-                /* y */ scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)    ),
-            };
+            xywh_type p;
+            p.x = scalar_type( pos().x + opt.outer_pad                                            );
+            p.y = scalar_type( pos().y + opt.outer_pad + scalar_type(y) * (ch + opt.inner_pad)    );
+            p.w = scalar_type( cw                                                                 );
+            p.h = scalar_type( ch * scalar_type(opt.h) + scalar_type(opt.h - 1) * opt.inner_pad   );
 
             return rect_type{p};
         }
@@ -689,7 +685,7 @@ namespace ut
         static_assert(offsetof(rect_t, bottom) == offsetof(rect_t, pack) + sizeof(N) * 3, "wrong 'bottom' layout in pack");
     }
 
-    template <typename N> template <typename T, bool I> constexpr rectx<T,I> psizex<N>::rect() const
+    template <typename N> template <typename T, bool I> constexpr rectx<T,I> xywhx<N>::rect() const
     { return { minX(), minY(), maxX(), maxY() }; }
 
     using rect = rectx<real_t>;

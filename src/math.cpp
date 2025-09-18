@@ -31,10 +31,10 @@ namespace ut
     template struct rectx<int         , true>;
     template struct rectx<unsigned    , true>;
 
-    template struct psizex<float       >;
-    template struct psizex<double      >;
-    template struct psizex<int         >;
-    template struct psizex<unsigned    >;
-    //template struct psizex<std::uint8_t>;
+    template struct xywhx<float       >;
+    template struct xywhx<double      >;
+    template struct xywhx<int         >;
+    template struct xywhx<unsigned    >;
+    //template struct xywhx<std::uint8_t>;
 
 }

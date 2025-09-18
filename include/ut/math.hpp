@@ -9,5 +9,5 @@
 #include <ut/math/matrix4D.hpp>
 #include <ut/math/matrixND.hpp>
 
-#include <ut/math/psize.hpp>
+#include <ut/math/xywh.hpp>
 #include <ut/math/rect.hpp>
