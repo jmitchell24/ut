@@ -96,6 +96,21 @@ namespace ut::test
             return res;
         }
 
+        [[nodiscard]] std::string toSplitBinString() const
+        {
+            constexpr int ndigits = sizeof(IntType)*8;
+
+            std::string res; res.reserve(ndigits+ndigits/4);
+            for (int i = 0; i < ndigits; ++i)
+            {
+                int ri = ndigits - i - 1;
+                res += ((value >> ri) & 1) ? '1' : '0';
+                if (i % 4 == 3) res += ' ';
+            }
+
+            return res;
+        }
+
         [[nodiscard]] std::string toHexString() const
         {
             constexpr int ndigits = sizeof(IntType) * 2;
