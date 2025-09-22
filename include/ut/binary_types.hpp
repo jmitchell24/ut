@@ -126,6 +126,22 @@ namespace ut::test
             return res;
         }
 
+        [[nodiscard]] std::string toSplitHexString() const
+        {
+            constexpr int ndigits = sizeof(IntType) * 2;
+            constexpr char chars[] = "0123456789abcdef";
+
+            std::string res; res.reserve(ndigits+ndigits/2);
+            for (int i = 0; i < ndigits; ++i)
+            {
+                int ri = ndigits - i - 1;
+                res += chars[(value >> (ri * 4)) & 0xf];
+                if (i % 2 == 1) res += ' ';
+            }
+
+            return res;
+        }
+
         [[nodiscard]] std::string toDecString() const
         {
             if (value == 0) return "0";
