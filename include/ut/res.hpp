@@ -11,7 +11,7 @@ namespace ut
 {
     /// \brief  Transforms arbitrary data into embed-able source code.
     ///         Inspired by ImGui, borrowing the same stb lib code.
-    struct SrcPacker
+    struct SrcRes
     {
         size_t wrap = 120;
 

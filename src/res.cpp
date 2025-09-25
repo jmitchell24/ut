@@ -2,7 +2,7 @@
 // Created by james on 24/09/25.
 //
 
-#include "ut/src_pack.hpp"
+#include "ut/res.hpp"
 
 #include <cstring>
 using namespace ut;
@@ -386,7 +386,7 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
-string SrcPacker::pack(void const* data_in, size_t data_size) const
+string SrcRes::pack(void const* data_in, size_t data_size) const
 {
     if (data_in == nullptr)
         return "";
@@ -457,7 +457,7 @@ string SrcPacker::pack(void const* data_in, size_t data_size) const
     )", name, data_size, oss.str());
 }
 
-size_t SrcPacker::unpackBin(string const& str_in, vector<uint8_t>& data_unpacked)
+size_t SrcRes::unpackBin(string const& str_in, vector<uint8_t>& data_unpacked)
 {
     vector<uint8_t> data_packed;
     data_packed.resize((str_in.size() + 4) / 5 * 4);
@@ -472,7 +472,7 @@ size_t SrcPacker::unpackBin(string const& str_in, vector<uint8_t>& data_unpacked
     return data_unpacked.size();
 }
 
-size_t SrcPacker::unpackStr(string const& str_in, string& data_unpacked)
+size_t SrcRes::unpackStr(string const& str_in, string& data_unpacked)
 {
     vector<uint8_t> data_packed;
     data_packed.resize((str_in.size() + 4) / 5 * 4);
