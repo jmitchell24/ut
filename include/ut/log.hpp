@@ -197,42 +197,42 @@ namespace detail
     // stream manipulators
     //
 
-    std::ostream& info(std::ostream& os)
+    static std::ostream& info(std::ostream& os)
     { detail::Prefix(INFO).print(os); return os; }
 
-    std::ostream& warning(std::ostream& os)
+    static std::ostream& warning(std::ostream& os)
     { detail::Prefix(WARNING).print(os); return os; }
 
-    std::ostream& error(std::ostream& os)
+    static std::ostream& error(std::ostream& os)
     { detail::Prefix(ERROR).print(os); return os; }
 
-    std::ostream& fatal(std::ostream& os)
+    static std::ostream& fatal(std::ostream& os)
     { detail::Prefix(FATAL).print(os); return os; }
 
-    std::ostream& date(std::ostream& os)
+    static std::ostream& date(std::ostream& os)
     { detail::Timestamp(local_datetime::now(), DATE).print(os); return os; }
 
-    std::ostream& time(std::ostream& os)
+    static std::ostream& time(std::ostream& os)
     { detail::Timestamp(local_datetime::now(), TIME).print(os); return os; }
 
-    std::ostream& end(std::ostream& os)
+    static std::ostream& end(std::ostream& os)
     { return os << esc::rendl; }
 
     //
     // parametarized stream manipulators
     //
 
-    detail::SrcLoc src(SrcLocOpts opts={true,true,true}, std::source_location const& sl = std::source_location::current())
+    static detail::SrcLoc src(SrcLocOpts opts={true,true,true}, std::source_location const& sl = std::source_location::current())
     { return { .sl=sl, .opts = opts }; }
 
-    detail::PrintWrap wrap(strparam str, size_t limit, char const* prefix="", char const* suffix="\n")
+    static detail::PrintWrap wrap(strparam str, size_t limit, char const* prefix="", char const* suffix="\n")
     {
         check_null(prefix); check_null(suffix);
         return { .str =str, .limit =limit, .prefix =prefix, .suffix =suffix };
     }
 
     template <typename T>
-    detail::Parameter param(strparam lbl, T const&& t, char const* suffix="", char const* prefix="")
+    static detail::Parameter param(strparam lbl, T const&& t, char const* suffix="", char const* prefix="")
     { return { lbl.str(), std::to_string(t), suffix, prefix }; }
 
 }
