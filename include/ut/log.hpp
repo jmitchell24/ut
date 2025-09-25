@@ -231,6 +231,7 @@ namespace detail
         return { .str =str, .limit =limit, .prefix =prefix, .suffix =suffix };
     }
 
+
     template <typename T>
     static detail::Parameter param(strparam lbl, T const&& t, char const* suffix="", char const* prefix="")
     { return { lbl.str(), std::to_string(t), suffix, prefix }; }
