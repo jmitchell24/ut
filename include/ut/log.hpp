@@ -7,6 +7,7 @@
 //
 
 #include "ut/term/escapes.hpp"
+#include "ut/string.hpp"
 #include "ut/color.hpp"
 #include "ut/time.hpp"
 
