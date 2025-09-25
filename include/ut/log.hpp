@@ -171,6 +171,8 @@ namespace detail
     {
         std::string lbl;
         std::string val;
+        std::string suf;
+        std::string pre;
 
         void print(std::ostream& os) const
         {
@@ -179,7 +181,7 @@ namespace detail
             << " "
             << t.param_box.toFgEscCode() << "[" << esc::reset
             << lbl << " "
-            << t.param_val.toFgEscCode() << val
+            << t.param_val.toFgEscCode() << pre << val << suf
             << t.param_box.toFgEscCode() << "]" << esc::reset
             << " ";
         }
@@ -227,8 +229,8 @@ namespace detail
     }
 
     template <typename T>
-    detail::Parameter param(strparam lbl, T const&& t)
-    { return { lbl.str(), std::to_string(t) }; }
+    detail::Parameter param(strparam lbl, T const&& t, char const* suffix="", char const* prefix="")
+    { return { lbl.str(), std::to_string(t), suffix, prefix }; }
 
 }
 
