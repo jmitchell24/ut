@@ -32,14 +32,16 @@ namespace ut::log
 {
     struct Theme
     {
-        color timestamp         = colors::gold;
-        color param_box         = colors::gold;
-        color param_val         = colors::hotpink;
-        color source            = colors::cornflowerblue;
-        color prefix_error      = colors::orangered;
-        color prefix_warning    = colors::orange;
-        color prefix_info       = colors::lightgreen;
-        color prefix_fatal      = colors::darkred;
+        color timestamp   = colors::gold;
+        color param_box   = colors::gold;
+        color param_val   = colors::hotpink;
+        color source      = colors::cornflowerblue;
+        color pre_trace   = colors::white;
+        color pre_debug   = colors::white;
+        color pre_error   = colors::orangered;
+        color pre_warning = colors::orange;
+        color pre_info    = colors::lightgreen;
+        color pre_fatal   = colors::darkred;
 
         static Theme instance()
         {
@@ -49,7 +51,7 @@ namespace ut::log
     };
 
     enum PrefixKind
-    { INFO, WARNING, ERROR, FATAL };
+    { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL };
 
     enum TimestampKind
     { DATE, TIME };
@@ -161,10 +163,12 @@ namespace detail
             auto&& t = Theme::instance();
             switch (kind)
             {
-                case INFO   : printLabel(os, "  INFO   ", t.prefix_info); break;
-                case WARNING: printLabel(os, " WARNING ", t.prefix_warning); break;
-                case ERROR  : printLabel(os, "  ERROR  ", t.prefix_error); break;
-                case FATAL  : printLabel(os, "  FATAL  ", t.prefix_fatal); break;
+                case TRACE   : printLabel(os,"  TRACE  ", t.pre_trace); break;
+                case DEBUG  : printLabel(os, "  DEBUG  ", t.pre_debug); break;
+                case INFO   : printLabel(os, "  INFO   ", t.pre_info); break;
+                case WARNING: printLabel(os, " WARNING ", t.pre_warning); break;
+                case ERROR  : printLabel(os, "  ERROR  ", t.pre_error); break;
+                case FATAL  : printLabel(os, "  FATAL  ", t.pre_fatal); break;
             }
             os << " ";
         }
@@ -196,6 +200,12 @@ namespace detail
     //
     // stream manipulators
     //
+
+    static std::ostream& trace(std::ostream& os)
+    { detail::Prefix(TRACE).print(os); return os; }
+
+    static std::ostream& debug(std::ostream& os)
+    { detail::Prefix(DEBUG).print(os); return os; }
 
     static std::ostream& info(std::ostream& os)
     { detail::Prefix(INFO).print(os); return os; }
@@ -232,9 +242,11 @@ namespace detail
     }
 
 
-    template <typename T>
-    static detail::Parameter param(strparam lbl, T const&& t, char const* suffix="", char const* prefix="")
-    { return { lbl.str(), std::to_string(t), suffix, prefix }; }
+    template <typename... Args>
+    static detail::Parameter param(std::string const& label, std::string const& fmt, Args&&... args)
+    {
+        return { label, std::vformat(fmt, std::make_format_args(args...)) };
+    }
 
 }
 
