@@ -36,11 +36,11 @@ namespace ut::log
         color param_box   = colors::gold;
         color param_val   = colors::hotpink;
         color source      = colors::cornflowerblue;
-        color pre_trace   = colors::white;
-        color pre_debug   = colors::white;
+        color pre_trace   = colors::cornflowerblue;
+        color pre_debug   = colors::lightgreen;
         color pre_error   = colors::orangered;
         color pre_warning = colors::orange;
-        color pre_info    = colors::lightgreen;
+        color pre_info    = colors::whitesmoke;
         color pre_fatal   = colors::darkred;
 
         static Theme instance()
