@@ -25,8 +25,8 @@
 #define ut_trace    ( ut::log::trace() )
 #define ut_debug    ( ut::log::debug() )
 #else
-#define ut_trace
-#define ut_debug
+#define ut_trace(...)
+#define ut_debug(...)
 #endif
 
 #define ut_info     ( ut::log::info() )
