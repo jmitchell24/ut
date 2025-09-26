@@ -85,7 +85,7 @@ void log::Style::printSrc(ostream& os, source_location const& src) const
     static size_t g_pad = 0;
     g_pad = max(g_pad, str.size());
 
-    os << "[ " << setw((int)g_pad) << str << " ]";
+    os << "[ " << setw(-static_cast<int>(g_pad)) << str << " ]";
 }
 
 void log::Style::printTimestamp(ostream& os, local_datetime const& timestamp) const
