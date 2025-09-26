@@ -78,14 +78,14 @@ void log::Style::printLevel(ostream& os, Level level) const
 
 void log::Style::printSrc(ostream& os, source_location const& src) const
 {
-    auto str = format("[ {}:{} ]",
+    auto str = format("{}:{}",
         strview(src.file_name()).split("/").back().str(),
         src.line());
 
     static size_t g_pad = 0;
     g_pad = max(g_pad, str.size());
 
-    os << setw((int)g_pad) << str;
+    os << "[ " << setw((int)g_pad) << str << " ]";
 }
 
 void log::Style::printTimestamp(ostream& os, local_datetime const& timestamp) const
