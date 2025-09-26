@@ -34,7 +34,7 @@
 #define ut_error    ( ut::log::error() )
 #define ut_fatal    ( ut::log::fatal() )
 
-#ifdef WIN32
+#ifdef _WIN32
 #define DEFAULT_PRINT_MODE ( ut::log::ASCII )
 #else
 #define DEFAULT_PRINT_MODE ( ut::log::TERM )
