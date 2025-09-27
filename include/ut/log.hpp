@@ -35,7 +35,7 @@
 #define ut_fatal    ( ut::log::fatal() )
 
 #ifdef _WIN32
-#define DEFAULT_PRINT_MODE ( ut::log::ASCII )
+#define DEFAULT_PRINT_MODE ( ut::log::TEXT )
 #else
 #define DEFAULT_PRINT_MODE ( ut::log::TERM )
 #endif
@@ -48,7 +48,7 @@ namespace ut::log
     enum PrintMode
     {
         TERM, ///< Print to modern terminal (escapes, unicode chars, etc...)
-        ASCII ///< Print to plaintext
+        TEXT  ///< Print to plaintext
     };
 
     struct Log
@@ -57,6 +57,17 @@ namespace ut::log
         std::source_location    src;
         local_datetime          timestamp;
         std::string             message;
+    };
+
+    struct VarChars
+    {
+        char const *prefix="", *suffix="", *open="[", *close="]";
+    };
+
+    template<typename T> struct Var
+    {
+        T const& value;
+        VarChars chars;
     };
 
     struct Style
@@ -73,21 +84,26 @@ namespace ut::log
             { }
         };
 
-        Item level_trace { };
-        Item level_debug { };
-        Item level_info { };
-        Item level_warning { };
-        Item level_error { };
-        Item level_fatal { };
+        Item level_trace    { };
+        Item level_debug    { };
+        Item level_info     { };
+        Item level_warning  { };
+        Item level_error    { };
+        Item level_fatal    { };
 
-        Item time { };
-        Item src { };
+        Item time   { };
+        Item src    { };
+
+        color var_value { };
+        color var_affix { };
 
         PrintMode print_mode = DEFAULT_PRINT_MODE;
 
         Style();
 
         void printLog(std::ostream& os, Log const& log) const;
+        [[nodiscard]] std::string getPrefix(VarChars const& v) const;
+        [[nodiscard]] std::string getSuffix(VarChars const& v) const;
 
     private:
         void printLevel(std::ostream& os, Level level) const;
@@ -137,6 +153,10 @@ namespace ut::log
     };
 
 
+    template<typename T> [[maybe_unused]] auto var(T const& value,
+    char const* pre="", char const* suf="", char const* open="[", char const* close="]")
+    { return Var<T>{value, {pre, suf, open, close}}; }
+
     [[maybe_unused]] static Builder trace   (std::source_location src = std::source_location::current()) { return {TRACE  , src}; }
     [[maybe_unused]] static Builder debug   (std::source_location src = std::source_location::current()) { return {DEBUG  , src}; }
     [[maybe_unused]] static Builder info    (std::source_location src = std::source_location::current()) { return {INFO   , src}; }
@@ -146,4 +166,26 @@ namespace ut::log
 
 
 
+}
+
+namespace std
+{
+    template<typename T>
+    struct formatter<ut::log::Var<T>>
+    {
+        formatter<T> underlying_formatter;
+
+        constexpr auto parse(std::format_parse_context& ctx)
+        {
+            return underlying_formatter.parse(ctx);
+        }
+
+        auto format(const ut::log::Var<T>& p, std::format_context& ctx) const
+        {
+            // Add color escape sequence before, reset after
+            std::format_to(ctx.out(), "{}", ut::log::Sink::instance().style.getPrefix(p.chars));
+            auto it = underlying_formatter.format(p.value, ctx);
+            return std::format_to(it, "{}", ut::log::Sink::instance().style.getSuffix(p.chars)); // reset color
+        }
+    };
 }

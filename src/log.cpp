@@ -4,6 +4,7 @@
 
 #include "ut/log.hpp"
 #include "ut/term/escapes.hpp"
+#include "ut/random.hpp"
 using namespace ut;
 
 //
@@ -34,6 +35,9 @@ log::Style::Style()
     level_error   = Item { color(0xf15000FF) };
     level_fatal   = Item { color(0xf10000FF) };
 
+    var_value = colors::hotpink;
+    var_affix = colors::gold;
+
     // Supporting elements - subtle and readable
     time = Item { color(0xf1e900FF)  };
     src  = Item { color(0x808080FF) };
@@ -47,16 +51,16 @@ void log::Style::printLevel(ostream& os, Level level) const
     {
         switch (level)
         {
-            case TRACE:    printItem(os, level_trace  ); os << "  TRACE  " << esc::reset; break;
-            case DEBUG:    printItem(os, level_debug  ); os << "  DEBUG  " << esc::reset; break;
-            case INFO:     printItem(os, level_info   ); os << "  INFO   " << esc::reset; break;
-            case WARNING:  printItem(os, level_warning); os << " WARNING " << esc::reset; break;
-            case ERROR:    printItem(os, level_error  ); os << "  ERROR  " << esc::reset; break;
-            case FATAL:    printItem(os, level_fatal  ); os << "  FATAL  " << esc::reset; break;
+            case TRACE:    os << " "; printItem(os, level_trace  ); os << "▓▒░  TRACE  ░▒▓" << esc::reset; break;
+            case DEBUG:    os << " "; printItem(os, level_debug  ); os << "▓▒░  DEBUG  ░▒▓" << esc::reset; break;
+            case INFO:     os << " "; printItem(os, level_info   ); os << "▓▒░  INFO   ░▒▓" << esc::reset; break;
+            case WARNING:  os << " "; printItem(os, level_warning); os << "▓▒░ WARNING ░▒▓" << esc::reset; break;
+            case ERROR:    os << " "; printItem(os, level_error  ); os << "▓▒░  ERROR  ░▒▓" << esc::reset; break;
+            case FATAL:    os << " "; printItem(os, level_fatal  ); os << "▓▒░  FATAL  ░▒▓" << esc::reset; break;
             default:nopath_case(log::Level);
         }
     }
-    else if (print_mode == ASCII)
+    else
     {
         switch (level)
         {
@@ -69,12 +73,9 @@ void log::Style::printLevel(ostream& os, Level level) const
             default:nopath_case(log::Level);
         }
     }
-    else
-    {
-        nopath_impl;
-    }
-
 }
+
+static int g_pad = 0;
 
 void log::Style::printSrc(ostream& os, source_location const& src) const
 {
@@ -82,7 +83,6 @@ void log::Style::printSrc(ostream& os, source_location const& src) const
         strview(src.file_name()).split("/").back().str(),
         src.line());
 
-    static int g_pad = 0;
     g_pad = max(g_pad, (int)str.size());
 
     os << "[ " << setw(g_pad) << str << " ]";
@@ -90,12 +90,14 @@ void log::Style::printSrc(ostream& os, source_location const& src) const
 
 void log::Style::printTimestamp(ostream& os, local_datetime const& timestamp) const
 {
-    switch (print_mode)
+    if (print_mode == TERM)
     {
-        case TERM:; printItem(os, time); os << timestamp.str(" %p %I:%M:%S ") << esc::reset; break;
-        case ASCII: os << timestamp.str("[ %p %I:%M:%S ]"); break;
+        printItem(os, time); os << timestamp.str(" %p %I:%M:%S ") << esc::reset;
     }
-
+    else
+    {
+        os << timestamp.str("[ %p %I:%M:%S ]");
+    }
 }
 
 void log::Style::printMessage(ostream& os, string const& message) const
@@ -115,8 +117,41 @@ void log::Style::printLog(std::ostream& os, Log const& log) const
     printSrc(os, log.src);
     os << " ";
     printMessage(os, log.message);
-    os << esc::rendl;
+
+    if (print_mode == TERM)
+        os << esc::rendl;
+    else
+        os << endl;
 }
+
+string log::Style::getPrefix(VarChars const& v) const
+{
+    if (print_mode == TERM)
+    {
+        ostringstream oss;
+        oss << var_affix.toFgEscCode() << v.open
+            << esc::reset << v.prefix
+            << var_value.toFgEscCode();
+        return oss.str();
+    }
+    return v.open;
+}
+
+string log::Style::getSuffix(VarChars const& v) const
+{
+    if (print_mode == TERM)
+    {
+        ostringstream oss;
+        oss
+            << esc::reset << v.suffix
+            << var_affix.toFgEscCode() << v.close
+            << esc::reset;
+        return oss.str();
+    }
+    return v.close;
+}
+
+
 
 log::Sink& log::Sink::instance()
 {
