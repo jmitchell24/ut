@@ -165,3 +165,4 @@ void log::Sink::push(Log const& log)
     style.printLog(cout, log);
 }
 
+
