@@ -34,6 +34,8 @@
 #define ut_error    ( ut::log::error() )
 #define ut_fatal    ( ut::log::fatal() )
 
+#define ut_var(_var) ( ut::log::var( (_var), #_var "=") )
+
 #ifdef _WIN32
 #define DEFAULT_PRINT_MODE ( ut::log::TEXT )
 #else
