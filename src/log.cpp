@@ -51,12 +51,19 @@ void log::Style::printLevel(ostream& os, Level level) const
     {
         switch (level)
         {
-            case TRACE:    os << " "; printItem(os, level_trace  ); os << "▓▒░  TRACE  ░▒▓" << esc::reset; break;
-            case DEBUG:    os << " "; printItem(os, level_debug  ); os << "▓▒░  DEBUG  ░▒▓" << esc::reset; break;
-            case INFO:     os << " "; printItem(os, level_info   ); os << "▓▒░  INFO   ░▒▓" << esc::reset; break;
-            case WARNING:  os << " "; printItem(os, level_warning); os << "▓▒░ WARNING ░▒▓" << esc::reset; break;
-            case ERROR:    os << " "; printItem(os, level_error  ); os << "▓▒░  ERROR  ░▒▓" << esc::reset; break;
-            case FATAL:    os << " "; printItem(os, level_fatal  ); os << "▓▒░  FATAL  ░▒▓" << esc::reset; break;
+            // case TRACE:    os << " "; printItem(os, level_trace  ); os << "▓▒░  TRACE  ░▒▓" << esc::reset; break;
+            // case DEBUG:    os << " "; printItem(os, level_debug  ); os << "▓▒░  DEBUG  ░▒▓" << esc::reset; break;
+            // case INFO:     os << " "; printItem(os, level_info   ); os << "▓▒░  INFO   ░▒▓" << esc::reset; break;
+            // case WARNING:  os << " "; printItem(os, level_warning); os << "▓▒░ WARNING ░▒▓" << esc::reset; break;
+            // case ERROR:    os << " "; printItem(os, level_error  ); os << "▓▒░  ERROR  ░▒▓" << esc::reset; break;
+            // case FATAL:    os << " "; printItem(os, level_fatal  ); os << "▓▒░  FATAL  ░▒▓" << esc::reset; break;
+
+            case TRACE:    os << " "; printItem(os, level_trace  ); os << "  TRACE  " << esc::reset; break;
+            case DEBUG:    os << " "; printItem(os, level_debug  ); os << "  DEBUG  " << esc::reset; break;
+            case INFO:     os << " "; printItem(os, level_info   ); os << "  INFO   " << esc::reset; break;
+            case WARNING:  os << " "; printItem(os, level_warning); os << " WARNING " << esc::reset; break;
+            case ERROR:    os << " "; printItem(os, level_error  ); os << "  ERROR  " << esc::reset; break;
+            case FATAL:    os << " "; printItem(os, level_fatal  ); os << "  FATAL  " << esc::reset; break;
             default:nopath_case(log::Level);
         }
     }
