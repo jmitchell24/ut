@@ -34,7 +34,8 @@
 #define ut_error    ( ut::log::error() )
 #define ut_fatal    ( ut::log::fatal() )
 
-#define ut_var(_var) ( ut::log::var( (_var), #_var "=") )
+#define ut_var(_var)   ( ut::log::var( (_var), #_var "=") )
+#define ut_list(_list) ( ut::log::list( (_list), #_list "=" ) )
 
 #ifdef _WIN32
 #define DEFAULT_PRINT_MODE ( ut::log::TEXT )
@@ -64,6 +65,7 @@ namespace ut::log
     struct VarChars
     {
         char const *prefix="", *suffix="", *open="[", *close="]";
+        bool use_newline=false;
     };
 
     template<typename T> struct Var
@@ -71,6 +73,13 @@ namespace ut::log
         T const& value;
         VarChars chars;
     };
+
+    template<typename T> struct VarList
+    {
+        T const& value;
+        VarChars chars;
+    };
+
 
     struct Style
     {
@@ -103,6 +112,8 @@ namespace ut::log
 
         Style();
 
+        /// Prints log to stream.
+        ///     \returns The length of the log BEFORE message (for indenting).
         void printLog(std::ostream& os, Log const& log) const;
         [[nodiscard]] std::string getPrefix(VarChars const& v) const;
         [[nodiscard]] std::string getSuffix(VarChars const& v) const;
@@ -159,6 +170,10 @@ namespace ut::log
     char const* pre="", char const* suf="", char const* open="[", char const* close="]")
     { return Var<T>{value, {pre, suf, open, close}}; }
 
+    template<typename T> [[maybe_unused]] auto list(T const& value,
+    bool use_newlines=false, char const* pre="", char const* suf="", char const* open="[", char const* close="]")
+    { return VarList<T>{value, {pre, suf, open, close, use_newlines} }; }
+
     [[maybe_unused]] static Builder trace   (std::source_location src = std::source_location::current()) { return {TRACE  , src}; }
     [[maybe_unused]] static Builder debug   (std::source_location src = std::source_location::current()) { return {DEBUG  , src}; }
     [[maybe_unused]] static Builder info    (std::source_location src = std::source_location::current()) { return {INFO   , src}; }
@@ -182,12 +197,66 @@ namespace std
             return underlying_formatter.parse(ctx);
         }
 
-        auto format(const ut::log::Var<T>& p, std::format_context& ctx) const
+        auto format(ut::log::Var<T> const& p, std::format_context& ctx) const
         {
-            // Add color escape sequence before, reset after
-            std::format_to(ctx.out(), "{}", ut::log::Sink::instance().style.getPrefix(p.chars));
+            auto&& s = ut::log::Sink::instance();
+
+            std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
             auto it = underlying_formatter.format(p.value, ctx);
-            return std::format_to(it, "{}", ut::log::Sink::instance().style.getSuffix(p.chars)); // reset color
+            return std::format_to(it, "{}", s.style.getSuffix(p.chars)); // reset color
+        }
+    };
+
+    template<typename T>
+    struct formatter<ut::log::VarList<T>>
+    {
+        using element_type = std::remove_reference_t<decltype(*std::declval<T>().begin())>;
+        formatter<element_type> underlying_formatter;
+
+        constexpr auto parse(std::format_parse_context& ctx)
+        {
+            return underlying_formatter.parse(ctx);
+        }
+
+        auto format(ut::log::VarList<T> const& p, std::format_context& ctx) const
+        {
+            auto&& s = ut::log::Sink::instance();
+
+            std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
+
+            auto it = p.value.begin();
+            auto end = p.value.end();
+
+            if (it != end)
+            {
+                if (p.chars.use_newline)
+                {
+                    std::format_to(ctx.out(), "\n  ");
+                }
+
+                ctx.advance_to(underlying_formatter.format(*it, ctx));
+                ++it;
+
+                for (; it != end; ++it)
+                {
+                    if (p.chars.use_newline)
+                    {
+                        std::format_to(ctx.out(), ",\n  ");
+                    }
+                    else
+                    {
+                        std::format_to(ctx.out(), ", ");
+                    }
+                    ctx.advance_to(underlying_formatter.format(*it, ctx));
+                }
+
+                if (p.chars.use_newline)
+                {
+                    std::format_to(ctx.out(), "\n");
+                }
+            }
+
+            return std::format_to(ctx.out(), "{}", s.style.getSuffix(p.chars));
         }
     };
 }

@@ -7,9 +7,6 @@
 //---- Use std::string_view if enabled, otherwise use ut::cstrview
 //#define UT_PRINTER_USE_STL_STRINGVIEW
 
-//---- Enable {fmt} support ( https://fmt.dev/ )
-//#define UT_PRINTER_USE_FMT
-
 //---- Specify string buffer size
 //#define UT_PRINTER_BUFFER_SIZE 256
 
