@@ -222,7 +222,10 @@ namespace std
         {
             auto&& s = ut::log::Sink::instance();
 
-            std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
+            if (p.chars.use_newline)
+                std::format_to(ctx.out(), "\n {}", s.style.getPrefix(p.chars));
+            else
+                std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
 
             auto it = p.value.begin();
             auto end = p.value.end();
@@ -231,7 +234,7 @@ namespace std
             {
                 if (p.chars.use_newline)
                 {
-                    std::format_to(ctx.out(), "\n  ");
+                    std::format_to(ctx.out(), "\n     ");
                 }
 
                 ctx.advance_to(underlying_formatter.format(*it, ctx));
@@ -241,7 +244,7 @@ namespace std
                 {
                     if (p.chars.use_newline)
                     {
-                        std::format_to(ctx.out(), ",\n  ");
+                        std::format_to(ctx.out(), ",\n     ");
                     }
                     else
                     {
@@ -256,6 +259,8 @@ namespace std
                 }
             }
 
+            if (p.chars.use_newline)
+                return std::format_to(ctx.out(), " {}", s.style.getSuffix(p.chars));
             return std::format_to(ctx.out(), "{}", s.style.getSuffix(p.chars));
         }
     };
