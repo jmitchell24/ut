@@ -61,7 +61,7 @@ void log::Printer::setPrintTerm()
     esc_value       = colors::hotpink.toFgEscCode();
     esc_affix       = colors::gold.toFgEscCode();
     esc_tim         = getEscBg( color(0xf1e900FF) );
-    esc_src         = getEscBg( color(0x808080FF) );
+    esc_src         = "";
     esc_reset       = TERM_RESET;
 }
 
@@ -112,14 +112,13 @@ string const& log::Printer::escLvl(Level lvl) const
     return "[  ?????  ]";
 }
 
-std::string log::Printer::strSrc(source_location const& src) const
+std::string log::Printer::strSrc(source_location const& src)
 {
     auto str = format("{}:{}",
         strview(src.file_name()).split("/").back().str(),
         src.line());
-    static int g_pad = 0;
-    g_pad = max(g_pad, (int)str.size());
-    return format("{:{}}", str, g_pad);
+    m_src_pad = max(m_src_pad, str.size());
+    return format("{:{}}", str, m_src_pad);
 }
 
 std::string log::Printer::strTim(local_datetime const& tim) const

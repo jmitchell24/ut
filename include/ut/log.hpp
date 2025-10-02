@@ -34,8 +34,8 @@
 #define ut_error    ( ut::log::error() )
 #define ut_fatal    ( ut::log::fatal() )
 
-#define ut_var(_var)   ( ut::log::var( (_var), #_var "=") )
-#define ut_list(_list) ( ut::log::list( (_list), false, #_list "=" ) )
+#define ut_var(_var)    ( ut::log::var( (_var), #_var "=") )
+#define ut_list(_list)  ( ut::log::list( (_list), false, #_list "=" ) )
 #define ut_vlist(_list) ( ut::log::list( (_list), true, #_list "=" ) )
 
 
@@ -97,6 +97,7 @@ namespace ut::log
 
     private:
         size_t m_indent=0;
+        size_t m_src_pad=0;
 
         std::ostream& m_os;
 
@@ -115,7 +116,7 @@ namespace ut::log
         std::string esc_reset;
 
         std::string strLvl(Level lvl) const;
-        std::string strSrc(std::source_location const& src) const;
+        std::string strSrc(std::source_location const& src);
         std::string strTim(local_datetime const& tim) const;
 
         std::string const& escLvl(Level lvl) const;
@@ -205,11 +206,10 @@ namespace std
         {
             auto&& prt = ut::log::Printer::instance();
 
-            auto indent = string(prt.indent(), ' ');
-            auto indent2 = string(prt.indent() + 4, ' ');
+            auto indent  = string(1, ' ');
+            auto indent2 = string(5, ' ');
 
-            if (p.chars.use_newline)
-                std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
+            if (p.chars.use_newline)std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
             else
                 std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
 
