@@ -15,161 +15,155 @@ using namespace ut;
 #include <sstream>
 using namespace std;
 
+
 //
 // helpers
 //
 
-void printItem(ostream& os, log::Style::Item const& it)
+static std::string getEscFgBg(color const& fg, color const& bg)
 {
-    os << it.fg.toFgEscCode() << it.bg.toBgEscCode();
+    return fg.toFgEscCode() + bg.toBgEscCode();
 }
 
-
-log::Style::Style()
+static std::string getEscBg(color const& bg)
 {
-    // Log levels - pastels with good contrast
-    level_trace   = Item { color(0x71f100FF) };
-    level_debug   = Item { color(0x71f100FF) };
-    level_info    = Item { color(0x00a1f1FF) };
-    level_warning = Item { color(0xf18100FF) };
-    level_error   = Item { color(0xf15000FF) };
-    level_fatal   = Item { color(0xf10000FF) };
-
-    var_value = colors::hotpink;
-    var_affix = colors::gold;
-
-    // Supporting elements - subtle and readable
-    time = Item { color(0xf1e900FF)  };
-    src  = Item { color(0x808080FF) };
-
-
+    return getEscFgBg(
+        bg.toOKLCH().l < .5 ? colors::white : colors::black,
+        bg);
 }
 
-void log::Style::printLevel(ostream& os, Level level) const
+log::Printer::Printer(ostream& os)
+    : m_os{os}
 {
-    if (print_mode == TERM)
-    {
-        switch (level)
-        {
-            // case TRACE:    os << " "; printItem(os, level_trace  ); os << "▓▒░  TRACE  ░▒▓" << esc::reset; break;
-            // case DEBUG:    os << " "; printItem(os, level_debug  ); os << "▓▒░  DEBUG  ░▒▓" << esc::reset; break;
-            // case INFO:     os << " "; printItem(os, level_info   ); os << "▓▒░  INFO   ░▒▓" << esc::reset; break;
-            // case WARNING:  os << " "; printItem(os, level_warning); os << "▓▒░ WARNING ░▒▓" << esc::reset; break;
-            // case ERROR:    os << " "; printItem(os, level_error  ); os << "▓▒░  ERROR  ░▒▓" << esc::reset; break;
-            // case FATAL:    os << " "; printItem(os, level_fatal  ); os << "▓▒░  FATAL  ░▒▓" << esc::reset; break;
-
-            case TRACE:    os << " "; printItem(os, level_trace  ); os << "  TRACE  " << esc::reset; break;
-            case DEBUG:    os << " "; printItem(os, level_debug  ); os << "  DEBUG  " << esc::reset; break;
-            case INFO:     os << " "; printItem(os, level_info   ); os << "  INFO   " << esc::reset; break;
-            case WARNING:  os << " "; printItem(os, level_warning); os << " WARNING " << esc::reset; break;
-            case ERROR:    os << " "; printItem(os, level_error  ); os << "  ERROR  " << esc::reset; break;
-            case FATAL:    os << " "; printItem(os, level_fatal  ); os << "  FATAL  " << esc::reset; break;
-            default:nopath_case(log::Level);
-        }
-    }
-    else
-    {
-        switch (level)
-        {
-            case TRACE:    os << "[  TRACE  ]"; break;
-            case DEBUG:    os << "[  DEBUG  ]"; break;
-            case INFO:     os << "[  INFO   ]"; break;
-            case WARNING:  os << "[ WARNING ]"; break;
-            case ERROR:    os << "[  ERROR  ]"; break;
-            case FATAL:    os << "[  FATAL  ]"; break;
-            default:nopath_case(log::Level);
-        }
-    }
+#ifdef _WIN32
+    setPrintText();
+#else
+    setPrintTerm();
+#endif
 }
 
-static int g_pad = 0;
-
-void log::Style::printSrc(ostream& os, source_location const& src) const
+log::Printer& log::Printer::instance()
 {
-    auto str = format("{}:{}",
-        strview(src.file_name()).split("/").back().str(),
-        src.line());
-
-    g_pad = max(g_pad, (int)str.size());
-
-    os << "[ " << setw(g_pad) << str << " ]";
-}
-
-void log::Style::printTimestamp(ostream& os, local_datetime const& timestamp) const
-{
-    if (print_mode == TERM)
-    {
-        printItem(os, time); os << timestamp.str(" %p %I:%M:%S ") << esc::reset;
-    }
-    else
-    {
-        os << timestamp.str("[ %p %I:%M:%S ]");
-    }
-}
-
-void log::Style::printMessage(ostream& os, string const& message) const
-{
-    os << message;
-}
-
-
-
-
-void log::Style::printLog(std::ostream& os, Log const& log) const
-{
-    printLevel(os, log.level);
-    os << " ";
-    printTimestamp(os, log.timestamp);
-    os << " ";
-    printSrc(os, log.src);
-    os << " ";
-    printMessage(os, log.message);
-
-    if (print_mode == TERM)
-        os << esc::rendl;
-    else
-        os << endl;
-}
-
-string log::Style::getPrefix(VarChars const& v) const
-{
-    if (print_mode == TERM)
-    {
-        ostringstream oss;
-        oss << var_affix.toFgEscCode() << v.open
-            << esc::reset << v.prefix
-            << var_value.toFgEscCode();
-        return oss.str();
-    }
-    return v.open;
-}
-
-string log::Style::getSuffix(VarChars const& v) const
-{
-    if (print_mode == TERM)
-    {
-        ostringstream oss;
-        oss
-            << esc::reset << v.suffix
-            << var_affix.toFgEscCode() << v.close
-            << esc::reset;
-        return oss.str();
-    }
-    return v.close;
-}
-
-
-
-log::Sink& log::Sink::instance()
-{
-    static Sink x;
+    static Printer x{cout};
     return x;
 }
 
 
-void log::Sink::push(Log const& log)
+void log::Printer::setPrintTerm()
 {
-    style.printLog(cout, log);
+    print_mode      = TERM;
+    esc_trace       = getEscBg( color(0x71f100FF) );
+    esc_debug       = getEscBg( color(0x71f100FF) );
+    esc_info        = getEscBg( color(0x00a1f1FF) );
+    esc_warning     = getEscBg( color(0xf18100FF) );
+    esc_error       = getEscBg( color(0xf15000FF) );
+    esc_fatal       = getEscBg( color(0xf10000FF) );
+    esc_value       = colors::hotpink.toFgEscCode();
+    esc_affix       = colors::gold.toFgEscCode();
+    esc_tim         = getEscBg( color(0xf1e900FF) );
+    esc_src         = getEscBg( color(0x808080FF) );
+    esc_reset       = TERM_RESET;
 }
+
+void log::Printer::setPrintText()
+{
+    print_mode      = TEXT;
+    esc_trace       = "";
+    esc_debug       = "";
+    esc_info        = "";
+    esc_warning     = "";
+    esc_error       = "";
+    esc_fatal       = "";
+    esc_value       = "";
+    esc_affix       = "";
+    esc_tim         = "";
+    esc_src         = "";
+    esc_reset       = "";
+}
+
+
+string log::Printer::strLvl(Level lvl) const
+{
+    switch (lvl)
+    {
+        case TRACE:   return print_mode == TERM ? "  TRACE  " : "[  TRACE  ]";
+        case DEBUG:   return print_mode == TERM ? "  DEBUG  " : "[  DEBUG  ]";
+        case INFO:    return print_mode == TERM ? "  INFO   " : "[  INFO   ]";
+        case WARNING: return print_mode == TERM ? " WARNING " : "[ WARNING ]";
+        case ERROR:   return print_mode == TERM ? "  ERROR  " : "[  ERROR  ]";
+        case FATAL:   return print_mode == TERM ? "  FATAL  " : "[  FATAL  ]";
+        default:nopath_case(log::Level);
+    }
+    return "[  ?????  ]";
+}
+
+string const& log::Printer::escLvl(Level lvl) const
+{
+    switch (lvl)
+    {
+        case TRACE:   return esc_trace;
+        case DEBUG:   return esc_debug;
+        case INFO:    return esc_info;
+        case WARNING: return esc_warning;
+        case ERROR:   return esc_error;
+        case FATAL:   return esc_fatal;
+        default:nopath_case(log::Level);
+    }
+    return "[  ?????  ]";
+}
+
+std::string log::Printer::strSrc(source_location const& src) const
+{
+    auto str = format("{}:{}",
+        strview(src.file_name()).split("/").back().str(),
+        src.line());
+    static int g_pad = 0;
+    g_pad = max(g_pad, (int)str.size());
+    return format("{:{}}", str, g_pad);
+}
+
+std::string log::Printer::strTim(local_datetime const& tim) const
+{
+    return tim.str(print_mode == TERM ? " %p %I:%M:%S ": "[ %p %I:%M:%S ]");
+}
+
+void log::Printer::printLog(Log const& log)
+{
+    m_indent = 1;
+
+    string str = strLvl(log.lvl);
+    m_indent += str.size() + 1;
+    m_os << " " << escLvl(log.lvl) << str << esc_reset;
+
+    str = strTim(log.tim);
+    m_indent += str.size() + 1;
+    m_os << " " << esc_tim << str << esc_reset;
+
+    str = strSrc(log.src);
+    m_indent += str.size() + 1;
+    m_os << " " << esc_src << str << esc_reset;
+
+    m_os << " " << log.msg << "\n";
+}
+
+string log::Printer::getPrefix(VarChars const& v) const
+{
+    ostringstream oss;
+    oss << esc_affix << v.open
+        << esc_reset << v.prefix
+        << esc_value;
+    return oss.str();
+}
+
+string log::Printer::getSuffix(VarChars const& v) const
+{
+    ostringstream oss;
+    oss
+        << esc_reset << v.suffix
+        << esc_affix << v.close
+        << esc_reset;
+    return oss.str();
+}
+
 
 

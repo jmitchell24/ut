@@ -35,13 +35,10 @@
 #define ut_fatal    ( ut::log::fatal() )
 
 #define ut_var(_var)   ( ut::log::var( (_var), #_var "=") )
-#define ut_list(_list) ( ut::log::list( (_list), #_list "=" ) )
+#define ut_list(_list) ( ut::log::list( (_list), false, #_list "=" ) )
+#define ut_vlist(_list) ( ut::log::list( (_list), true, #_list "=" ) )
 
-#ifdef _WIN32
-#define DEFAULT_PRINT_MODE ( ut::log::TEXT )
-#else
-#define DEFAULT_PRINT_MODE ( ut::log::TERM )
-#endif
+
 
 namespace ut::log
 {
@@ -56,15 +53,15 @@ namespace ut::log
 
     struct Log
     {
-        Level                   level;
+        Level                   lvl;
         std::source_location    src;
-        local_datetime          timestamp;
-        std::string             message;
+        local_datetime          tim;
+        std::string             msg;
     };
 
     struct VarChars
     {
-        char const *prefix="", *suffix="", *open="[", *close="]";
+        char const *prefix="", *suffix="", *open="[", *close="]", *delim=",";
         bool use_newline=false;
     };
 
@@ -81,75 +78,61 @@ namespace ut::log
     };
 
 
-    struct Style
+    class Printer
     {
-        struct Item
-        {
-            color bg, fg;
-            Item(color const& bg, color const& fg)
-                : bg{bg}, fg{fg}
-            { }
+    public:
+        Printer(std::ostream& os);
 
-            explicit Item(color const& bg = colors::white)
-                : bg{bg}, fg{bg.toOKLCH().l < .5 ? colors::white : colors::black}
-            { }
-        };
+        [[nodiscard]] size_t indent() const
+        { return m_indent; }
 
-        Item level_trace    { };
-        Item level_debug    { };
-        Item level_info     { };
-        Item level_warning  { };
-        Item level_error    { };
-        Item level_fatal    { };
+        void setPrintTerm();
+        void setPrintText();
 
-        Item time   { };
-        Item src    { };
-
-        color var_value { };
-        color var_affix { };
-
-        PrintMode print_mode = DEFAULT_PRINT_MODE;
-
-        Style();
-
-        /// Prints log to stream.
-        ///     \returns The length of the log BEFORE message (for indenting).
-        void printLog(std::ostream& os, Log const& log) const;
+        void printLog(Log const& log);
         [[nodiscard]] std::string getPrefix(VarChars const& v) const;
         [[nodiscard]] std::string getSuffix(VarChars const& v) const;
 
-    private:
-        void printLevel(std::ostream& os, Level level) const;
-        void printSrc(std::ostream& os, std::source_location const& src) const;
-        void printTimestamp(std::ostream& os, local_datetime const& timestamp) const;
-        void printMessage(std::ostream& os, std::string const& message) const;
-    };
-
-
-
-    class Sink
-    {
-    public:
-        Style style;
-
-        static Sink& instance();
-
-        void push(Log const& log);
+        static Printer& instance();
 
     private:
+        size_t m_indent=0;
+
+        std::ostream& m_os;
+
+        PrintMode print_mode;
+
+        std::string esc_trace;
+        std::string esc_debug;
+        std::string esc_info;
+        std::string esc_warning;
+        std::string esc_error;
+        std::string esc_fatal;
+        std::string esc_tim;
+        std::string esc_src;
+        std::string esc_value;
+        std::string esc_affix;
+        std::string esc_reset;
+
+        std::string strLvl(Level lvl) const;
+        std::string strSrc(std::source_location const& src) const;
+        std::string strTim(local_datetime const& tim) const;
+
+        std::string const& escLvl(Level lvl) const;
     };
 
     class Builder
     {
     public:
         Log log;
+        Printer& prt;
 
-        Builder(Level level, std::source_location src)
-            : log{ .level=level, .src=src, .timestamp = local_datetime::now() }
+        Builder(Level lvl, std::source_location src, Printer& prt = Printer::instance())
+            : log{ .lvl=lvl, .src=src, .tim = local_datetime::now() }, prt{prt}
         { }
 
         ~Builder()
-        { Sink::instance().push(log); }
+        { prt.printLog(log); }
 
         Builder()=delete;
         Builder(Builder const&)=delete;
@@ -160,7 +143,7 @@ namespace ut::log
         template <typename... Args>
         Builder& operator() (std::string const& fmt, Args&&... args)
         {
-            log.message += std::vformat(fmt, std::make_format_args(args...));
+            log.msg += std::vformat(fmt, std::make_format_args(args...));
             return *this;
         }
     };
@@ -171,8 +154,8 @@ namespace ut::log
     { return Var<T>{value, {pre, suf, open, close}}; }
 
     template<typename T> [[maybe_unused]] auto list(T const& value,
-    bool use_newlines=false, char const* pre="", char const* suf="", char const* open="[", char const* close="]")
-    { return VarList<T>{value, {pre, suf, open, close, use_newlines} }; }
+    bool use_newlines=false, char const* pre="", char const* suf="", char const* open="[", char const* close="]", char const* delim=",")
+    { return VarList<T>{value, {pre, suf, open, close, delim, use_newlines} }; }
 
     [[maybe_unused]] static Builder trace   (std::source_location src = std::source_location::current()) { return {TRACE  , src}; }
     [[maybe_unused]] static Builder debug   (std::source_location src = std::source_location::current()) { return {DEBUG  , src}; }
@@ -199,11 +182,11 @@ namespace std
 
         auto format(ut::log::Var<T> const& p, std::format_context& ctx) const
         {
-            auto&& s = ut::log::Sink::instance();
+            auto&& prt = ut::log::Printer::instance();
 
-            std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
+            std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
             auto it = underlying_formatter.format(p.value, ctx);
-            return std::format_to(it, "{}", s.style.getSuffix(p.chars)); // reset color
+            return std::format_to(it, "{}", prt.getSuffix(p.chars)); // reset color
         }
     };
 
@@ -220,12 +203,15 @@ namespace std
 
         auto format(ut::log::VarList<T> const& p, std::format_context& ctx) const
         {
-            auto&& s = ut::log::Sink::instance();
+            auto&& prt = ut::log::Printer::instance();
+
+            auto indent = string(prt.indent(), ' ');
+            auto indent2 = string(prt.indent() + 4, ' ');
 
             if (p.chars.use_newline)
-                std::format_to(ctx.out(), "\n {}", s.style.getPrefix(p.chars));
+                std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
             else
-                std::format_to(ctx.out(), "{}", s.style.getPrefix(p.chars));
+                std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
 
             auto it = p.value.begin();
             auto end = p.value.end();
@@ -234,7 +220,7 @@ namespace std
             {
                 if (p.chars.use_newline)
                 {
-                    std::format_to(ctx.out(), "\n     ");
+                    std::format_to(ctx.out(), "\n{}", indent2);
                 }
 
                 ctx.advance_to(underlying_formatter.format(*it, ctx));
@@ -244,11 +230,11 @@ namespace std
                 {
                     if (p.chars.use_newline)
                     {
-                        std::format_to(ctx.out(), ",\n     ");
+                        std::format_to(ctx.out(), "{}\n{}", p.chars.delim, indent2);
                     }
                     else
                     {
-                        std::format_to(ctx.out(), ", ");
+                        std::format_to(ctx.out(), "{} ", p.chars.delim);
                     }
                     ctx.advance_to(underlying_formatter.format(*it, ctx));
                 }
@@ -260,8 +246,8 @@ namespace std
             }
 
             if (p.chars.use_newline)
-                return std::format_to(ctx.out(), " {}", s.style.getSuffix(p.chars));
-            return std::format_to(ctx.out(), "{}", s.style.getSuffix(p.chars));
+                return std::format_to(ctx.out(), "{}{}", indent, prt.getSuffix(p.chars));
+            return std::format_to(ctx.out(), "{}", prt.getSuffix(p.chars));
         }
     };
 }
