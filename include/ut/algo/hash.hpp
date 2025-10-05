@@ -122,17 +122,17 @@ namespace ut
         // single-put convenience methods
         //
 
-        TM_DECL(...Ts)  static digest_type args  (Ts&&... ts)                  { digest_type tmp; tmp.template putArgs(ts...);         return tmp; }
-        TM_DECL(T)      static digest_type range (T&& t)                       { digest_type tmp; tmp.template putRange(t);            return tmp; }
-        TM_DECL(It)     static digest_type range (It&& first, It&& last)       { digest_type tmp; tmp.template putRange(first, last);  return tmp; }
-        TM_DECL(T)      static digest_type value (T&& t)                       { digest_type tmp; tmp.template putValue(t);            return tmp; }
+        TM_DECL(...Ts)  static digest_type args  (Ts&&... ts)                  { digest_type tmp; tmp.putArgs(ts...);         return tmp; }
+        TM_DECL(T)      static digest_type range (T&& t)                       { digest_type tmp; tmp.putRange(t);            return tmp; }
+        TM_DECL(It)     static digest_type range (It&& first, It&& last)       { digest_type tmp; tmp.putRange(first, last);  return tmp; }
+        TM_DECL(T)      static digest_type value (T&& t)                       { digest_type tmp; tmp.putValue(t);            return tmp; }
         M_DECL          static digest_type digest(digest_type d)               { digest_type tmp; tmp.putDigest(d);                    return tmp; }
         M_DECL          static digest_type bytes (void* data, size_type size)  { digest_type tmp; tmp.putBytes(data, size);            return tmp; }
 
-        TM_DECL(...Ts)  static digest_type nextArgs  (digest_param d, Ts&&... ts)                { digest_type tmp(d); tmp.template putArgs(ts...);         return tmp; }
-        TM_DECL(T)      static digest_type nextRange (digest_param d, T&& t)                     { digest_type tmp(d); tmp.template putRange(t);            return tmp; }
-        TM_DECL(It)     static digest_type nextRange (digest_param d, It&& first, It&& last)     { digest_type tmp(d); tmp.template putRange(first, last);  return tmp; }
-        TM_DECL(T)      static digest_type nextValue (digest_param d, T&& t)                     { digest_type tmp(d); tmp.template putValue(t);            return tmp; }
+        TM_DECL(...Ts)  static digest_type nextArgs  (digest_param d, Ts&&... ts)                { digest_type tmp(d); tmp.putArgs(ts...);         return tmp; }
+        TM_DECL(T)      static digest_type nextRange (digest_param d, T&& t)                     { digest_type tmp(d); tmp.putRange(t);            return tmp; }
+        TM_DECL(It)     static digest_type nextRange (digest_param d, It&& first, It&& last)     { digest_type tmp(d); tmp.putRange(first, last);  return tmp; }
+        TM_DECL(T)      static digest_type nextValue (digest_param d, T&& t)                     { digest_type tmp(d); tmp.putValue(t);            return tmp; }
         M_DECL          static digest_type nextDigest(digest_param d, digest_type y)             { digest_type tmp(d); tmp.putDigest(y);                    return tmp; }
         M_DECL          static digest_type nextBytes (digest_param d, void* data, size_type size){ digest_type tmp(d); tmp.putBytes(data, size);            return tmp; }
 
