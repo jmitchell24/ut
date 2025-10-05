@@ -255,6 +255,13 @@ namespace ut
             [[nodiscard]] oklch invLCH() const { return { 1.0f-l, 1.0f-c, 360.0f-h, a }; }
             [[nodiscard]] oklch opaque() const { return { l, c, h, 1.0f }; }
 
+            [[nodiscard]] oklch lighten(real_t x) const
+            { return { l + (1.0f - l) * x, c, h, a }; }
+
+            [[nodiscard]] oklch darken(real_t x) const
+            { return { l * (1.0f - x), c, h, a }; }
+
+
             [[nodiscard]] vec4   toVec4  () const { return { l,c,h,a }; }
             [[nodiscard]] vec3   toVec3  () const { return { l,c,h }; }
             [[nodiscard]] color  toColor () const { return OKLCHtoRGB(*this); }
