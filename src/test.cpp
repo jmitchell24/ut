@@ -15,6 +15,7 @@ using namespace ut::test;
 // std
 //
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 //
