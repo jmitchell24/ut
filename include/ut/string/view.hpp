@@ -915,20 +915,15 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
     { return cstrview::make_cstrview(str, sz); }
 }
 
-namespace std
+template <typename Char, typename Traits, bool NullTerminated>
+struct std::hash<ut::basic_strview<Char,Traits,NullTerminated>>
 {
-    template<class Key> struct hash;
-
-    template <typename Char, typename Traits, bool NullTerminated>
-    struct hash<ut::basic_strview<Char,Traits,NullTerminated>>
+    size_t operator()(ut::basic_strview<Char,Traits,NullTerminated> const& k) const
     {
-        size_t operator()(ut::basic_strview<Char,Traits,NullTerminated> const& k) const
-        {
-            using string_view_type = typename ut::basic_strview<Char,Traits,NullTerminated>::string_view_type;
-            return hash<string_view_type>{}(k.view());
-        }
-    };
-}
+        using string_view_type = typename ut::basic_strview<Char,Traits,NullTerminated>::string_view_type;
+        return hash<string_view_type>{}(k.view());
+    }
+};
 
 #undef M_DECL_PURE
 #undef M_DECL
