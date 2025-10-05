@@ -80,12 +80,12 @@ namespace ut
         // copy with hash
         //
 
-        TM_DECL_PURE(...Ts)  digest_type withArgs (Ts&&... ts)                  const { digest_type tmp=*this; tmp.template putArgs(ts...);         return tmp; }
-        TM_DECL_PURE(T)      digest_type withRange(T&& t)                       const { digest_type tmp=*this; tmp.template putRange(t);            return tmp; }
-        TM_DECL_PURE(It)     digest_type withRange(It&& first, It&& last)       const { digest_type tmp=*this; tmp.template putRange(first, last);  return tmp; }
-        TM_DECL_PURE(T)      digest_type withValue(T&& t)                       const { digest_type tmp=*this; tmp.template putValue(t);            return tmp; }
-        M_DECL_PURE          digest_type withDigest (digest_type d)             const { digest_type tmp=*this; tmp.putDigest(d);                      return tmp; }
-        M_DECL_PURE          digest_type withBytes(void* data, size_type size)  const { digest_type tmp=*this; tmp.putBytes(data, size);            return tmp; }
+        TM_DECL_PURE(...Ts)  digest_type withArgs (Ts&&... ts)                  const { digest_type tmp=*this; tmp.putArgs(ts...);         return tmp; }
+        TM_DECL_PURE(T)      digest_type withRange(T&& t)                       const { digest_type tmp=*this; tmp.putRange(t);            return tmp; }
+        TM_DECL_PURE(It)     digest_type withRange(It&& first, It&& last)       const { digest_type tmp=*this; tmp.putRange(first, last);  return tmp; }
+        TM_DECL_PURE(T)      digest_type withValue(T&& t)                       const { digest_type tmp=*this; tmp.putValue(t);            return tmp; }
+        M_DECL_PURE          digest_type withDigest (digest_type d)             const { digest_type tmp=*this; tmp.putDigest(d);           return tmp; }
+        M_DECL_PURE          digest_type withBytes(void* data, size_type size)  const { digest_type tmp=*this; tmp.putBytes(data, size);   return tmp; }
 
         //
         // incremental hash
