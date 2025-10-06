@@ -23,7 +23,7 @@ namespace ut
      * @param str The string to check
      * @return bool True if the string matches the pattern, false otherwise
      */
-    bool globMatch(std::string const& pattern, std::string const& str)
+    static bool globMatch(std::string const& pattern, std::string const& str)
     {
         // Dynamic programming solution using 1D array
         // We only need to keep track of the current row of the DP table
