@@ -1,5 +1,4 @@
-#ifndef RECT_HPP
-#define RECT_HPP
+#pragma once
 
 #include "vector2D.hpp"
 
@@ -21,12 +20,12 @@ namespace ut
     {
         real_t v;
 
-        inline constexpr explicit perc(real_t v)
+        constexpr explicit perc(real_t v)
             : v{v}
         { assert(v > static_cast<real_t>(0) ); }
 
         template <typename T>
-        inline constexpr T operator() (T t) const
+        constexpr T operator() (T t) const
         {
             auto x = v * static_cast<real_t>(t);
             return static_cast<T>(x);
@@ -161,13 +160,13 @@ namespace ut
     typedef xywhx<std::uint8_t> xywhb;
 
     template <typename N>
-    inline std::ostream& operator<<(std::ostream& os, xywhx<N> const& r)
+    std::ostream& operator<<(std::ostream& os, xywhx<N> const& r)
     {
         return os << r.x << "x" << r.y << " [" << r.w << ", " << r.h << "]";
     }
 
     template <typename N>
-    inline std::string to_string(psizex<N> const& v)
+    std::string to_string(psizex<N> const& v)
     {
         std::ostringstream ss;
         ss << v;
@@ -179,5 +178,3 @@ namespace ut
 
 #undef M_DECL_PURE
 #undef M_DECL
-
-#endif // RECT_HPP

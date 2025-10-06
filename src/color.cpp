@@ -4,11 +4,6 @@
 
 #include "ut/color.hpp"
 
-extern "C"
-{
-#include "hsluv.c"
-}
-
 //
 // std
 //

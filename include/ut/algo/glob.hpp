@@ -80,27 +80,4 @@ namespace ut
 
         return dp[pattern.length()];
     }
-
-    /**
-     * @brief Find all substrings in a string that match a glob pattern
-     *
-     * @param text The text to search within
-     * @param pattern The glob pattern to search for
-     * @return std::vector<std::string> All matching substrings
-     */
-
-
-    std::vector<std::string> findGlobMatches(const std::string& text, const std::string& pattern)
-    {
-        std::vector<std::string> matches;
-
-        for (auto&& it: testFiles)
-        {
-            if (globMatch(pattern, it)) {
-                matches.push_back(it);
-            }
-        }
-
-        return matches;
-    }
 }

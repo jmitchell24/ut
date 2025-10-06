@@ -9,7 +9,7 @@
 #include <ostream>
 #include <type_traits>
 
-namespace ut::test
+namespace ut::exp
 {
 
     template<typename FinalType, typename IntType> class BitType

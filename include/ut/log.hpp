@@ -129,7 +129,7 @@ namespace ut::log
         Printer& prt;
 
         Builder(Level lvl, std::source_location src, Printer& prt = Printer::instance())
-            : log{ .lvl=lvl, .src=src, .tim = local_datetime::now() }, prt{prt}
+            : log{ .lvl=lvl, .src=src, .tim = local_datetime::now(), .msg={} }, prt{prt}
         { }
 
         ~Builder()

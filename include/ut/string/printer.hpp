@@ -51,6 +51,7 @@
 
 namespace ut
 {
+
     template <size_t BufferSize, size_t BufferCount>
     class basic_printer
     {

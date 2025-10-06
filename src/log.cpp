@@ -109,7 +109,9 @@ string const& log::Printer::escLvl(Level lvl) const
         case FATAL:   return esc_fatal;
         default:nopath_case(log::Level);
     }
-    return "[  ?????  ]";
+
+    thread_local string s = "[  ?????  ]";
+    return s;
 }
 
 std::string log::Printer::strSrc(source_location const& src)

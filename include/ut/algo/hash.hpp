@@ -151,7 +151,7 @@ namespace ut
     using digest    = digest64;
 
     template <typename N, N O, N P>
-    inline constexpr std::ostream& operator<<(std::ostream& os, basic_digest<N,O,P> const& d)
+    constexpr std::ostream& operator<<(std::ostream& os, basic_digest<N,O,P> const& d)
     {
         static_assert(sizeof(N) <= 8, "your int is too big");
         static_assert(std::is_integral_v<N>, "your int isn't an int");
@@ -172,7 +172,7 @@ namespace ut
     }
 
     template <typename N, N O, N P>
-    inline std::string to_string(basic_digest<N,O,P> const& d)
+    std::string to_string(basic_digest<N,O,P> const& d)
     {
         std::ostringstream ss;
         ss << d;

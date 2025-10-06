@@ -8,7 +8,6 @@
 // ut
 //
 
-#include <ut/options.hpp>
 #include <ut/time.hpp>
 #include <ut/term/escapes.hpp>
 #include <ut/string.hpp>
