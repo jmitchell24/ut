@@ -2,10 +2,10 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-option(HOUSE_KEEPING_MODE "All Warnings, All Warnings as Errors, Clang Compilation" ON)
+option(HOUSE_KEEPING_MODE "All Warnings, All Warnings as Errors, Clang Compilation" OFF)
 
 # Set compiler to Clang before project() call
-if(HOUSE_KEEPING_MODE)
+if (HOUSE_KEEPING_MODE)
     find_program(CLANG_C_COMPILER clang)
     find_program(CLANG_CXX_COMPILER clang++)
 
@@ -14,10 +14,13 @@ if(HOUSE_KEEPING_MODE)
         set(CMAKE_C_COMPILER ${CLANG_C_COMPILER})
         set(CMAKE_CXX_COMPILER ${CLANG_CXX_COMPILER})
 
-        message(STATUS "Using Clang: ${CLANG_CXX_COMPILER}")
+        message(STATUS "UT HOUSE KEEPING MODE ENABLED WITH CLANG")
     else()
-        message(WARNING "Clang not found, using default compiler")
+        message(WARNING "UT HOUSE KEEPING MODE DISABLED: CLANG NOT FOUND")
+        set(HOUSE_KEEPING_MODE OFF)
     endif()
+else()
+    message(STATUS "UT HOUSE KEEPING MODE DISABLED")
 endif()
 
 project(
@@ -54,6 +57,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Housekeeping Compiler Flags
+if (HOUSE_KEEPING_MODE)
 target_compile_options(${PROJECT_NAME} PRIVATE
         # Turn on all warnings, make all warnings into errors
         -Wall -Wextra -Wpedantic -Werror
@@ -70,6 +74,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wno-sign-compare
 
 )
+else()
+
+endif()
 
 # Testing target (separate from CMake's testing features)
 #option(BUILD_TESTS "Build the test program" OFF)
