@@ -2,6 +2,20 @@
 
 cmake_minimum_required(VERSION 3.12)
 
+# Set compiler to Clang before project() call
+if(NOT EMSCRIPTEN AND NOT DEFINED CMAKE_C_COMPILER)
+    find_program(CLANG_C_COMPILER clang)
+    find_program(CLANG_CXX_COMPILER clang++)
+
+    if(CLANG_C_COMPILER AND CLANG_CXX_COMPILER)
+        set(CMAKE_C_COMPILER ${CLANG_C_COMPILER})
+        set(CMAKE_CXX_COMPILER ${CLANG_CXX_COMPILER})
+        message(STATUS "Using Clang: ${CLANG_CXX_COMPILER}")
+    else()
+        message(WARNING "Clang not found, using default compiler")
+    endif()
+endif()
+
 project(
     ut
     VERSION "25.10.5"

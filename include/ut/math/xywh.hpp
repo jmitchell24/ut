@@ -33,7 +33,7 @@ namespace ut
         }
     };
 
-    inline constexpr perc operator "" _pc(unsigned long long i) noexcept
+    inline constexpr perc operator ""_pc (unsigned long long i) noexcept
     { return perc((real_t)i / (real_t)100); }
 
     template <typename N>

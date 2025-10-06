@@ -911,7 +911,7 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
     using cstrparam = cstrview;
 
 
-    M_DECL_PURE cstrview operator "" _sv(char const* str, size_t sz) noexcept
+    M_DECL_PURE cstrview operator ""_sv (char const* str, size_t sz) noexcept
     { return cstrview::make_cstrview(str, sz); }
 }
 

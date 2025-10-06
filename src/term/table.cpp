@@ -61,7 +61,7 @@ void Table::expandTo(size_t width, size_t height)
     // Update dimensions and cells
     m_width = new_width;
     m_height = new_height;
-    m_cells = move(new_cells);
+    m_cells = std::move(new_cells);
 
     // Expand widths and headers vectors
     m_widths.resize(m_width, 0);

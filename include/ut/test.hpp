@@ -135,7 +135,7 @@ namespace ut::test
 namespace impl
 {
     struct Run;
-    struct RunContext;
+    class RunContext;
     using runlist_type = std::vector<Run>;
     using runfunc_type = void(*)(RunContext&);
 
