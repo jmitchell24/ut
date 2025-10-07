@@ -2,6 +2,8 @@
 // Created by james on 24/09/25.
 //
 
+#pragma once
+
 #include <string>
 #include <vector>
 #include <array>
