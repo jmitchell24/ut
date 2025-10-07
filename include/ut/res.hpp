@@ -4,6 +4,12 @@
 
 #pragma once
 
+#include <ut/string.hpp>
+
+//
+// std
+//
+
 #include <string>
 #include <vector>
 #include <array>
@@ -15,28 +21,41 @@ namespace ut
     ///         Inspired by ImGui, borrowing the same stb lib code.
     struct SrcRes
     {
-        size_t wrap = 120;
+        std::string name;
+        size_t wrap;
+
+        SrcRes(std::string name, size_t wrap = 120)
+            : name{std::move(name)}, wrap{wrap}
+        { check(!this->name.empty()); }
 
         template <typename T>
-        std::string pack(std::vector<T> const& vec) const
-        {
-            return pack(vec.data(), vec.size() * sizeof(T));
-        }
+        std::string encode(std::vector<T> const& vec) const
+        { return encode(vec.data(), vec.size() * sizeof(T)); }
 
         template <typename T, size_t N>
-        std::string pack(std::array<T, N> const& arr) const
+        std::string encode(std::array<T, N> const& arr) const
+        { return encode(arr.data(), arr.size() * sizeof(T)); }
+
+        std::string encode(strparam str) const
+        { return encode(str.data(), str.size() * sizeof(char)); }
+
+        std::string encode(void const* data_in, size_t size) const;
+
+        static size_t decode(cstrparam str, void* data_out, size_t size);
+
+        template <typename T>
+        static void decode(std::vector<std::uint8_t>& vec)
         {
-            return pack(arr.data(), arr.size() * sizeof(T));
+            vec.resize(static_cast<size_t>(T::DECODED_SIZE));
+            decode(static_cast<cstrview>(T::ENCODED_DATA), vec.data(), vec.size());
         }
 
-        std::string pack(std::string const& str) const
+        template <typename T>
+        static void decode(std::array<std::uint8_t, static_cast<size_t>(T::DECODED_SIZE)>& arr)
         {
-            return pack(str.data(), str.size() * sizeof(char));
+            unpack(static_cast<cstrview>(T::ENCODED_DATA), arr.data(), arr.size());
         }
-
-        std::string pack(void const* data_in, size_t size) const;
-
-        static size_t unpackBin(std::string const& str, std::vector<std::uint8_t>& data);
-        static size_t unpackStr(std::string const& str, std::string& data);
     };
+
+
 }

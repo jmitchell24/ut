@@ -3,13 +3,13 @@
 //
 
 #include "ut/res.hpp"
-
-#include <cstring>
+#include "ut/time.hpp"
 using namespace ut;
 
 //
 // std
 //
+#include <cstring>
 #include <cstddef>
 #include <vector>
 #include <cstdint>
@@ -391,7 +391,7 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
-string SrcRes::pack(void const* data_in, size_t data_size) const
+string SrcRes::encode(void const* data_in, size_t data_size) const
 {
     if (data_in == nullptr)
         return "";
@@ -411,11 +411,6 @@ string SrcRes::pack(void const* data_in, size_t data_size) const
 
 
     ostringstream oss;
-
-    string name = "foo";
-
-
-
 
     oss << "\"";
 
@@ -438,56 +433,45 @@ string SrcRes::pack(void const* data_in, size_t data_size) const
         if ((src_i % wrap) == wrap - 4)
             oss << "\"\n    \"";
     }
-    oss << "\"";
+    oss << "\"_sv";
 
     return format(R"(
 
-    // encoded with <ut/src_pack.hpp>
-    // 2025-09-24, James Mitchell
-
-    struct {0}
+    // encoded with <ut/res.hpp> ({0})
+    struct {1}
     {{
-        constexpr static size_t data_size = {1};
-        using arr_type = std::array<uint8_t, {1}>;
-        using vec_type = std::vector<uint8_t>;
-        static char const* const encoded_data;
-
-        static const arr_type data;
-        static void unpack(arr_type& arr) {{ }}
+        constexpr static size_t DECODED_SIZE = {2};
+        const static ut::cstrview ENCODED_DATA;
     }};
 
-    char const* const {0}::encoded_data =
-    {2};
+    cstrview const {1}::ENCODED_DATA =
+    {3};
 
-    )", name, data_size, oss.str());
+    )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), name, data_size, oss.str());
 }
 
-size_t SrcRes::unpackBin(string const& str_in, vector<uint8_t>& data_unpacked)
+size_t SrcRes::decode(cstrparam str_encoded, void* bin_out, size_t bin_out_size)
 {
-    vector<uint8_t> data_packed;
-    data_packed.resize((str_in.size() + 4) / 5 * 4);
+    vector<uint8_t> bin_encoded;
+    bin_encoded.resize((str_encoded.size() + 4) / 5 * 4);
 
-    Decode85((unsigned char const*)str_in.data(), data_packed.data());
+    Decode85((unsigned char const*)str_encoded.data(), bin_encoded.data());
 
-    data_unpacked.resize(stb_decompress_length(data_packed.data()));
-
-    size_t new_sz = stb_decompress(data_unpacked.data(), data_packed.data(), data_unpacked.size());
-    data_unpacked.resize(new_sz);
-
-    return data_unpacked.size();
+    //size_t bin_decoded_size = stb_decompress_length(bin_encoded.data());
+    return stb_decompress((unsigned char*)bin_out, bin_encoded.data(), bin_out_size);
 }
 
-size_t SrcRes::unpackStr(string const& str_in, string& data_unpacked)
-{
-    vector<uint8_t> data_packed;
-    data_packed.resize((str_in.size() + 4) / 5 * 4);
-
-    Decode85((unsigned char const*)str_in.data(), data_packed.data());
-
-    data_unpacked.resize(stb_decompress_length(data_packed.data()));
-
-    size_t new_sz = stb_decompress((unsigned char*)data_unpacked.data(), data_packed.data(), data_unpacked.size());
-    data_unpacked.resize(new_sz);
-
-    return data_unpacked.size();
-}
+// size_t SrcRes::unpackStr(cstrparam str_in, string& data_unpacked)
+// {
+//     vector<uint8_t> data_packed;
+//     data_packed.resize((str_in.size() + 4) / 5 * 4);
+//
+//     Decode85((unsigned char const*)str_in.data(), data_packed.data());
+//
+//     data_unpacked.resize(stb_decompress_length(data_packed.data()));
+//
+//     size_t new_sz = stb_decompress((unsigned char*)data_unpacked.data(), data_packed.data(), data_unpacked.size());
+//     data_unpacked.resize(new_sz);
+//
+//     return data_unpacked.size();
+// }
