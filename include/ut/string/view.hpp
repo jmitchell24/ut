@@ -913,6 +913,9 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
 
     M_DECL_PURE cstrview operator ""_sv (char const* str, size_t sz) noexcept
     { return cstrview::make_cstrview(str, sz); }
+
+    M_DECL_PURE cstrview operator ""_src (char const* str, size_t sz) noexcept
+    { return cstrview::make_cstrview(str, sz).trimMargin(); }
 }
 
 template <typename Char, typename Traits, bool NullTerminated>

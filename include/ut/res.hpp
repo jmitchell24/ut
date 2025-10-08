@@ -21,6 +21,8 @@ namespace ut
     ///         Inspired by ImGui, borrowing the same stb lib code.
     struct SrcRes
     {
+        struct Src { std::string decl, impl; };
+
         std::string name;
         size_t wrap;
 
@@ -29,17 +31,17 @@ namespace ut
         { check(!this->name.empty()); }
 
         template <typename T>
-        std::string encode(std::vector<T> const& vec) const
+        Src encode(std::vector<T> const& vec) const
         { return encode(vec.data(), vec.size() * sizeof(T)); }
 
         template <typename T, size_t N>
-        std::string encode(std::array<T, N> const& arr) const
+        Src encode(std::array<T, N> const& arr) const
         { return encode(arr.data(), arr.size() * sizeof(T)); }
 
-        std::string encode(strparam str) const
+        Src encode(strparam str) const
         { return encode(str.data(), str.size() * sizeof(char)); }
 
-        std::string encode(void const* data_in, size_t size) const;
+        Src encode(void const* data_in, size_t size) const;
 
         static size_t decode(cstrparam str, void* data_out, size_t size);
 

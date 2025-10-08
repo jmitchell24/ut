@@ -391,13 +391,13 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
-string SrcRes::encode(void const* data_in, size_t data_size) const
+SrcRes::Src SrcRes::encode(void const* data_in, size_t data_size) const
 {
     if (data_in == nullptr)
-        return "";
+        return {};
 
     if (data_size == 0)
-        return "";
+        return {};
 
     int data_sz = data_size;
     char const* data = reinterpret_cast<char const*>(data_in);
@@ -435,19 +435,22 @@ string SrcRes::encode(void const* data_in, size_t data_size) const
     }
     oss << "\"_sv";
 
-    return format(R"(
+    return
+    {
+        format(R"(
+        // encoded with <ut/res.hpp> ({0})
+        struct {1}
+        {{
+            constexpr static size_t DECODED_SIZE = {2};
+            const static ut::cstrview ENCODED_DATA;
+        }};
+        )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), name, data_size),
 
-    // encoded with <ut/res.hpp> ({0})
-    struct {1}
-    {{
-        constexpr static size_t DECODED_SIZE = {2};
-        const static ut::cstrview ENCODED_DATA;
-    }};
-
-    cstrview const {1}::ENCODED_DATA =
-    {3};
-
-    )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), name, data_size, oss.str());
+        format(R"(
+        cstrview const {0}::ENCODED_DATA =
+        {1};
+        )", name, oss.str())
+    };
 }
 
 size_t SrcRes::decode(cstrparam str_encoded, void* bin_out, size_t bin_out_size)

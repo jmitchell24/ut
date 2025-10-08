@@ -25,7 +25,7 @@ endif()
 
 project(
     ut
-    VERSION "25.10.7"
+    VERSION "25.10.8"
     DESCRIPTION "ut, my personal c++ code library"
     LANGUAGES CXX
 )

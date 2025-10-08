@@ -1,16 +1,12 @@
 #pragma once
 
-// https://stackoverflow.com/a/4976611
-//    template <std::size_t BlockSize=4096, typename Char=char, typename Traits = std::char_traits<Char>>
-//    std::basic_string<Char,Traits> gulp(std::basic_istream<Char,Traits>& in)
-//    {
-//        std::basic_string<Char,Traits> ret;
-//        Char block[BlockSize];
-//        while (in.read(block, sizeof(block)))
-//            ret.append(block, sizeof(block));
-//        ret.append(block, in.gcount());
-//        return ret;
-//    }
+
+
+#include <ut/check.hpp>
+
+//
+// std
+//
 
 #include <fstream>
 #include <vector>
@@ -23,6 +19,18 @@
 
 namespace ut::gulp
 {
+    // https://stackoverflow.com/a/4976611
+    //    template <std::size_t BlockSize=4096, typename Char=char, typename Traits = std::char_traits<Char>>
+    //    std::basic_string<Char,Traits> gulp(std::basic_istream<Char,Traits>& in)
+    //    {
+    //        std::basic_string<Char,Traits> ret;
+    //        Char block[BlockSize];
+    //        while (in.read(block, sizeof(block)))
+    //            ret.append(block, sizeof(block));
+    //        ret.append(block, in.gcount());
+    //        return ret;
+    //    }
+
 
     // Equivalent to 1 GiB
 
@@ -32,7 +40,7 @@ namespace ut::gulp
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename T=std::uint8_t>
     std::vector<T> file_to_vector(FILE* in)
     {
-        assert(in != nullptr);
+        check_null(in);
 
         std::vector<T> ret;
         T block[BlockSize];
@@ -57,6 +65,22 @@ namespace ut::gulp
         }
 
         throw std::runtime_error{"gulp::file_to_vector(): maxiumum file read exceeded"};
+    }
+
+    template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename T=std::uint8_t>
+    std::vector<T> file_to_vector(char const* filename)
+    {
+        std::vector<T> ret;
+        if (FILE* file = fopen(filename, "rb"))
+        {
+            ret = file_to_vector<MaxBlocks, BlockSize, T>(file);
+            fclose(file);
+        }
+        else
+        {
+            throw std::runtime_error{std::format("gulp::file_to_vector(): failed to open file: {}", filename)};
+        }
+        return ret;
     }
 
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename Char=char, typename Traits = std::char_traits<Char>>
@@ -107,6 +131,22 @@ namespace ut::gulp
         }
 
         throw std::runtime_error{"gulp::file_to_string(): maxiumum file read exceeded"};
+    }
+
+    template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename Char=char, typename Traits = std::char_traits<Char>>
+    std::basic_string<Char,Traits> file_to_string(char const* filename)
+    {
+        std::basic_string<Char,Traits> ret;
+        if (FILE* file = fopen(filename, "rb"))
+        {
+            ret = file_to_string<MaxBlocks, BlockSize, Char, Traits>(file);
+            fclose(file);
+        }
+        else
+        {
+            throw std::runtime_error{std::format("gulp::file_to_string(): failed to open file: {}", filename)};
+        }
+        return ret;
     }
 
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename Char=char, typename Traits = std::char_traits<Char>>
