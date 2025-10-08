@@ -16,6 +16,7 @@
 #include <cstring>
 #include <cstdint>
 #include <cassert>
+#include <format>
 
 namespace ut::gulp
 {
