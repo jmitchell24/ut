@@ -55,7 +55,7 @@ namespace ut
         template <typename T>
         static void decode(std::array<std::uint8_t, static_cast<size_t>(T::DECODED_SIZE)>& arr)
         {
-            unpack(static_cast<cstrview>(T::ENCODED_DATA), arr.data(), arr.size());
+            decode(static_cast<cstrview>(T::ENCODED_DATA), arr.data(), arr.size());
         }
     };
 
