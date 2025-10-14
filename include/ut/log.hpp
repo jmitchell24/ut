@@ -34,9 +34,10 @@
 #define ut_error    ( ut::log::error() )
 #define ut_fatal    ( ut::log::fatal() )
 
-#define ut_var(_var)    ( ut::log::var( (_var), #_var "=") )
-#define ut_list(_list)  ( ut::log::list( (_list), false, #_list "=" ) )
-#define ut_vlist(_list) ( ut::log::list( (_list), true, #_list "=" ) )
+#define ut_var(_var)                ( ut::log::var( (_var), #_var "=") )
+#define ut_named_var(_name, _var)   ( ut::log::var( (_var), _name "=") )
+#define ut_list(_list)              ( ut::log::list( (_list), false, #_list "=" ) )
+#define ut_vlist(_list)             ( ut::log::list( (_list), true, #_list "=" ) )
 
 
 
