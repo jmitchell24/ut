@@ -10,11 +10,17 @@ using namespace ut;
 //
 // std
 //
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 using namespace std;
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 //
 // helpers
@@ -35,10 +41,29 @@ static std::string getEscBg(color const& bg)
 log::Printer::Printer(ostream& os)
     : m_os{os}
 {
-#ifdef _WIN32
+#if defined(__EMSCRIPTEN__)
     setPrintText();
+#elif defined(_WIN32)
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    if (h != INVALID_HANDLE_VALUE && GetConsoleMode(h, &mode))
+    {
+        SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        setPrintTerm();
+    }
+    else
+    {
+        setPrintText();
+    }
 #else
-    setPrintTerm();
+    if (isatty(STDOUT_FILENO))
+    {
+        setPrintTerm();
+    }
+    else
+    {
+        setPrintText();
+    }
 #endif
 }
 
