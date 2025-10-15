@@ -2,12 +2,6 @@
 // Created by james on 26/09/25.
 //
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
 #include "ut/log.hpp"
 #include "ut/term/escapes.hpp"
 #include "ut/random.hpp"
@@ -24,7 +18,11 @@ using namespace ut;
 #include <sstream>
 using namespace std;
 
-
+#ifdef _WIN32
+// Fuck you Windows!
+#else
+#include <unistd.h>
+#endif
 
 //
 // helpers
@@ -48,17 +46,7 @@ log::Printer::Printer(ostream& os)
 #if defined(__EMSCRIPTEN__)
     setPrintText();
 #elif defined(_WIN32)
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD mode = 0;
-    if (h != INVALID_HANDLE_VALUE && GetConsoleMode(h, &mode))
-    {
-        SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        setPrintTerm();
-    }
-    else
-    {
-        setPrintText();
-    }
+    setPrintText(); // Fuck you Windows!
 #else
     if (isatty(STDOUT_FILENO))
     {
