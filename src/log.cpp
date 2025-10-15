@@ -2,16 +2,18 @@
 // Created by james on 26/09/25.
 //
 
-#include "ut/log.hpp"
-#include "ut/term/escapes.hpp"
-#include "ut/random.hpp"
-using namespace ut;
-
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
 #endif
+
+#include "ut/log.hpp"
+#include "ut/term/escapes.hpp"
+#include "ut/random.hpp"
+using namespace ut;
+
+
 
 //
 // std
