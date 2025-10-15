@@ -7,6 +7,12 @@
 #include "ut/random.hpp"
 using namespace ut;
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 //
 // std
 //
@@ -16,11 +22,7 @@ using namespace ut;
 #include <sstream>
 using namespace std;
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
+
 
 //
 // helpers
