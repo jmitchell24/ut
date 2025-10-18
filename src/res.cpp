@@ -18,6 +18,7 @@ using namespace ut;
 #include <cassert>
 #include <sstream>
 #include <format>
+#include <unordered_set>
 using namespace std;
 
 // stb_compress* from stb.h - declaration
@@ -391,8 +392,47 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
+bool isValidCPPName(std::string const& s)
+{
+    if (s.empty())
+        return false;
+
+    // First character must be a letter or underscore
+    if (!isalpha(s[0]) && s[0] != '_')
+        return false;
+
+    // Remaining characters must be letters, digits, or underscores
+    for (size_t i = 1; i < s.length(); ++i)
+        if (!isalnum(s[i]) && s[i] != '_')
+            return false;
+
+    // Check if it's a C++ keyword
+    static const unordered_set<string> keywords = {
+        "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor",
+        "bool", "break", "case", "catch", "char", "char8_t", "char16_t", "char32_t",
+        "class", "compl", "concept", "const", "consteval", "constexpr", "constinit",
+        "const_cast", "continue", "co_await", "co_return", "co_yield", "decltype",
+        "default", "delete", "do", "double", "dynamic_cast", "else", "enum",
+        "explicit", "export", "extern", "false", "float", "for", "friend", "goto",
+        "if", "inline", "int", "long", "mutable", "namespace", "new", "noexcept",
+        "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected",
+        "public", "register", "reinterpret_cast", "requires", "return", "short",
+        "signed", "sizeof", "static", "static_assert", "static_cast", "struct",
+        "switch", "template", "this", "thread_local", "throw", "true", "try",
+        "typedef", "typeid", "typename", "union", "unsigned", "using", "virtual",
+        "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
+    };
+
+    if (keywords.contains(s))
+        return false;
+
+    return true;
+}
+
 SrcRes::Src SrcRes::encode(void const* data_in, size_t data_size) const
 {
+    check(isValidCPPName(name));
+
     if (data_in == nullptr)
         return {};
 
