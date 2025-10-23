@@ -9,6 +9,7 @@
 #include "ut/algo/glob.hpp"
 #include "ut/algo/gulp.hpp"
 #include "ut/algo/hash.hpp"
+#include "ut/algo/optional_range_support.hpp"
 
 namespace ut
 { }

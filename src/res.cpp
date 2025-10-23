@@ -392,7 +392,7 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
-bool isValidCPPName(std::string const& s)
+static bool isValidCPPName(string const& s)
 {
     if (s.empty())
         return false;
@@ -503,18 +503,3 @@ size_t SrcRes::decode(cstrparam str_encoded, void* bin_out, size_t bin_out_size)
     //size_t bin_decoded_size = stb_decompress_length(bin_encoded.data());
     return stb_decompress((unsigned char*)bin_out, bin_encoded.data(), bin_out_size);
 }
-
-// size_t SrcRes::unpackStr(cstrparam str_in, string& data_unpacked)
-// {
-//     vector<uint8_t> data_packed;
-//     data_packed.resize((str_in.size() + 4) / 5 * 4);
-//
-//     Decode85((unsigned char const*)str_in.data(), data_packed.data());
-//
-//     data_unpacked.resize(stb_decompress_length(data_packed.data()));
-//
-//     size_t new_sz = stb_decompress((unsigned char*)data_unpacked.data(), data_packed.data(), data_unpacked.size());
-//     data_unpacked.resize(new_sz);
-//
-//     return data_unpacked.size();
-// }
