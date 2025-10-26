@@ -11,6 +11,8 @@
 #define one_                    scalar_type{1}
 #define two_                    scalar_type{2}
 
+
+
 namespace ut
 {
     template <typename N> class vec<N, 2>
@@ -29,6 +31,14 @@ namespace ut
             struct { scalar_type x,y; };
             pack_type pack;
         };
+
+        //
+        // class extras (if any)
+        //
+
+        #ifdef UT_VEC2_CLASS_EXTRA
+        UT_VEC2_CLASS_EXTRA
+        #endif
 
         //
         // ctor

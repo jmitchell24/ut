@@ -31,6 +31,14 @@ namespace ut
         };
 
         //
+        // class extras (if any)
+        //
+
+        #ifdef UT_VEC3_CLASS_EXTRA
+        UT_VEC3_CLASS_EXTRA
+        #endif
+
+        //
         // ctor
         //
 

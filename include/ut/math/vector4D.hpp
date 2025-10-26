@@ -30,6 +30,14 @@ namespace ut
             pack_type pack;
         };
 
+        //
+        // class extras (if any)
+        //
+
+        #ifdef UT_VEC4_CLASS_EXTRA
+        UT_VEC4_CLASS_EXTRA
+        #endif
+
         M_DECL vec()
             : x{zero_}, y{zero_}, z{zero_}, w{zero_}
         {}

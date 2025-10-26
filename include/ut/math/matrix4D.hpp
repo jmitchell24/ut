@@ -85,6 +85,14 @@ namespace ut
         };
 
         //
+        // class extras (if any)
+        //
+
+        #ifdef UT_MAT4_CLASS_EXTRA
+        UT_MAT4_CLASS_EXTRA
+        #endif
+
+        //
         // ctor
         //
 
