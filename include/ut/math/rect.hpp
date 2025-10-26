@@ -160,7 +160,7 @@ namespace ut
 
         template <typename T=N>
         M_DECL_PURE xywhx<T> xywh() const
-        { return xywhx<T>(static_cast<T>(width()), static_cast<T>(height()), static_cast<T>(min.x), static_cast<T>(min.y)); }
+        { return xywhx<T>(static_cast<T>(min.x), static_cast<T>(min.y), static_cast<T>(width()), static_cast<T>(height())); }
 
 
 
