@@ -54,6 +54,14 @@ namespace ut
         };
 
         //
+        // class extras (if any)
+        //
+
+        #ifdef UT_XYWH_CLASS_EXTRA
+        UT_XYWH_CLASS_EXTRA
+        #endif
+
+        //
         // ctor
         //
 

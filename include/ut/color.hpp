@@ -353,6 +353,14 @@ namespace ut
         pack_type   pack;
         struct { b8 a,b,g,r; };
 
+        //
+        // class extras (if any)
+        //
+
+        #ifdef UT_COLOR_CLASS_EXTRA
+        UT_COLOR_CLASS_EXTRA
+        #endif
+
         M_DECL color()
             : i{0x000000ff}
         {}
