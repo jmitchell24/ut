@@ -19,6 +19,7 @@ using namespace ut;
 #include <sstream>
 #include <format>
 #include <unordered_set>
+#include <fstream>
 using namespace std;
 
 // stb_compress* from stb.h - declaration
@@ -392,7 +393,7 @@ static void Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 
-static bool isValidCPPName(string const& s)
+static bool isValidCPPName(strparam s)
 {
     if (s.empty())
         return false;
@@ -402,12 +403,12 @@ static bool isValidCPPName(string const& s)
         return false;
 
     // Remaining characters must be letters, digits, or underscores
-    for (size_t i = 1; i < s.length(); ++i)
+    for (size_t i = 1; i < s.size(); ++i)
         if (!isalnum(s[i]) && s[i] != '_')
             return false;
 
     // Check if it's a C++ keyword
-    static const unordered_set<string> keywords = {
+    static const unordered_set<strparam> keywords = {
         "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor",
         "bool", "break", "case", "catch", "char", "char8_t", "char16_t", "char32_t",
         "class", "compl", "concept", "const", "consteval", "constexpr", "constinit",
@@ -429,10 +430,26 @@ static bool isValidCPPName(string const& s)
     return true;
 }
 
+static bool isValidCPPNamespace(strparam s)
+{
+    for (auto&& it: strview(s).split("::"))
+        if (!isValidCPPName(it))
+            return false;
+    return true;
+}
+
+SrcRes::SrcRes(string name, string ns, size_t wrap)
+    : m_name{std::move(name)}, m_namespace{std::move(ns)}, m_wrap{wrap}
+{
+    if (!isValidCPPName(m_name))
+        throw runtime_error{"Invalid CPP Name: " + m_name};
+
+    if (!m_namespace.empty() && !isValidCPPNamespace(m_namespace))
+        throw runtime_error{"Invalid CPP Namespace: " + m_namespace};
+}
+
 SrcRes::Src SrcRes::encode(void const* data_in, size_t data_size) const
 {
-    check(isValidCPPName(name));
-
     if (data_in == nullptr)
         return {};
 
@@ -470,26 +487,49 @@ SrcRes::Src SrcRes::encode(void const* data_in, size_t data_size) const
             prev_c = c;
         }
 
-        if ((src_i % wrap) == wrap - 4)
+        if ((src_i % m_wrap) == m_wrap - 4)
             oss << "\"\n    \"";
     }
     oss << "\"_sv";
 
+    if (m_namespace.empty())
+    {
+        return
+        {
+            format(R"(
+                // encoded with <ut/res.hpp> ({0})
+                struct {1}
+                {{
+                    constexpr static size_t DECODED_SIZE = {2};
+                    const static ut::cstrview ENCODED_DATA;
+                }};
+                )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_name, data_size),
+
+            format(R"(
+                cstrview const {0}::ENCODED_DATA =
+                {1};
+                )", m_name, oss.str())
+        };
+    }
+
     return
     {
         format(R"(
-        // encoded with <ut/res.hpp> ({0})
-        struct {1}
-        {{
-            constexpr static size_t DECODED_SIZE = {2};
-            const static ut::cstrview ENCODED_DATA;
-        }};
-        )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), name, data_size),
+            // encoded with <ut/res.hpp> ({0})
+            namespace {1}
+            {{
+                struct {2}
+                {{
+                    constexpr static size_t DECODED_SIZE = {3};
+                    const static ut::cstrview ENCODED_DATA;
+                }};
+            }}
+            )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_namespace, m_name, data_size),
 
         format(R"(
-        cstrview const {0}::ENCODED_DATA =
-        {1};
-        )", name, oss.str())
+            cstrview const {0}::{1}::ENCODED_DATA =
+            {2};
+            )", m_namespace, m_name, oss.str())
     };
 }
 
@@ -502,4 +542,108 @@ size_t SrcRes::decode(cstrparam str_encoded, void* bin_out, size_t bin_out_size)
 
     //size_t bin_decoded_size = stb_decompress_length(bin_encoded.data());
     return stb_decompress((unsigned char*)bin_out, bin_encoded.data(), bin_out_size);
+}
+
+namespace fs = std::filesystem;
+
+// Helper function to sanitize a filename/directory name into a valid C++ identifier
+static std::string sanitizeName(std::string const& name)
+{
+    std::string result;
+    result.reserve(name.size());
+
+    for (char c : name) {
+        if (std::isalnum(static_cast<unsigned char>(c))) {
+            result += c;
+        } else if (c == '.' || c == '-' || c == ' ') {
+            result += '_';
+        }
+        // Skip other invalid characters
+    }
+
+    // Ensure it doesn't start with a digit
+    if (!result.empty() && std::isdigit(static_cast<unsigned char>(result[0]))) {
+        result = "_" + result;
+    }
+
+    return result.empty() ? "unnamed" : result;
+}
+
+// Helper function to read file contents into a vector
+static std::vector<std::uint8_t> readFileBytes(fs::path const& path)
+{
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + path.string());
+    }
+
+    auto size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<std::uint8_t> buffer(static_cast<size_t>(size));
+    if (!file.read(reinterpret_cast<char*>(buffer.data()), size)) {
+        throw std::runtime_error("Failed to read file: " + path.string());
+    }
+
+    return buffer;
+}
+
+namespace fs = std::filesystem;
+
+static std::string sanitize(std::string const& s)
+{
+    std::string r;
+    r.reserve(s.size());
+    for (char c : s)
+        if (std::isalnum(c)) r += c;
+        else if (c == '.' || c == '-' || c == ' ') r += '_';
+    if (!r.empty() && std::isdigit(r[0])) r = "_" + r;
+    return r.empty() ? "unnamed" : r;
+}
+
+static std::vector<std::uint8_t> readFile(fs::path const& p)
+{
+    std::ifstream f(p, std::ios::binary | std::ios::ate);
+    if (!f) throw std::runtime_error("Failed to open: " + p.string());
+    auto sz = f.tellg();
+    f.seekg(0);
+    std::vector<std::uint8_t> buf(sz);
+    if (!f.read(reinterpret_cast<char*>(buf.data()), sz))
+        throw std::runtime_error("Failed to read: " + p.string());
+    return buf;
+}
+
+SrcRes::Src SrcRes::encodeFile(fs::path const& p)
+{
+    if (!fs::is_regular_file(p))
+        throw std::runtime_error("Not a file: " + p.string());
+    return SrcRes(sanitize(p.filename().string())).encode(readFile(p));
+}
+
+SrcRes::Src SrcRes::encodeDirectory(fs::path const& p, bool rec)
+{
+    if (!fs::is_directory(p))
+        throw std::runtime_error("Not a directory: " + p.string());
+
+    std::ostringstream decl, impl;
+
+    auto process = [&](auto& self, fs::path const& dir, std::string const& ns) -> void {
+        for (auto const& e : fs::directory_iterator(dir)) {
+            if (e.is_regular_file()) {
+                auto name = sanitize(e.path().filename().string());
+                try {
+                    auto src = SrcRes(name, ns).encode(readFile(e.path()));
+                    decl << src.decl << "\n";
+                    impl << src.impl << "\n";
+                } catch (...) {}
+            } else if (rec && e.is_directory()) {
+                auto sub = sanitize(e.path().filename().string());
+                self(self, e.path(), ns.empty() ? sub : ns + "::" + sub);
+            }
+        }
+    };
+
+    process(process, p, sanitize(p.filename().string()));
+
+    return {decl.str(), impl.str()};
 }

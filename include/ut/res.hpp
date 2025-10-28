@@ -14,6 +14,7 @@
 #include <vector>
 #include <array>
 #include <cstdint>
+#include <filesystem>
 
 namespace ut
 {
@@ -23,12 +24,19 @@ namespace ut
     {
         struct Src { std::string decl, impl; };
 
-        std::string name;
-        size_t wrap;
+        SrcRes(std::string name, std::string ns="", size_t wrap = 120);
 
-        SrcRes(std::string name, size_t wrap = 120)
-            : name{std::move(name)}, wrap{wrap}
-        { check(!this->name.empty()); }
+        /// Namespace for code output ( optional )
+        std::string const& ns() const
+        { return m_namespace; }
+
+        /// Struct name for code output ( must be a valid C++ name )
+        std::string const& name() const
+        { return m_name; }
+
+        /// Maximum line length for encoded string literal.
+        size_t wrap() const
+        { return m_wrap; }
 
         template <typename T>
         Src encode(std::vector<T> const& vec) const
@@ -38,7 +46,7 @@ namespace ut
         Src encode(std::array<T, N> const& arr) const
         { return encode(arr.data(), arr.size() * sizeof(T)); }
 
-        Src encode(strparam str) const
+        Src encode(std::string const& str) const
         { return encode(str.data(), str.size() * sizeof(char)); }
 
         Src encode(void const* data_in, size_t size) const;
@@ -57,7 +65,17 @@ namespace ut
         {
             decode(static_cast<cstrview>(T::ENCODED_DATA), arr.data(), arr.size());
         }
+
+        static Src encodeFile(std::filesystem::path const& path);
+        static Src encodeDirectory(std::filesystem::path const& path, bool recursive=true);
+
+    private:
+        std::string m_name;
+        std::string m_namespace;
+        size_t      m_wrap;
     };
+
+
 
 
 }
