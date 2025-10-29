@@ -216,7 +216,7 @@ namespace ut
         /// Returns indices for the entire range of this view.
         /// \return     A struct containing the indices.
         M_DECL_PURE indices asIndices() const
-        { return indices(m_begin, m_end - m_begin); }
+        { return indices(0, m_end - m_begin); }
 
 
         /// Returns indices of this view within an enclosing string.
@@ -343,7 +343,7 @@ namespace ut
             check(m_end   <= orig.m_end);
             check(m_end   >= orig.m_begin);
 
-            pointer_type begin = copy.m_begin + size_type(m_begin - orig.m_begin);
+            pointer_type begin = copy.m_begin + size_t(m_begin - orig.m_begin);
             pointer_type end   = begin + size();
             return copy.with(begin, end);
         }
@@ -511,11 +511,16 @@ namespace ut
         M_DECL_PURE pointer_type findLast(strview_type const& s) const
         {
             size_t sz = s.size();
-            if (sz > size())
-                return m_end;
-            for(pointer_type i = m_end-s.size(); i > m_begin-1; --i)
-                if (equals(with(i,i+sz), s))
+            if (sz > size() || empty()) return m_end;
+
+            // Start from the last possible position
+            for (pointer_type i = m_end - sz; i >= m_begin; --i)
+            {
+                if (equals(with(i, i + sz), s))
                     return i;
+                if (i == m_begin) // Prevent going before m_begin
+                    break;
+            }
             return m_end;
         }
 
@@ -525,8 +530,7 @@ namespace ut
         /// \return         Pointer to the last occurrence of \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findLast(char_type c) const
         {
-            if (m_begin == m_end)
-                return m_begin;
+            if (m_begin == m_end) return m_begin;
             for (pointer_type i = m_end-1; i > m_begin-1; --i)
                 if (traits_type::eq(*i,c))
                     return i;
@@ -538,9 +542,15 @@ namespace ut
         /// \return         Pointer to the last occurrence of a character not equal to \a c, or \a end() if not found.
         M_DECL_PURE pointer_type findLastNot(char_type c) const
         {
-            for (pointer_type i = m_end-1; i != m_begin-1; --i)
-                if (!traits_type::eq(*i,c))
+            if (empty()) return m_end;
+
+            for (pointer_type i = m_end - 1; i >= m_begin; --i)
+            {
+                if (!traits_type::eq(*i, c))
                     return i;
+                if (i == m_begin) // Prevent going before m_begin
+                    break;
+            }
             return m_end;
         }
 
@@ -549,8 +559,7 @@ namespace ut
         /// \return         True if this view begins with the character \a c, false otherwise.
         M_DECL_PURE bool beginsWith(char_type c) const
         {
-            if (m_begin == m_end)
-                return false;
+            if (m_begin == m_end) return false;
             return *m_begin == c;
         }
 
@@ -559,8 +568,7 @@ namespace ut
         /// \return         True if this view begins with the string \a s, false otherwise.
         M_DECL_PURE bool beginsWith(strview_type const& s) const
         {
-            if (s.size() > size())
-                return false;
+            if (s.size() > size()) return false;
             return equals(takeBegin(s.size()), s);
         }
 
@@ -569,8 +577,7 @@ namespace ut
         /// \return         True if this view ends with the character \a c, false otherwise.
         M_DECL_PURE bool endsWith(char_type c) const
         {
-            if (m_begin == m_end)
-                return false;
+            if (m_begin == m_end) return false;
             return *(m_end-1) == c;
         }
 
@@ -579,6 +586,7 @@ namespace ut
         /// \return         True if this view ends with the string \a s, false otherwise.
         M_DECL_PURE bool endsWith(strview_type const& s) const
         {
+            if (s.size() > size()) return false;
             return equals(with(m_end - s.size(), m_end), s);
         }
 
@@ -599,11 +607,11 @@ namespace ut
 
         /// Removes trailing whitespace from this view.
         /// \return       A new view with trailing whitespace removed.
-        M_DECL_PURE strview_nstr_type rtrim() const { return with(m_begin, trimEnd()); }
+        M_DECL_PURE strview_nstr_type rtrim() const { return with(m_begin, trimEnd(m_begin)); }
 
         /// Removes leading and trailing whitespace from this view.
         /// \return       A new view with leading and trailing whitespace removed.
-        M_DECL_PURE strview_nstr_type trim() const { return with(trimBegin(), trimEnd()); }
+        M_DECL_PURE strview_nstr_type trim() const { return with(trimBegin(), trimEnd(m_end)); }
 
         /// Checks if this view is trimmed. A view is considered trimmed if it is empty or if the first and last characters are not whitespace.
         /// \return       True if this view is trimmed, false otherwise.       
@@ -621,7 +629,7 @@ namespace ut
         M_DECL_PURE size_t ltrimLength() const { return trimBegin() - m_begin; }
 
         ///
-        M_DECL_PURE size_t rtrimLength() const { return m_end - trimEnd(); }
+        M_DECL_PURE size_t rtrimLength() const { return m_end - trimEnd(m_begin); }
 
 
         M_DECL_PURE std::string trimMargin(strview_cstr_type margin_prefix = "|") const
@@ -674,18 +682,12 @@ namespace ut
 
         #pragma region Split
 
-M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1)
+        // Fixed rsplit implementation
+        M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1) const
         {
-
-            // TODO: implement this correctly (below is broken)
-            nopath_impl;
-            return { };
-
-#define RSPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.insert(v.begin(), with(m_begin, word_end)); return v; } }
-
             std::vector<strview_nstr_type> v;
 
-            if (max_split == 0)
+            if (max_split == 0 || empty())
                 return v;
 
             // Default separator (whitespace)
@@ -693,65 +695,96 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
             {
                 auto word_end = m_end;
 
-                while (word_end != m_begin)
+                while (word_end > m_begin)
                 {
                     // Skip trailing whitespace
-                    while (word_end != m_begin && std::isspace(*(word_end - 1)))
-                    {
-                        if (--word_end == m_begin)
-                            return v;
-                    }
+                    while (word_end > m_begin && std::isspace(*(word_end - 1)))
+                        --word_end;
+
+                    if (word_end == m_begin)
+                        break;
 
                     auto word_beg = word_end;
 
-                    // Find beginning of current token
-                    while (word_beg != m_begin && !std::isspace(*(word_beg - 1)))
-                    {
-                        if (--word_beg == m_begin)
-                        {
-                            v.insert(v.begin(), with(word_beg, word_end));
-                            return v;
-                        }
-                    }
+                    // Find beginning of current word
+                    while (word_beg > m_begin && !std::isspace(*(word_beg - 1)))
+                        --word_beg;
 
-                    RSPLIT_CHECK
+                    // Add the word at the beginning of the vector
                     v.insert(v.begin(), with(word_beg, word_end));
+
+                    // Check if we've hit max_split
+                    if (max_split > 0 && (int)v.size() >= max_split)
+                    {
+                        // Add remaining portion as first element
+                        if (word_beg > m_begin)
+                        {
+                            auto remaining_end = word_beg;
+                            while (remaining_end > m_begin && std::isspace(*(remaining_end - 1)))
+                                --remaining_end;
+                            if (remaining_end > m_begin)
+                                v.insert(v.begin(), with(m_begin, remaining_end));
+                        }
+                        return v;
+                    }
 
                     word_end = word_beg;
                 }
             }
             else
             {
-                auto word_end = m_end;
-                auto sep_beg = m_begin;
+                if (sep.size() > size())
+                    return v;
+
                 auto sep_sz = sep.size();
+                auto word_end = m_end;
 
-                while (word_end >= sep_beg + sep_sz)
+                while (word_end >= m_begin + sep_sz)
                 {
-                    auto word_beg = word_end;
+                    // Find the last occurrence of separator before word_end
+                    auto word_beg = word_end - sep_sz;
 
-                    while (with(word_beg - sep_sz, word_beg) != sep)
+                    // Search backwards for separator
+                    while (word_beg >= m_begin)
                     {
-                        if (--word_beg < sep_beg)
+                        if (with(word_beg, word_beg + sep_sz) == sep)
+                            break;
+                        if (word_beg == m_begin)
                         {
-                            RSPLIT_CHECK
-                            v.insert(v.begin(), with(m_begin, m_end));
-                            return v;
+                            word_beg = nullptr;
+                            break;
                         }
+                        --word_beg;
                     }
 
-                    RSPLIT_CHECK
+                    if (word_beg == nullptr)
+                    {
+                        // No separator found, add entire remaining string
+                        v.insert(v.begin(), with(m_begin, word_end));
+                        break;
+                    }
+
+                    // Add the segment after the separator
                     v.insert(v.begin(), with(word_beg + sep_sz, word_end));
+
+                    // Check if we've hit max_split
+                    if (max_split > 0 && (int)v.size() >= max_split)
+                    {
+                        // Add remaining portion as first element
+                        if (word_beg > m_begin)
+                            v.insert(v.begin(), with(m_begin, word_beg));
+                        return v;
+                    }
 
                     word_end = word_beg;
                 }
 
-                RSPLIT_CHECK
-                v.insert(v.begin(), with(m_begin, word_end));
+                // Add any remaining portion at the start
+                if (word_end > m_begin && (max_split < 0 || (int)v.size() < max_split))
+                    v.insert(v.begin(), with(m_begin, word_end));
             }
 
             return v;
-#undef RSPLIT_CHECK
         }
 
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1) const
@@ -841,15 +874,20 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
         M_DECL_PURE char_type operator[] (size_t i) const
         { return *(m_begin+i); }
 
-#if defined(UT_VIEW_CSTR_CONVERSION)
-        ENABLE_IF_NULL_TERMINATED
-        M_DECL_PURE operator pointer_type() const { return m_begin; }
-#endif
+// #if defined(UT_VIEW_CSTR_CONVERSION)
+//         ENABLE_IF_NULL_TERMINATED
+//         M_DECL_PURE operator pointer_type() const { return m_begin; }
+// #endif
 
         M_DECL_PURE bool operator<  (strview_type const& s) const { return compare(*this, s) <  0; }
         M_DECL_PURE bool operator>  (strview_type const& s) const { return compare(*this, s) >  0; }
         M_DECL_PURE bool operator== (strview_type const& s) const { return equals (*this, s) == true; }
         M_DECL_PURE bool operator!= (strview_type const& s) const { return equals (*this, s) == false; }
+
+        M_DECL_PURE bool operator<  (char_type c) const { return compare(*this, c) <  0; }
+        M_DECL_PURE bool operator>  (char_type c) const { return compare(*this, c) >  0; }
+        M_DECL_PURE bool operator== (char_type c) const { return equals (*this, c) == true; }
+        M_DECL_PURE bool operator!= (char_type c) const { return equals (*this, c) == false; }
 
         M_DECL_PURE static bool equals(strview_nstr_type const& a, strview_nstr_type const& b)
         {
@@ -890,12 +928,17 @@ M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, i
             return i;
         }
 
-        M_DECL_PURE pointer_type trimEnd() const
+        M_DECL_PURE pointer_type trimEnd(pointer_type end) const
         {
-            pointer_type i = m_end-1;
-            pointer_type end = m_begin-1;
-            while (i!=end && std::isspace(*i)) --i;
-            return (i==end) ? m_end : i+1;
+            if (m_begin == m_end) return end;
+
+            pointer_type i = m_end - 1;
+            while (i >= m_begin && std::isspace(*i))
+            {
+                if (i == m_begin) return end; // Entire string is whitespace
+                --i;
+            }
+            return i + 1;
         }
     };
 
@@ -928,6 +971,9 @@ struct std::hash<ut::basic_strview<Char,Traits,NullTerminated>>
     }
 };
 
+#include "view_impl_split.hpp"
+
 #undef M_DECL_PURE
 #undef M_DECL
 #undef SUPPORTS_STD_FORMAT
+
