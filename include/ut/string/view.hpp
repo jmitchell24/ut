@@ -687,13 +687,17 @@ namespace ut
         {
             std::vector<strview_nstr_type> v;
 
-            if (max_split == 0 || empty())
+            if (max_split == 0)
+                return v;
+
+            if (empty())
                 return v;
 
             // Default separator (whitespace)
             if (sep.empty())
             {
                 auto word_end = m_end;
+                int splits_done = 0;
 
                 while (word_end > m_begin)
                 {
@@ -704,6 +708,17 @@ namespace ut
                     if (word_end == m_begin)
                         break;
 
+                    // Check if we've hit max_split before finding this word
+                    if (max_split > 0 && splits_done >= max_split)
+                    {
+                        // Add everything remaining as first element (trimmed)
+                        auto remaining_end = word_end;
+                        while (remaining_end > m_begin && std::isspace(*(remaining_end - 1)))
+                            --remaining_end;
+                        v.insert(v.begin(), with(m_begin, remaining_end).trim());
+                        break;
+                    }
+
                     auto word_beg = word_end;
 
                     // Find beginning of current word
@@ -712,21 +727,7 @@ namespace ut
 
                     // Add the word at the beginning of the vector
                     v.insert(v.begin(), with(word_beg, word_end));
-
-                    // Check if we've hit max_split
-                    if (max_split > 0 && (int)v.size() >= max_split)
-                    {
-                        // Add remaining portion as first element
-                        if (word_beg > m_begin)
-                        {
-                            auto remaining_end = word_beg;
-                            while (remaining_end > m_begin && std::isspace(*(remaining_end - 1)))
-                                --remaining_end;
-                            if (remaining_end > m_begin)
-                                v.insert(v.begin(), with(m_begin, remaining_end));
-                        }
-                        return v;
-                    }
+                    splits_done++;
 
                     word_end = word_beg;
                 }
@@ -734,54 +735,57 @@ namespace ut
             else
             {
                 if (sep.size() > size())
+                {
+                    v.push_back(*this);
                     return v;
+                }
 
                 auto sep_sz = sep.size();
-                auto word_end = m_end;
+                auto search_end = m_end;
+                int splits_done = 0;
 
-                while (word_end >= m_begin + sep_sz)
+                while (search_end >= m_begin + sep_sz)
                 {
-                    // Find the last occurrence of separator before word_end
-                    auto word_beg = word_end - sep_sz;
-
-                    // Search backwards for separator
-                    while (word_beg >= m_begin)
+                    // Check if we've hit max_split
+                    if (max_split > 0 && splits_done >= max_split)
                     {
-                        if (with(word_beg, word_beg + sep_sz) == sep)
-                            break;
-                        if (word_beg == m_begin)
-                        {
-                            word_beg = nullptr;
-                            break;
-                        }
-                        --word_beg;
+                        // Add everything remaining as first element
+                        v.insert(v.begin(), with(m_begin, search_end));
+                        break;
                     }
 
-                    if (word_beg == nullptr)
+                    // Find the last occurrence of separator before search_end
+                    pointer_type sep_pos = nullptr;
+                    for (pointer_type i = search_end - sep_sz; i >= m_begin; --i)
                     {
-                        // No separator found, add entire remaining string
-                        v.insert(v.begin(), with(m_begin, word_end));
+                        if (with(i, i + sep_sz) == sep)
+                        {
+                            sep_pos = i;
+                            break;
+                        }
+                        if (i == m_begin)
+                            break;
+                    }
+
+                    if (sep_pos == nullptr)
+                    {
+                        // No more separators found, add remaining string
+                        v.insert(v.begin(), with(m_begin, search_end));
                         break;
                     }
 
                     // Add the segment after the separator
-                    v.insert(v.begin(), with(word_beg + sep_sz, word_end));
+                    v.insert(v.begin(), with(sep_pos + sep_sz, search_end));
+                    splits_done++;
 
-                    // Check if we've hit max_split
-                    if (max_split > 0 && (int)v.size() >= max_split)
-                    {
-                        // Add remaining portion as first element
-                        if (word_beg > m_begin)
-                            v.insert(v.begin(), with(m_begin, word_beg));
-                        return v;
-                    }
-
-                    word_end = word_beg;
+                    search_end = sep_pos;
                 }
 
-                // Add any remaining portion at the start
-                if (word_end > m_begin && (max_split < 0 || (int)v.size() < max_split))
-                    v.insert(v.begin(), with(m_begin, word_end));
+                // Add any remaining portion at the start if we didn't already
+                if (search_end > m_begin && (max_split < 0 || splits_done < max_split))
+                {
+                    v.insert(v.begin(), with(m_begin, search_end));
+                }
             }
 
             return v;
