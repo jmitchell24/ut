@@ -4,6 +4,7 @@
 
 #include "ut/res.hpp"
 #include "ut/time.hpp"
+#include "ut/algo/gulp.hpp"
 using namespace ut;
 
 //
@@ -492,45 +493,47 @@ SrcRes::Src SrcRes::encode(void const* data_in, size_t data_size) const
     }
     oss << "\"_sv";
 
+
+    Src src;
+
     if (m_namespace.empty())
     {
-        return
-        {
-            format(R"(
-                // encoded with <ut/res.hpp> ({0})
-                struct {1}
-                {{
-                    constexpr static size_t DECODED_SIZE = {2};
-                    const static ut::cstrview ENCODED_DATA;
-                }};
-                )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_name, data_size),
+        src.decl = format(R"(
+            |// encoded with <ut/res.hpp> ({0})
+            |struct {1}
+            |{{
+            |    constexpr static size_t DECODED_SIZE = {2};
+            |    const static ut::cstrview ENCODED_DATA;
+            |}};
+            )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_name, data_size);
 
-            format(R"(
-                cstrview const {0}::ENCODED_DATA =
-                {1};
-                )", m_name, oss.str())
-        };
+        src.impl = format(R"(
+            |cstrview const {0}::ENCODED_DATA =
+            |{1};
+            )", m_name, oss.str());
     }
-
-    return
+    else
     {
-        format(R"(
-            // encoded with <ut/res.hpp> ({0})
-            namespace {1}
-            {{
-                struct {2}
-                {{
-                    constexpr static size_t DECODED_SIZE = {3};
-                    const static ut::cstrview ENCODED_DATA;
-                }};
-            }}
-            )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_namespace, m_name, data_size),
+        src.decl = format(R"(
+            |// encoded with <ut/res.hpp> ({0})
+            |namespace {1}
+            |{{
+            |    struct {2}
+            |    {{
+            |        constexpr static size_t DECODED_SIZE = {3};
+            |        const static ut::cstrview ENCODED_DATA;
+            |    }};
+            |}}
+            )", local_datetime::now().str("%Y-%m-%d, %I:%M %p"), m_namespace, m_name, data_size);
 
-        format(R"(
-            cstrview const {0}::{1}::ENCODED_DATA =
-            {2};
-            )", m_namespace, m_name, oss.str())
-    };
+        src.impl = format(R"(
+            |cstrview const {0}::{1}::ENCODED_DATA =
+            |{2};
+            )", m_namespace, m_name, oss.str());
+    }
+    src.impl = strview(src.impl).trim().trimMargin();
+    src.decl = strview(src.decl).trim().trimMargin();
+    return src;
 }
 
 size_t SrcRes::decode(cstrparam str_encoded, void* bin_out, size_t bin_out_size)
@@ -590,18 +593,18 @@ static std::vector<std::uint8_t> readFileBytes(fs::path const& path)
 
 namespace fs = std::filesystem;
 
-static std::string sanitize(std::string const& s)
+static string sanitize(std::string const& s)
 {
-    std::string r;
+    string r;
     r.reserve(s.size());
     for (char c : s)
-        if (std::isalnum(c)) r += c;
+        if (isalnum(c)) r += c;
         else if (c == '.' || c == '-' || c == ' ') r += '_';
-    if (!r.empty() && std::isdigit(r[0])) r = "_" + r;
+    if (!r.empty() && isdigit(r[0])) r = "_" + r;
     return r.empty() ? "unnamed" : r;
 }
 
-static std::vector<std::uint8_t> readFile(fs::path const& p)
+static vector<std::uint8_t> readFile(fs::path const& p)
 {
     std::ifstream f(p, std::ios::binary | std::ios::ate);
     if (!f) throw std::runtime_error("Failed to open: " + p.string());
@@ -615,28 +618,34 @@ static std::vector<std::uint8_t> readFile(fs::path const& p)
 
 SrcRes::Src SrcRes::encodeFile(fs::path const& p)
 {
-    if (!fs::is_regular_file(p))
+    if (!is_regular_file(p))
         throw std::runtime_error("Not a file: " + p.string());
     return SrcRes(sanitize(p.filename().string())).encode(readFile(p));
 }
 
 SrcRes::Src SrcRes::encodeDirectory(fs::path const& p, bool rec)
 {
-    if (!fs::is_directory(p))
+    if (!is_directory(p))
         throw std::runtime_error("Not a directory: " + p.string());
 
-    std::ostringstream decl, impl;
+    ostringstream decl, impl;
 
-    auto process = [&](auto& self, fs::path const& dir, std::string const& ns) -> void {
-        for (auto const& e : fs::directory_iterator(dir)) {
-            if (e.is_regular_file()) {
+    auto process = [&](auto& self, fs::path const& dir, std::string const& ns) -> void
+    {
+        for (auto const& e : fs::directory_iterator(dir))
+        {
+            if (e.is_regular_file())
+            {
                 auto name = sanitize(e.path().filename().string());
-                try {
+                try
+                {
                     auto src = SrcRes(name, ns).encode(readFile(e.path()));
                     decl << src.decl << "\n";
                     impl << src.impl << "\n";
                 } catch (...) {}
-            } else if (rec && e.is_directory()) {
+            }
+            else if (rec && e.is_directory())
+            {
                 auto sub = sanitize(e.path().filename().string());
                 self(self, e.path(), ns.empty() ? sub : ns + "::" + sub);
             }
@@ -646,4 +655,25 @@ SrcRes::Src SrcRes::encodeDirectory(fs::path const& p, bool rec)
     process(process, p, sanitize(p.filename().string()));
 
     return {decl.str(), impl.str()};
+}
+
+void SrcRes::writeSrcTofile(fs::path const& path, string const& filename, Src const& src)
+{
+    if (!exists(path)) return;
+    if (!is_directory(path)) return;
+
+    string filename_hpp = filename + ".hpp";
+    string filename_cpp = filename + ".cpp";
+
+    if (auto file_hpp = ofstream{path / filename_hpp})
+    {
+        if (auto file_cpp = ofstream{path / filename_cpp})
+        {
+            file_hpp << "#pragma once\n\n#include <ut/string.hpp>\n\n";
+            file_hpp << src.decl;
+
+            file_cpp << "#include \"" << filename_hpp << "\"\nusing namespace ut;\n\n";
+            file_cpp << src.impl;
+        }
+    }
 }

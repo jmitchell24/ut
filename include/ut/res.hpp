@@ -68,7 +68,7 @@ namespace ut
 
         static Src encodeFile(std::filesystem::path const& path);
         static Src encodeDirectory(std::filesystem::path const& path, bool recursive=true);
-
+        static void writeSrcTofile(std::filesystem::path const& path, std::string const& filename, Src const& src);
     private:
         std::string m_name;
         std::string m_namespace;
