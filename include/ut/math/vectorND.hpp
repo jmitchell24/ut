@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <cmath>
 #include <cstdint>
-
+#include <format>
 #include <cstddef>
 #include <sstream>
 
@@ -313,6 +313,24 @@ namespace ut
         ss << v;
         return ss.str();
     }
+}
+
+//
+// std::format compatibility
+//
+
+namespace std
+{
+    template<typename N, size_t D>
+    struct formatter<ut::vec<N,D>> : std::formatter<std::string>
+    {
+        auto format(ut::vec<N,D> const& obj, std::format_context& ctx) const
+        {
+            std::ostringstream oss;
+            oss << obj;
+            return std::formatter<std::string>::format(oss.str(), ctx);
+        }
+    };
 }
 
 #undef M_DECL_PURE

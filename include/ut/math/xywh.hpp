@@ -182,6 +182,24 @@ namespace ut
     }
 }
 
+//
+// std::format compatibility
+//
+
+namespace std
+{
+    template <typename N>
+    struct formatter<ut::xywhx<N>> : std::formatter<std::string>
+    {
+        auto format(ut::xywhx<N> const& obj, std::format_context& ctx) const
+        {
+            std::ostringstream oss;
+            oss << obj;
+            return std::formatter<std::string>::format(oss.str(), ctx);
+        }
+    };
+}
+
 #undef ASSERT_SIZE
 
 #undef M_DECL_PURE

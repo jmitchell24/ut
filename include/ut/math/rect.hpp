@@ -743,5 +743,23 @@ namespace ut
     }
 }
 
+//
+// std::format compatibility
+//
+
+namespace std
+{
+    template<typename N, bool I>
+    struct formatter<ut::rectx<N,I>> : std::formatter<std::string>
+    {
+        auto format(ut::rectx<N,I> const& obj, std::format_context& ctx) const
+        {
+            std::ostringstream oss;
+            oss << obj;
+            return std::formatter<std::string>::format(oss.str(), ctx);
+        }
+    };
+}
+
 #undef M_DECL_PURE
 #undef M_DECL

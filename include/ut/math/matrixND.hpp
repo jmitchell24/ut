@@ -217,6 +217,24 @@ namespace ut
     }
 }
 
+//
+// std::format compatibility
+//
+
+namespace std
+{
+    template <typename N, size_t Col, size_t Row>
+    struct formatter<ut::mat<N,Col,Row>> : std::formatter<std::string>
+    {
+        auto format(ut::mat<N,Col,Row> const& obj, std::format_context& ctx) const
+        {
+            std::ostringstream oss;
+            oss << obj;
+            return std::formatter<std::string>::format(oss.str(), ctx);
+        }
+    };
+}
+
 #undef zero_
 #undef one_
 #undef two_

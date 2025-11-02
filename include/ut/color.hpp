@@ -563,14 +563,27 @@ namespace ut
     }
 
 #define COLOR_VAR(_name, _value) static constexpr color _name{_value};
-
-namespace colors
-{
-    UT_EXPAND_COLORS(COLOR_VAR)
-}
-
+namespace colors { UT_EXPAND_COLORS(COLOR_VAR) }
 #undef COLOR_VAR
 
+}
+
+//
+// std::format compatibility
+//
+
+namespace std
+{
+    template <>
+    struct formatter<ut::color> : std::formatter<std::string>
+    {
+        auto format(ut::color const& obj, std::format_context& ctx) const
+        {
+            std::ostringstream oss;
+            oss << obj;
+            return std::formatter<std::string>::format(oss.str(), ctx);
+        }
+    };
 }
 
 #undef CLAMP
