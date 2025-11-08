@@ -873,7 +873,7 @@ namespace ut
         { return find(s) != m_end; }
 
         M_DECL_PURE bool contains(char_type c) const
-        { return find(c) != nullptr; }
+        { return find(c) != m_end; }
 
         M_DECL_PURE char_type operator[] (size_t i) const
         { return *(m_begin+i); }
