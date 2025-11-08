@@ -143,15 +143,15 @@ namespace ut
         M_DECL_PURE scalar_type width () const { if constexpr (INCLUSIVE) return max.x - min.x + 1; else return max.x - min.x; }
         M_DECL_PURE scalar_type height() const { if constexpr (INCLUSIVE) return max.y - min.y + 1; else return max.y - min.y; }
 
-        M_DECL_PURE point_type tl() const { return min; }              /// Top Left
-        M_DECL_PURE point_type tr() const { return {max.x, min.y }; }  /// Top Right
-        M_DECL_PURE point_type bl() const { return {min.x, max.y }; }  /// Bottom Left
-        M_DECL_PURE point_type br() const { return max; }              /// Bottom Right
+        M_DECL_PURE point_type tl() const { return min; }              ///< Top Left
+        M_DECL_PURE point_type tr() const { return {max.x, min.y }; }  ///< Top Right
+        M_DECL_PURE point_type bl() const { return {min.x, max.y }; }  ///< Bottom Left
+        M_DECL_PURE point_type br() const { return max; }              ///< Bottom Right
 
-        M_DECL_PURE point_type tc() const { return point_type(min.x + (width()) / 2, min.y); } /// Top Center
-        M_DECL_PURE point_type bc() const { return point_type(min.x + (width()) / 2, max.y); } /// Bottom Center
-        M_DECL_PURE point_type lc() const { return point_type(min.x, min.y + (height()) / 2); } /// Left Center
-        M_DECL_PURE point_type rc() const { return point_type(max.x, min.y + (height()) / 2); } /// Right Center
+        M_DECL_PURE point_type tc() const { return point_type(min.x + (width()) / 2, min.y); } ///< Top Center
+        M_DECL_PURE point_type bc() const { return point_type(min.x + (width()) / 2, max.y); } ///< Bottom Center
+        M_DECL_PURE point_type lc() const { return point_type(min.x, min.y + (height()) / 2); } ///< Left Center
+        M_DECL_PURE point_type rc() const { return point_type(max.x, min.y + (height()) / 2); } ///< Right Center
 
         template <typename T>
         M_DECL_PURE rectx<T> cast() const

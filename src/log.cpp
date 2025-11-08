@@ -40,23 +40,24 @@ static std::string getEscBg(color const& bg)
         bg);
 }
 
+log::PrintMode log::getSystemPrintMode()
+{
+#if defined(__EMSCRIPTEN__)
+    return TEXT;
+#elif defined(_WIN32)
+    return TEXT; // Fuck you Windows!
+#else
+    return isatty(STDOUT_FILENO) ? TERM : TEXT;
+#endif
+}
+
 log::Printer::Printer(ostream& os)
     : m_os{os}
 {
-#if defined(__EMSCRIPTEN__)
-    setPrintText();
-#elif defined(_WIN32)
-    setPrintText(); // Fuck you Windows!
-#else
-    if (isatty(STDOUT_FILENO))
-    {
+    if (getSystemPrintMode() == TERM)
         setPrintTerm();
-    }
     else
-    {
         setPrintText();
-    }
-#endif
 }
 
 log::Printer& log::Printer::instance()

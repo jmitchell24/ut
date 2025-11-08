@@ -166,7 +166,7 @@ namespace ut::log
     [[maybe_unused]] static Builder error   (std::source_location src = std::source_location::current()) { return {ERROR  , src}; }
     [[maybe_unused]] static Builder fatal   (std::source_location src = std::source_location::current()) { return {FATAL  , src}; }
 
-
+    PrintMode getSystemPrintMode();
 
 }
 
