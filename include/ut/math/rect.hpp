@@ -7,49 +7,49 @@
 
 #define ENABLE_IF_INCLUSIVE     template <bool I_ = I, typename = std::enable_if_t<I>>
 
-#define UT_EXPAND_RECT_ANCHORS \
-    X(TL, tl) \
-    X(TR, tr) \
-    X(BL, bl) \
-    X(BR, br) \
-    X(TC, tc) \
-    X(BC, bc) \
-    X(LC, lc) \
-    X(RC, rc) \
-    X(CC, cc)
+#define UT_EXPAND_RECT_ANCHORS(ANCHOR) \
+    ANCHOR(TL, tl) \
+    ANCHOR(TR, tr) \
+    ANCHOR(BL, bl) \
+    ANCHOR(BR, br) \
+    ANCHOR(TC, tc) \
+    ANCHOR(BC, bc) \
+    ANCHOR(LC, lc) \
+    ANCHOR(RC, rc) \
+    ANCHOR(CC, cc)
 
-#define UT_EXPAND_RECT_ALIGNMENTS \
-    X(TLtoTL) \
-    X(TLtoTR) \
-    X(TLtoBL) \
-    X(TLtoBR) \
+#define UT_EXPAND_RECT_ALIGNMENTS(ALIGN) \
+    ALIGN(TLtoTL) \
+    ALIGN(TLtoTR) \
+    ALIGN(TLtoBL) \
+    ALIGN(TLtoBR) \
     \
-    X(TRtoTL) \
-    X(TRtoTR) \
-    X(TRtoBL) \
-    X(TRtoBR) \
+    ALIGN(TRtoTL) \
+    ALIGN(TRtoTR) \
+    ALIGN(TRtoBL) \
+    ALIGN(TRtoBR) \
     \
-    X(BLtoTL) \
-    X(BLtoTR) \
-    X(BLtoBL) \
-    X(BLtoBR) \
+    ALIGN(BLtoTL) \
+    ALIGN(BLtoTR) \
+    ALIGN(BLtoBL) \
+    ALIGN(BLtoBR) \
     \
-    X(BRtoTL) \
-    X(BRtoTR) \
-    X(BRtoBL) \
-    X(BRtoBR) \
+    ALIGN(BRtoTL) \
+    ALIGN(BRtoTR) \
+    ALIGN(BRtoBL) \
+    ALIGN(BRtoBR) \
     \
-    X(TCtoTC) \
-    X(TCtoBC) \
-    X(BCtoTC) \
-    X(BCtoBC) \
+    ALIGN(TCtoTC) \
+    ALIGN(TCtoBC) \
+    ALIGN(BCtoTC) \
+    ALIGN(BCtoBC) \
     \
-    X(LCtoLC) \
-    X(LCtoRC) \
-    X(RCtoLC) \
-    X(RCtoRC) \
+    ALIGN(LCtoLC) \
+    ALIGN(LCtoRC) \
+    ALIGN(RCtoLC) \
+    ALIGN(RCtoRC) \
     \
-    X(CCtoCC)
+    ALIGN(CCtoCC)
 
 
 namespace ut

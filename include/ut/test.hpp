@@ -112,17 +112,30 @@ namespace ut::test
 
     struct Suite
     {
+        enum PrintFlags
+        {
+            PF_NONE         = 0,
+            PF_PRINT_FAILS  = 1,
+            PF_PRINT_PASSES = 2,
+            PF_ALL = PF_PRINT_FAILS|PF_PRINT_PASSES
+        };
+
+
+
         struct Stats { int total=0, passed=0, failed=0, skipped=0; };
 
         testlist_type tests;
 
+
+
         Stats getTestStats(Test const& test) const;
         Stats getSuiteStats() const;
 
-        void printPretty(std::ostream& os) const;
+        void print(std::ostream& os, int flags=PF_ALL) const;
         void printJunitXml(std::ostream& os) const;
 
     private:
+        mutable int m_print_flags=PF_ALL;
 
         void printSuite(std::ostream& os, Suite const& sut, std::string prefix, bool is_last) const;
         void printTest(std::ostream& os, Test const& tst, std::string prefix, bool is_last) const;

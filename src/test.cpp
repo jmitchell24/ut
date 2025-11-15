@@ -52,8 +52,9 @@ Suite ut::test::runAllTests()
 // Suite -> Implementation
 //
 
-void Suite::printPretty(ostream& os) const
+void Suite::print(ostream& os, int flags) const
 {
+    m_print_flags = flags;
     printSuite(os, *this, "", false);
 }
 
@@ -197,6 +198,14 @@ void Suite::printSection(ostream& os, Section const& seq, string prefix, bool is
 
 void Suite::printRequire(ostream& os, Require const& req, string prefix, bool is_last) const
 {
+    // skip if PRINT_FAILS flag is not set
+    if ( !(m_print_flags&PF_PRINT_FAILS) && req.failed() )
+        return;
+
+    // skip if PRINT_PASSES flag is not set
+    if ( !(m_print_flags&PF_PRINT_PASSES) && req.passed() )
+        return;
+
     os
     << TERM_FG_BRIGHT_MAGENTA << setw(4) << req.line << TERM_RESET " "
     << prefix;
