@@ -29,7 +29,7 @@ namespace ut::test::impl \
 { \
     struct Test_##_line { \
         using _test_type = Test_##_line; \
-        static void run(ut_test_context& _context); \
+        static inline void run(ut_test_context& _context); \
         Test_##_line() { ut_test_register(_line, _file, _label_text, &run); } \
     } static t_##_line; \
 } \
@@ -103,6 +103,17 @@ namespace ut::test
 
         secslist_type secs;
         reqslist_type reqs;
+
+        bool empty() const
+        { return reqs.empty() && secs.empty(); }
+
+        size_t passedCount() const;
+        size_t failedCount() const;
+        size_t skippedCount() const;
+
+        bool anyPassed() const;
+        bool anyFailed() const;
+        bool anySkipped() const;
     };
 
     struct Test : Section
@@ -114,10 +125,11 @@ namespace ut::test
     {
         enum PrintFlags
         {
-            PF_NONE         = 0,
-            PF_PRINT_FAILS  = 1,
-            PF_PRINT_PASSES = 2,
-            PF_ALL = PF_PRINT_FAILS|PF_PRINT_PASSES
+            PF_NONE          = 0x00,
+            PF_PRINT_FAILED  = 0x01,
+            PF_PRINT_PASSED  = 0x02,
+            PF_PRINT_SKIPPED = 0x04,
+            PF_PRINT_ALL = PF_PRINT_FAILED|PF_PRINT_PASSED|PF_PRINT_SKIPPED
         };
 
 
@@ -126,22 +138,32 @@ namespace ut::test
 
         testlist_type tests;
 
-
-
         Stats getTestStats(Test const& test) const;
         Stats getSuiteStats() const;
 
-        void print(std::ostream& os, int flags=PF_ALL) const;
+        void print(std::ostream& os, int flags=PF_PRINT_FAILED) const;
         void printJunitXml(std::ostream& os) const;
 
     private:
-        mutable int m_print_flags=PF_ALL;
+        mutable int m_print_flags=PF_PRINT_FAILED;
 
-        void printSuite(std::ostream& os, Suite const& sut, std::string prefix, bool is_last) const;
-        void printTest(std::ostream& os, Test const& tst, std::string prefix, bool is_last) const;
-        void printSection(std::ostream& os, Section const& seq, std::string prefix, bool is_last) const;
-        void printRequire(std::ostream& os, Require const& req, std::string prefix, bool is_last) const;
-        void printRequireState(std::ostream& os, Require::State state) const;
+        bool pfPrintFailed() const
+        { return m_print_flags & PF_PRINT_FAILED; }
+
+        bool pfPrintPassed() const
+        { return m_print_flags & PF_PRINT_PASSED; }
+
+        bool pfPrintSkipped() const
+        { return m_print_flags & PF_PRINT_SKIPPED; }
+
+        bool pfPrintAll() const
+        { return m_print_flags == PF_PRINT_ALL; }
+
+        void printSuite         (std::ostream& os, Suite const& sut, std::string prefix, bool is_last) const;
+        void printTest          (std::ostream& os, Test const& tst, std::string prefix, bool is_last) const;
+        void printSection       (std::ostream& os, Section const& seq, std::string prefix, bool is_last) const;
+        void printRequire       (std::ostream& os, Require const& req, std::string prefix, bool is_last) const;
+        void printRequireState  (std::ostream& os, Require::State state) const;
 
     };
 
@@ -241,7 +263,7 @@ namespace impl
             auto& parent = getTopSec();
             parent.reqs.push_back(r);
 
-            timer::sleep(duration::milliseconds(ut_rng.nexti(100)));
+            //timer::sleep(duration::milliseconds(ut_rng.nexti(100)));
         }
 
         SectionScopeGuard section(int line, char const* name, int /* sec_tick */)
@@ -251,7 +273,7 @@ namespace impl
             s.name = name;
             s.reqs = { };
 
-            timer::sleep(50_milliseconds);
+            //timer::sleep(50_milliseconds);
             return SectionScopeGuard(s, *this);
         }
 

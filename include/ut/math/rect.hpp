@@ -113,8 +113,19 @@ namespace ut
         { }
 
         M_DECL explicit rectx(xywh_type const& xywh)
-            : left{xywh.minX()}, top{xywh.minY()}, right{xywh.maxX()}, bottom{xywh.maxY()}
-        { }
+            : left{xywh.minX()}, top{xywh.minY()}
+        {
+            if constexpr (I)
+            {
+                right = xywh.maxX()-1;
+                bottom = xywh.maxY()-1;
+            }
+            else
+            {
+                right = xywh.maxX();
+                bottom = xywh.maxY();
+            }
+        }
 
         M_DECL rectx(rectx const&)=default;
         M_DECL rectx(rectx&&) noexcept =default;

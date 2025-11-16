@@ -22,7 +22,7 @@ using namespace std;
 // runAllTests -> Implementation
 //
 
-Suite ut::test::runAllTests()
+Suite test::runAllTests()
 {
     auto&& reg = impl::Registry::instance();
     auto runlist = reg.runlist();
@@ -32,20 +32,87 @@ Suite ut::test::runAllTests()
 
     Suite s;
 
-    spinParallel(runlist.size(), [&](SpinnerRunner& sr, size_t i)
-    {
-        auto&& it = runlist[i];
-        sr.prefix("running...");
-        sr.suffix(it.test.name);
+    // ... being fancy ...
+    // spinParallel(runlist.size(), [&](SpinnerRunner& sr, size_t i)
+    // {
+    //     auto&& it = runlist[i];
+    //     sr.prefix("running...");
+    //     sr.suffix(it.test.name);
+    //
+    //     auto rc = impl::RunContext(it.test);
+    //     it.fn(rc);
+    //     s.tests.push_back(rc.test());
+    //
+    //     sr.prefix("done      ");
+    // });
 
+    for (auto&& it: runlist)
+    {
         auto rc = impl::RunContext(it.test);
         it.fn(rc);
         s.tests.push_back(rc.test());
-
-        sr.prefix("done      ");
-    });
+    }
 
     return s;
+}
+
+//
+// Section -> Implementation
+//
+
+size_t Section::passedCount() const
+{
+    size_t acc=0;
+    for (auto&& it: reqs)
+        if (it.passed()) ++acc;
+    for (auto&& it: secs)
+        acc += it.passedCount();
+    return acc;
+}
+
+size_t Section::failedCount() const
+{
+    for (auto&& it: reqs)
+        if (it.failed()) return true;
+    for (auto&& it: secs)
+        if (it.failedCount()) return true;
+    return false;
+}
+
+size_t Section::skippedCount() const
+{
+    for (auto&& it: reqs)
+        if (it.skipped()) return true;
+    for (auto&& it: secs)
+        if (it.skippedCount()) return true;
+    return false;
+}
+
+bool Section::anyPassed() const
+{
+    for (auto&& it: reqs)
+        if (it.passed()) return true;
+    for (auto&& it: secs)
+        if (it.anyPassed()) return true;
+    return false;
+}
+
+bool Section::anyFailed() const
+{
+    for (auto&& it: reqs)
+        if (it.failed()) return true;
+    for (auto&& it: secs)
+        if (it.anyFailed()) return true;
+    return false;
+}
+
+bool Section::anySkipped() const
+{
+    for (auto&& it: reqs)
+        if (it.skipped()) return true;
+    for (auto&& it: secs)
+        if (it.anySkipped()) return true;
+    return false;
 }
 
 //
@@ -140,6 +207,12 @@ void Suite::printSuite(ostream& os, Suite const& sut, string prefix, bool is_las
 
 void Suite::printTest(ostream& os, Test const& tst, string prefix, bool is_last) const
 {
+    bool b_print = pfPrintAll()
+    || ( pfPrintPassed () && tst.anyPassed () )
+    || ( pfPrintFailed () && tst.anyFailed () )
+    || ( pfPrintSkipped() && tst.anySkipped() );
+    if (!b_print) return;
+
     os
     << prefix
     << TERM_FG_BLUE "TEST" TERM_RESET
@@ -168,6 +241,12 @@ void Suite::printTest(ostream& os, Test const& tst, string prefix, bool is_last)
 
 void Suite::printSection(ostream& os, Section const& seq, string prefix, bool is_last) const
 {
+    bool b_print = pfPrintAll()
+    || ( pfPrintPassed () && seq.anyPassed () )
+    || ( pfPrintFailed () && seq.anyFailed () )
+    || ( pfPrintSkipped() && seq.anySkipped() );
+    if (!b_print) return;
+
     os
     << TERM_FG_BRIGHT_MAGENTA << setw(4) << seq.line << TERM_RESET " "
     << prefix;
@@ -198,13 +277,12 @@ void Suite::printSection(ostream& os, Section const& seq, string prefix, bool is
 
 void Suite::printRequire(ostream& os, Require const& req, string prefix, bool is_last) const
 {
-    // skip if PRINT_FAILS flag is not set
-    if ( !(m_print_flags&PF_PRINT_FAILS) && req.failed() )
-        return;
+    bool b_print = pfPrintAll()
+    || ( pfPrintPassed () && req.passed() )
+    || ( pfPrintFailed () && req.failed() )
+    || ( pfPrintSkipped() && req.skipped() );
 
-    // skip if PRINT_PASSES flag is not set
-    if ( !(m_print_flags&PF_PRINT_PASSES) && req.passed() )
-        return;
+    if (!b_print) return;
 
     os
     << TERM_FG_BRIGHT_MAGENTA << setw(4) << req.line << TERM_RESET " "
