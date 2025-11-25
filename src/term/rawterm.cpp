@@ -20,8 +20,9 @@ using namespace std;
 //
 // unix
 //
+#include <sys/ioctl.h>
 #include <unistd.h>
-#include <termio.h>
+#include <termios.h>
 #include <poll.h>
 
 #define check_raw_mode { check_msg(m_enabled, "raw mode should be enabled"); }
