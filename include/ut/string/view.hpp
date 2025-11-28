@@ -691,7 +691,7 @@ namespace ut
             auto sv = *this;
             while (!sv.empty())
             {
-                char c = sv.first();
+                unsigned char c = sv.first();
                      if (c < 0x80) { v.push_back(sv.take(1)); sv = sv.skip(1); }
                 else if (c < 0xe0) { v.push_back(sv.take(2)); sv = sv.skip(2); }
                 else if (c < 0xf0) { v.push_back(sv.take(3)); sv = sv.skip(3); }
