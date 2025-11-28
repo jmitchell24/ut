@@ -683,15 +683,22 @@ namespace ut
 
         #pragma region Split
 
-        M_DECL_PURE std::pair<strview_nstr_type, strview_nstr_type> splitUtf8Char() const
+        M_DECL_PURE std::vector<strview_nstr_type> splitUtf8() const
         {
-            if (empty()) return {*this, *this};
+            if (empty()) return {};
 
-            char c = *m_begin;
-            if (c < 0x80) return { take(1), skip(1) };
-            if (c < 0xe0) return { take(2), skip(2) };
-            if (c < 0xf0) return { take(3), skip(3) };
-            return { take(4), skip(4) };
+            std::vector<strview_nstr_type> v;
+            auto sv = *this;
+            while (!sv.empty())
+            {
+                char c = sv.first();
+                     if (c < 0x80) { v.push_back(sv.take(1)); sv = sv.skip(1); }
+                else if (c < 0xe0) { v.push_back(sv.take(2)); sv = sv.skip(2); }
+                else if (c < 0xf0) { v.push_back(sv.take(3)); sv = sv.skip(3); }
+                else               { v.push_back(sv.take(4)); sv = sv.skip(4); }
+            }
+
+            return v;
         }
 
         // Fixed rsplit implementation
