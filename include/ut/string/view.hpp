@@ -99,7 +99,7 @@ namespace ut
             { return end - begin; }
 
             inline strview_nstr_type view(strview_type const& s) const
-            { return s.with(*this); }
+            { return s.withExact(*this); }
 
             friend inline ostream_type& operator<<(ostream_type& os, indices const& i)
             { return os << '[' << i.begin << ", " << i.end << ']'; }
@@ -345,7 +345,7 @@ namespace ut
 
             pointer_type begin = copy.m_begin + size_t(m_begin - orig.m_begin);
             pointer_type end   = begin + size();
-            return copy.with(begin, end);
+            return copy.withExact(begin, end);
         }
 
 
@@ -353,7 +353,7 @@ namespace ut
         /// \param begin    Pointer to the first char of the substring.
         /// \param end      Pointer to the char following the last char of the view.
         /// \return         View of the substring [begin, end].
-        M_DECL_PURE strview_nstr_type with(pointer_type begin, pointer_type end) const
+        M_DECL_PURE strview_nstr_type withExact(pointer_type begin, pointer_type end) const
         {
             check(begin >= m_begin);
             check(begin <= m_end);
@@ -363,38 +363,39 @@ namespace ut
             return strview_nstr_type{begin, end};
         }
 
+        /// Returns a view of the substring [begin, end], where begin >= begin() and end <= end().
+        /// Parameters are clamped, and substring [begin(), begin()] is returned if they are swapped [end, begin]
+        /// \param begin    Pointer to the first char of the substring.
+        /// \param end      Pointer to the char following the last char of the view.
+        /// \return         View of the substring [begin, end].
+        M_DECL_PURE strview_nstr_type withClamped(pointer_type begin, pointer_type end) const
+        {
+            if (begin < m_begin) begin = m_begin;
+            if (end > m_end) end = m_end;
+            if (end < begin) end=begin;
+            return strview_nstr_type{begin, end};
+        }
+
 
         /// Returns a view of the substring specified by indices.
         /// \param indices  Indices object that specifies substring
         /// \return         View of the substring defined by indices.
-        M_DECL_PURE strview_nstr_type with(indices const& i) const
-        { return with(m_begin+i.begin, m_begin+i.end); }
-
-
-        /// Returns a view of substring [begin, end], where begin >= begin() and end <= end().
-        /// \param begin    Pointer to the first char of the substring.
-        /// \param end      Pointer to the char following the last char of the view.
-        /// \return         View of the substring [begin, end].
-        M_DECL_PURE strview_nstr_type withClamp(pointer_type begin, pointer_type end) const
-        {
-            if (begin < m_begin) begin = m_begin;
-            if (end   > m_end  ) end   = m_end;
-            return strview_nstr_type{begin, end};
-        }
+        M_DECL_PURE strview_nstr_type withExact(indices const& i) const
+        { return withExact(m_begin+i.begin, m_begin+i.end); }
 
 
         /// Returns a view of substring [begin(), end], where end <= end().
         /// \param end  Pointer to the char following the last char of the view.
         /// \return     View of the substring [begin(), end]
-        M_DECL_PURE strview_nstr_type withEnd(pointer_type end) const
-        { return with(m_begin, end); }
+        M_DECL_PURE strview_nstr_type withExactEnd(pointer_type end) const
+        { return withExact(m_begin, end); }
 
 
         /// Returns a view of substring [begin, end()] where begin >= begin().
         /// \param begin    Pointer the first char of the substring.
         /// \return         View of the substring [begin, end()]
-        M_DECL_PURE strview_nstr_type withBegin(pointer_type begin) const
-        { return with(begin, m_end); }
+        M_DECL_PURE strview_nstr_type withExactBegin(pointer_type begin) const
+        { return withExact(begin, m_end); }
 
 
         /// Returns a view of substring [begin(), begin()+size]. Equivalent to takeBegin().
@@ -408,29 +409,29 @@ namespace ut
         /// \param beg_idx  index of the first char of the substring.
         /// \param end_idx  Pointer to the char following the last char of the view.
         /// \return         View of the substring [begin, end].
-        M_DECL_PURE strview_nstr_type withIndices(size_t beg_idx, size_t end_idx) const
-        { return with(m_begin+beg_idx, m_begin+end_idx); }
+        M_DECL_PURE strview_nstr_type withExactIndices(size_t beg_idx, size_t end_idx) const
+        { return withExact(m_begin+beg_idx, m_begin+end_idx); }
 
 
         M_DECL_PURE strview_nstr_type withIndices(indices const& i) const
-        { return withIndices(i.begin, i.end); }
+        { return withExactIndices(i.begin, i.end); }
 
 
         /// Returns a view of substring [begin(), begin()+size].
         /// \param size     Requested view size
         /// \return         View of the substring [begin(), begin()+size]
         M_DECL_PURE strview_nstr_type takeBegin(size_t size) const
-        { return with(m_begin, m_begin+size); }
+        { return withClamped(m_begin, m_begin+size); }
 
 
         /// Returns a view of substring [end()-size, end()].
         /// \param size     Requested view size.
         /// \return         View of the substring [end()-size, end()].
         M_DECL_PURE strview_nstr_type takeEnd(size_t size) const
-        { return with(m_end-size, m_end); }
+        { return withClamped(m_end-size, m_end); }
 
 
-        /// Returns a view of substring [end()-size, end()]. Equivalent to \a skipBegin()
+        /// Returns a view of substring [ \a begin()+size, \a end() ]. Equivalent to \a skipBegin()
         /// \param size     Requested view size.
         /// \return         View of the substring [end()-size, end()].
         M_DECL_PURE strview_nstr_type skip(size_t size) const
@@ -441,14 +442,14 @@ namespace ut
         /// \param size     Requested view size.
         /// \return         View of the substring [ \a begin()+size, \a end() ].
         M_DECL_PURE strview_nstr_type skipBegin(size_t size) const
-        { return with(m_begin+size, m_end); }
+        { return withClamped(m_begin+size, m_end); }
 
 
         /// Returns a view of the substring [ \a begin(), \a end()-size ].
         /// \param size     Requested view size.
         /// \return         View of the substring [ \a begin(), \a end()-size ].
         M_DECL_PURE strview_nstr_type skipEnd(size_t size) const
-        { return with(m_begin, m_end-size); }
+        { return withClamped(m_begin, m_end-size); }
 
         /// Returns a pointer to the first occurrence of \a s in this view.
         /// \param s        String to search for.
@@ -461,7 +462,7 @@ namespace ut
                 return m_end;
 
             for (pointer_type i = m_begin+n; i < m_end-sz+1; ++i)
-                if (equals(with(i,i+sz), s))
+                if (equals(withExact(i,i+sz), s))
                     return i;
             return m_end;
         }
@@ -516,7 +517,7 @@ namespace ut
             // Start from the last possible position
             for (pointer_type i = m_end - sz; i >= m_begin; --i)
             {
-                if (equals(with(i, i + sz), s))
+                if (equals(withExact(i, i + sz), s))
                     return i;
                 if (i == m_begin) // Prevent going before m_begin
                     break;
@@ -587,7 +588,7 @@ namespace ut
         M_DECL_PURE bool endsWith(strview_type const& s) const
         {
             if (s.size() > size()) return false;
-            return equals(with(m_end - s.size(), m_end), s);
+            return equals(withExact(m_end - s.size(), m_end), s);
         }
 
         ///
@@ -603,15 +604,15 @@ namespace ut
 
         /// Removes leading whitespace from this view.
         /// \return        A new view with leading whitespace removed.
-        M_DECL_PURE strview_nstr_type ltrim() const { return with(trimBegin(), m_end); }
+        M_DECL_PURE strview_nstr_type ltrim() const { return withExact(trimBegin(), m_end); }
 
         /// Removes trailing whitespace from this view.
         /// \return       A new view with trailing whitespace removed.
-        M_DECL_PURE strview_nstr_type rtrim() const { return with(m_begin, trimEnd(m_begin)); }
+        M_DECL_PURE strview_nstr_type rtrim() const { return withExact(m_begin, trimEnd(m_begin)); }
 
         /// Removes leading and trailing whitespace from this view.
         /// \return       A new view with leading and trailing whitespace removed.
-        M_DECL_PURE strview_nstr_type trim() const { return with(trimBegin(), trimEnd(m_end)); }
+        M_DECL_PURE strview_nstr_type trim() const { return withExact(trimBegin(), trimEnd(m_end)); }
 
         /// Checks if this view is trimmed. A view is considered trimmed if it is empty or if the first and last characters are not whitespace.
         /// \return       True if this view is trimmed, false otherwise.       
@@ -654,17 +655,17 @@ namespace ut
                     ++content_begin;
 
                 // Check if line starts with margin prefix after whitespace
-                if (withBegin(content_begin).beginsWith(margin_prefix))
+                if (withExactBegin(content_begin).beginsWith(margin_prefix))
                 {
 
                     // Copy content after margin prefix
                     auto after_prefix = content_begin + margin_prefix.size();
-                    result += with(after_prefix, line_end).str();
+                    result += withExact(after_prefix, line_end).str();
                 }
                 else
                 {
                     // Copy entire line (no margin prefix found)
-                    result += with(line_begin, line_end).str();
+                    result += withExact(line_begin, line_end).str();
                 }
 
                 if (*line_end != '\n')
@@ -681,6 +682,17 @@ namespace ut
         #pragma endregion Trim
 
         #pragma region Split
+
+        M_DECL_PURE std::pair<strview_nstr_type, strview_nstr_type> splitUtf8Char() const
+        {
+            if (empty()) return {*this, *this};
+
+            char c = *m_begin;
+            if (c < 0x80) return { take(1), skip(1) };
+            if (c < 0xe0) return { take(2), skip(2) };
+            if (c < 0xf0) return { take(3), skip(3) };
+            return { take(4), skip(4) };
+        }
 
         // Fixed rsplit implementation
         M_DECL_PURE std::vector<strview_nstr_type> rsplit(std::string const& sep = {}, int max_split = -1) const
@@ -717,7 +729,7 @@ namespace ut
                     while (word_beg > m_begin && !std::isspace(*(word_beg - 1)))
                         --word_beg;
 
-                    words.push_back(with(word_beg, word_end));
+                    words.push_back(withExact(word_beg, word_end));
 
                     // Check if we've collected enough splits
                     if (max_split > 0 && (int)words.size() >= max_split)
@@ -727,7 +739,7 @@ namespace ut
                         while (remaining_beg < word_beg && std::isspace(*remaining_beg))
                             ++remaining_beg;
                         if (remaining_beg < word_beg)
-                            words.push_back(with(remaining_beg, word_beg).rtrim());
+                            words.push_back(withExact(remaining_beg, word_beg).rtrim());
                         break;
                     }
 
@@ -759,17 +771,17 @@ namespace ut
                 while (search_pos >= m_begin)
                 {
                     // Check if we found the separator at this position
-                    if (equals(with(search_pos, search_pos + sep_sz), sep))
+                    if (equals(withExact(search_pos, search_pos + sep_sz), sep))
                     {
                         // Found a separator - add the segment after it
-                        parts.push_back(with(search_pos + sep_sz, segment_end));
+                        parts.push_back(withExact(search_pos + sep_sz, segment_end));
                         splits_done++;
 
                         // Check if we've done enough splits
                         if (max_split > 0 && splits_done >= max_split)
                         {
                             // Add the remaining portion as the final part
-                            parts.push_back(with(m_begin, search_pos));
+                            parts.push_back(withExact(m_begin, search_pos));
                             break;
                         }
 
@@ -786,7 +798,7 @@ namespace ut
                         if (search_pos == m_begin)
                         {
                             // Reached the beginning without hitting max_split
-                            parts.push_back(with(m_begin, segment_end));
+                            parts.push_back(withExact(m_begin, segment_end));
                             break;
                         }
                         --search_pos;
@@ -804,7 +816,7 @@ namespace ut
 
         M_DECL_PURE std::vector<strview_nstr_type> split(std::string const& sep = {}, int max_split = -1) const
         {
-#define SPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.push_back(with(word_beg, m_end)); return v; } }
+#define SPLIT_CHECK { if (max_split > 0 && v.size() >= (size_t)(max_split)) { v.push_back(withExact(word_beg, m_end)); return v; } }
 
             std::vector<strview_nstr_type> v;
 
@@ -832,13 +844,13 @@ namespace ut
                     {
                         if (++word_end == m_end)
                         {
-                            v.push_back(with(word_beg, word_end));
+                            v.push_back(withExact(word_beg, word_end));
                             return v;
                         }
                     }
 
                     SPLIT_CHECK
-                    v.push_back(with(word_beg, word_end));
+                    v.push_back(withExact(word_beg, word_end));
 
                     word_beg = word_end;
                 }
@@ -853,24 +865,24 @@ namespace ut
                 {
                     auto word_end = word_beg;
 
-                    while (with(word_end, word_end+sep_sz) != sep)
+                    while (withExact(word_end, word_end+sep_sz) != sep)
                     {
                         if (++word_end > sep_end)
                         {
                             SPLIT_CHECK
-                            v.push_back(with(word_beg, m_end));
+                            v.push_back(withExact(word_beg, m_end));
                             return v;
                         }
                     }
 
                     SPLIT_CHECK
-                    v.push_back(with(word_beg, word_end));
+                    v.push_back(withExact(word_beg, word_end));
 
                     word_beg = word_end + sep_sz;
                 }
 
                 SPLIT_CHECK
-                v.push_back(with(word_beg, m_end));
+                v.push_back(withExact(word_beg, m_end));
             }
 
             return v;
