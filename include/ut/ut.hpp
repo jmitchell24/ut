@@ -18,7 +18,7 @@
 #include <ut/time.hpp>
 
 #define UT_NAME         "ut"
-#define UT_VERSION      "25.11.27"
+#define UT_VERSION      "25.11.28"
 
 #define UT_CLOWN_MODE
 
