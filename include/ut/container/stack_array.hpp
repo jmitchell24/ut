@@ -16,7 +16,7 @@ namespace ut
     class stack_array
     {
     public:
-        static_assert(std::is_trivial_v<T>);
+        //static_assert(std::is_trivially_destructible_v<T>);
 
         stack_array()=default;
 
@@ -56,7 +56,7 @@ namespace ut
         M_DECL void pop()
         {
             assert(!empty());
-            std::destroy_at(std::launder(m_top));
+            std::destroy_at(m_top); //std::destroy_at(std::launder(m_top));
             m_end = m_top--;
         }
 
@@ -64,14 +64,15 @@ namespace ut
         {
             assert(n <= size());
             for (T* end = m_top-n; m_top != end; --m_top)
-                std::destroy_at(std::launder(m_top));
+                    std::destroy_at(m_top); //std::destroy_at(std::launder(m_top));
             m_end = m_top+1;
         }
 
         M_DECL void clear()
         {
             for (T* end = M_DATA-1; m_top != end; --m_top)
-                std::destroy_at(std::launder(m_top));
+
+                    std::destroy_at(m_top); //std::destroy_at(std::launder(m_top));
             m_end = m_top+1;
         }
 
