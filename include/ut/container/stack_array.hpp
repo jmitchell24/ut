@@ -21,6 +21,7 @@ namespace ut
         stack_array()=default;
 
 
+
         M_DECL ~stack_array() { clear(); }
 
         M_DECL_PURE size_t size      () const { return m_end-M_DATA_CONST; }
