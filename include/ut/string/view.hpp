@@ -89,19 +89,19 @@ namespace ut
         {
             size_t begin=0, end=0;
 
-            indices()=default;
+            constexpr indices()=default;
 
-            indices(size_t begin, size_t end)
+            constexpr indices(size_t begin, size_t end)
                 : begin{begin}, end{end}
-            { check(end >= begin); }
+            { constexpr_check(end >= begin); }
 
-            inline size_t size() const
+            constexpr size_t size() const
             { return end - begin; }
 
-            inline strview_nstr_type view(strview_type const& s) const
+            constexpr strview_nstr_type view(strview_type const& s) const
             { return s.withExact(*this); }
 
-            friend inline ostream_type& operator<<(ostream_type& os, indices const& i)
+            friend constexpr ostream_type& operator<<(ostream_type& os, indices const& i)
             { return os << '[' << i.begin << ", " << i.end << ']'; }
         };
 
@@ -131,18 +131,18 @@ namespace ut
         M_DECL basic_strview(string_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
         }
 
         /// \brief Construct with an STL basic_string_view
         M_DECL basic_strview(string_view_type const& s)
             : m_begin{s.data()}, m_end{s.data()+s.size()}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
         }
 
 
@@ -151,9 +151,9 @@ namespace ut
         M_DECL basic_strview(pointer_type begin, pointer_type end)
             : m_begin{begin}, m_end{end}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
         }
 
 
@@ -161,17 +161,17 @@ namespace ut
         ENABLE_IF_NOT_NULL_TERMINATED
         M_DECL_PURE explicit basic_strview(pointer_type begin, size_t sz)
             : m_begin{begin}, m_end{m_begin+sz}
-        { check(m_begin != nullptr); }
+        { constexpr_check(m_begin != nullptr); }
 
 
         /// \brief Construct with a begin pointer and length. Will dereference to check null-terminated.
         M_DECL_PURE basic_strview(pointer_type begin, size_t sz, basic_strview_cstr_tag)
                 : m_begin{begin}, m_end{m_begin+sz}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
-            check(*m_end == '\0');
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
+            constexpr_check(*m_end == '\0');
         }
 
 
@@ -180,9 +180,9 @@ namespace ut
         M_DECL basic_strview(strview_cstr_type const& s)
             : m_begin{s.begin()}, m_end{s.end()}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
         }
 
 
@@ -190,9 +190,9 @@ namespace ut
         M_DECL basic_strview(pointer_type p)
             : m_begin{p}, m_end{p+traits_type::length(p)}
         {
-            check(m_begin != nullptr);
-            check(m_end   != nullptr);
-            check(m_begin <= m_end);
+            constexpr_check(m_begin != nullptr);
+            constexpr_check(m_end   != nullptr);
+            constexpr_check(m_begin <= m_end);
         }
 
         #pragma endregion Constructors
@@ -355,10 +355,10 @@ namespace ut
         /// \return         View of the substring [begin, end].
         M_DECL_PURE strview_nstr_type withExact(pointer_type begin, pointer_type end) const
         {
-            check(begin >= m_begin);
-            check(begin <= m_end);
-            check(end   <= m_end);
-            check(end   >= m_begin);
+            constexpr_check(begin >= m_begin);
+            constexpr_check(begin <= m_end);
+            constexpr_check(end   <= m_end);
+            constexpr_check(end   >= m_begin);
 
             return strview_nstr_type{begin, end};
         }

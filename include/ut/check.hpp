@@ -9,18 +9,33 @@
 #include <cstdarg>
 #include <cassert>
 #include <cstdlib>
-#include <type_traits>
 
 
 #ifdef NDEBUG
-#define check_msg(...)      (void)0;
-#define nopath(...)         (void)0;
-#define nopath_case(x_)     (void)0;
+#define check_msg(...)          (void)0;
+#define constexpr_check(x_)     (void)0;
+#define nopath(...)             (void)0;
+#define nopath_case(x_)         (void)0;
 #else
 #define check_msg(x_, ...)  do { ::ut::internal::check_expression(x_, __LINE__, #x_, __func__, __FILE__, __VA_ARGS__); }while(0)
 #define nopath(...)         do { ::ut::internal::check_impossible(__LINE__, __func__, __FILE__, __VA_ARGS__); }while(0)
 #define nopath_case(x_)     do { static_assert(std::is_enum_v<x_>); ::ut::internal::check_impossible(__LINE__, __func__, __FILE__, "BAD ENUM CASE: %s", #x_); }while(0)
 #endif
+
+// constexpr-compatible check: no-op at compile time, full check at runtime
+#if __cplusplus >= 202002L // C++20 constexpr support
+#include <type_traits>
+#define constexpr_check(x_) \
+    do { if constexpr (!std::is_constant_evaluated()) \
+        { check_msg(x_, "SILENT CHECK"); } \
+        else \
+        { if ( (x_) == false ) throw std::runtime_error("SILENT CHECK"); } \
+    } while(0)
+#else
+#define constexpr_check(x_)     check_msg(x_, "SILENT CHECK")
+#endif
+
+#undef HAS_IS_CONSTANT_EVALUATED
 
 #define check(x_)           check_msg(x_, "SILENT CHECK")
 #define check_null(x_)      check_msg((x_) != nullptr, "NULL POINTER")
