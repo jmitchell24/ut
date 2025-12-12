@@ -102,7 +102,7 @@ namespace ut::log
 
         std::ostream& m_os;
 
-        PrintMode print_mode;
+        PrintMode print_mode=TEXT;
 
         std::string esc_trace;
         std::string esc_debug;

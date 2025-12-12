@@ -51,6 +51,12 @@ log::PrintMode log::getSystemPrintMode()
 #endif
 }
 
+//
+// log::Printer -> Implementation
+//
+
+static mutex g_print_mutex;
+
 log::Printer::Printer(ostream& os)
     : m_os{os}
 {
@@ -148,21 +154,26 @@ std::string log::Printer::strTim(local_datetime const& tim) const
 
 void log::Printer::printLog(Log const& log)
 {
+    ostringstream oss;
     m_indent = 1;
 
     string str = strLvl(log.lvl);
     m_indent += str.size() + 1;
-    m_os << " " << escLvl(log.lvl) << str << esc_reset;
+    oss << " " << escLvl(log.lvl) << str << esc_reset;
 
     str = strTim(log.tim);
     m_indent += str.size() + 1;
-    m_os << " " << esc_tim << str << esc_reset;
+    oss << " " << esc_tim << str << esc_reset;
 
     str = strSrc(log.src);
     m_indent += str.size() + 1;
-    m_os << " " << esc_src << str << esc_reset;
+    oss << " " << esc_src << str << esc_reset;
 
-    m_os << " " << log.msg << "\n";
+    oss << " " << log.msg << "\n";
+
+    g_print_mutex.lock();
+    m_os << oss.str();
+    g_print_mutex.unlock();
 }
 
 string log::Printer::getPrefix(VarChars const& v) const
