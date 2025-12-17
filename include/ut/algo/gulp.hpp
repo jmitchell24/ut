@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <cassert>
 #include <format>
+#include <filesystem>
 
 namespace ut::gulp
 {
@@ -69,17 +70,17 @@ namespace ut::gulp
     }
 
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename T=std::uint8_t>
-    std::vector<T> file_to_vector(char const* filename)
+    std::vector<T> file_to_vector(std::filesystem::path const& path)
     {
         std::vector<T> ret;
-        if (FILE* file = fopen(filename, "rb"))
+        if (FILE* file = fopen(path.c_str(), "rb"))
         {
             ret = file_to_vector<MaxBlocks, BlockSize, T>(file);
             fclose(file);
         }
         else
         {
-            throw std::runtime_error{std::format("gulp::file_to_vector(): failed to open file: {}", filename)};
+            throw std::runtime_error{std::format("gulp::file_to_vector(): failed to open file: {}", path.c_str())};
         }
         return ret;
     }
@@ -135,17 +136,17 @@ namespace ut::gulp
     }
 
     template <std::size_t MaxBlocks=GULP_MAX_BLOCKS, std::size_t BlockSize=GULP_BLOCK_SIZE, typename Char=char, typename Traits = std::char_traits<Char>>
-    std::basic_string<Char,Traits> file_to_string(char const* filename)
+    std::basic_string<Char,Traits> file_to_string(std::filesystem::path const& path)
     {
         std::basic_string<Char,Traits> ret;
-        if (FILE* file = fopen(filename, "rb"))
+        if (FILE* file = fopen(path.c_str(), "rb"))
         {
             ret = file_to_string<MaxBlocks, BlockSize, Char, Traits>(file);
             fclose(file);
         }
         else
         {
-            throw std::runtime_error{std::format("gulp::file_to_string(): failed to open file: {}", filename)};
+            throw std::runtime_error{std::format("gulp::file_to_string(): failed to open file: {}", path.c_str())};
         }
         return ret;
     }
