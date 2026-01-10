@@ -85,7 +85,8 @@ namespace ut::log
     {
     public:
         using callback_type = std::function<void(std::string const&)>;
-        callback_type callback = [](std::string const& s) { std::cout << s; };
+
+        callback_type callback;
 
         Printer();
 
@@ -95,6 +96,7 @@ namespace ut::log
         void setPrintTerm();
         void setPrintText();
         void setPrintCallback(callback_type callback);
+        void resetPrintCallback();
 
         void printLog(Log const& log);
         [[nodiscard]] std::string getPrefix(VarChars const& v) const;
@@ -103,8 +105,6 @@ namespace ut::log
         static Printer& instance();
 
     private:
-        callback_type m_callback;
-
         size_t m_indent=0;
         size_t m_src_pad=0;
 

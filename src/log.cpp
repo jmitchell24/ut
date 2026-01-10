@@ -57,7 +57,10 @@ log::PrintMode log::getSystemPrintMode()
 
 static mutex g_print_mutex;
 
+static log::Printer::callback_type g_default_callback = [](std::string const& s) { std::cout << s; };
+
 log::Printer::Printer()
+    : callback{g_default_callback}
 {
     if (getSystemPrintMode() == TERM)
         setPrintTerm();
@@ -77,6 +80,12 @@ void log::Printer::setPrintCallback(callback_type callback)
     this->callback = callback;
     g_print_mutex.unlock();
 }
+
+void log::Printer::resetPrintCallback()
+{
+    setPrintCallback(g_default_callback);
+}
+
 
 
 
