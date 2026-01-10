@@ -19,6 +19,8 @@
 #include <vector>
 #include <mutex>
 #include <source_location>
+#include <functional>
+#include <iostream>
 
 
 #ifndef NDEBUG
@@ -82,13 +84,17 @@ namespace ut::log
     class Printer
     {
     public:
-        Printer(std::ostream& os);
+        using callback_type = std::function<void(std::string const&)>;
+        callback_type callback = [](std::string const& s) { std::cout << s; };
+
+        Printer();
 
         [[nodiscard]] size_t indent() const
         { return m_indent; }
 
         void setPrintTerm();
         void setPrintText();
+        void setPrintCallback(callback_type callback);
 
         void printLog(Log const& log);
         [[nodiscard]] std::string getPrefix(VarChars const& v) const;
@@ -97,10 +103,10 @@ namespace ut::log
         static Printer& instance();
 
     private:
+        callback_type m_callback;
+
         size_t m_indent=0;
         size_t m_src_pad=0;
-
-        std::ostream& m_os;
 
         PrintMode print_mode=TEXT;
 

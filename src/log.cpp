@@ -57,8 +57,7 @@ log::PrintMode log::getSystemPrintMode()
 
 static mutex g_print_mutex;
 
-log::Printer::Printer(ostream& os)
-    : m_os{os}
+log::Printer::Printer()
 {
     if (getSystemPrintMode() == TERM)
         setPrintTerm();
@@ -68,9 +67,17 @@ log::Printer::Printer(ostream& os)
 
 log::Printer& log::Printer::instance()
 {
-    static Printer x{cout};
+    static Printer x{};
     return x;
 }
+
+void log::Printer::setPrintCallback(callback_type callback)
+{
+    g_print_mutex.lock();
+    this->callback = callback;
+    g_print_mutex.unlock();
+}
+
 
 
 void log::Printer::setPrintTerm()
@@ -172,7 +179,7 @@ void log::Printer::printLog(Log const& log)
     oss << " " << log.msg << "\n";
 
     g_print_mutex.lock();
-    m_os << oss.str();
+    callback(oss.str());
     g_print_mutex.unlock();
 }
 
