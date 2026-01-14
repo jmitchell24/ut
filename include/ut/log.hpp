@@ -41,18 +41,14 @@
 #define ut_list(_list)              ( ut::log::list( (_list), false, #_list "=" ) )
 #define ut_vlist(_list)             ( ut::log::list( (_list), true, #_list "=" ) )
 
+#define ut_logger ( ut::log::Logger::instance() )
+
 
 
 namespace ut::log
 {
 
     enum Level { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL };
-
-    enum PrintMode
-    {
-        TERM, ///< Print to modern terminal (escapes, unicode chars, etc...)
-        TEXT  ///< Print to plaintext
-    };
 
     struct Log
     {
@@ -80,76 +76,78 @@ namespace ut::log
         VarChars chars;
     };
 
-
-    class Printer
+    struct Printer
     {
-    public:
-        using callback_type = std::function<void(std::string const&)>;
+        /// function to stringify log (default to text or term string, if supported)
+        using strfn_type = std::function<std::string(Log const&)>;
 
-        callback_type callback;
+        /// function to stringify var prefix or suffix (default to text or term string, if supported)
+        using varfn_type = std::function<std::string(VarChars const&)>;
 
-        Printer();
+        strfn_type m_strfn;
+        varfn_type m_pre_varfn;
+        varfn_type m_suf_varfn;
 
-        [[nodiscard]] size_t indent() const
-        { return m_indent; }
-
-        void setPrintTerm();
-        void setPrintText();
-        void setPrintCallback(callback_type callback);
-        void resetPrintCallback();
-
-        void printLog(Log const& log);
-        [[nodiscard]] std::string getPrefix(VarChars const& v) const;
-        [[nodiscard]] std::string getSuffix(VarChars const& v) const;
-
-        static Printer& instance();
-
-    private:
-        size_t m_indent=0;
-        size_t m_src_pad=0;
-
-        PrintMode print_mode=TEXT;
-
-        std::string esc_trace;
-        std::string esc_debug;
-        std::string esc_info;
-        std::string esc_warning;
-        std::string esc_error;
-        std::string esc_fatal;
-        std::string esc_tim;
-        std::string esc_src;
-        std::string esc_value;
-        std::string esc_affix;
-        std::string esc_reset;
-
-        std::string strLvl(Level lvl) const;
-        std::string strSrc(std::source_location const& src);
-        std::string strTim(local_datetime const& tim) const;
-
-        std::string const& escLvl(Level lvl) const;
+        static Printer getText();
+        static Printer getTerm();
+        static Printer getSystem();
     };
 
-    class Builder
+    class Logger
+    {
+    public:
+        /// function to output log as string (default to std::cout)
+        using logfn_type = std::function<void(std::string const&)>;
+
+
+
+        void logfn(logfn_type const& fn)
+        { auto g = std::lock_guard{m_mutex}; m_logfn = fn; }
+
+        /// submit log
+        void log(Printer const& prt, Log const& log) const
+        { auto g = std::lock_guard{m_mutex}; m_logfn(prt.m_strfn(log)); }
+
+        /// Set Term Mode
+        void setTerm();
+
+        /// Set Text Mode
+        void setText();
+
+        /// Set Default Log
+        void setDefaultLog();
+
+        static Logger& instance();
+
+    private:
+        Logger();
+
+        logfn_type m_logfn;
+
+
+        mutable std::mutex m_mutex;
+    };
+
+    class LogGuard
     {
     public:
         Log log;
-        Printer& prt;
 
-        Builder(Level lvl, std::source_location src, Printer& prt = Printer::instance())
-            : log{ .lvl=lvl, .src=src, .tim = local_datetime::now(), .msg={} }, prt{prt}
+        LogGuard(Level lvl, std::source_location src)
+            : log{ .lvl=lvl, .src=src, .tim = local_datetime::now(), .msg={} }
         { }
 
-        ~Builder()
-        { prt.printLog(log); }
+        ~LogGuard()
+        { Logger::instance().log(log); }
 
-        Builder()=delete;
-        Builder(Builder const&)=delete;
-        Builder(Builder&&)=delete;
-        Builder& operator= (Builder const&)=delete;
-        Builder& operator= (Builder&&)=delete;
+        LogGuard()=delete;
+        LogGuard(LogGuard const&)=delete;
+        LogGuard(LogGuard&&)=delete;
+        LogGuard& operator= (LogGuard const&)=delete;
+        LogGuard& operator= (LogGuard&&)=delete;
 
         template <typename... Args>
-        Builder& operator() (std::string const& fmt, Args&&... args)
+        LogGuard& operator() (std::string const& fmt, Args&&... args)
         {
             log.msg += std::vformat(fmt, std::make_format_args(args...));
             return *this;
@@ -165,14 +163,14 @@ namespace ut::log
     bool use_newlines=false, char const* pre="", char const* suf="", char const* open="[", char const* close="]", char const* delim=",")
     { return VarList<T>{value, {pre, suf, open, close, delim, use_newlines} }; }
 
-    [[maybe_unused]] static Builder trace   (std::source_location src = std::source_location::current()) { return {TRACE  , src}; }
-    [[maybe_unused]] static Builder debug   (std::source_location src = std::source_location::current()) { return {DEBUG  , src}; }
-    [[maybe_unused]] static Builder info    (std::source_location src = std::source_location::current()) { return {INFO   , src}; }
-    [[maybe_unused]] static Builder warning (std::source_location src = std::source_location::current()) { return {WARNING, src}; }
-    [[maybe_unused]] static Builder error   (std::source_location src = std::source_location::current()) { return {ERROR  , src}; }
-    [[maybe_unused]] static Builder fatal   (std::source_location src = std::source_location::current()) { return {FATAL  , src}; }
+    [[maybe_unused]] static LogGuard trace   (std::source_location src = std::source_location::current()) { return {TRACE  , src}; }
+    [[maybe_unused]] static LogGuard debug   (std::source_location src = std::source_location::current()) { return {DEBUG  , src}; }
+    [[maybe_unused]] static LogGuard info    (std::source_location src = std::source_location::current()) { return {INFO   , src}; }
+    [[maybe_unused]] static LogGuard warning (std::source_location src = std::source_location::current()) { return {WARNING, src}; }
+    [[maybe_unused]] static LogGuard error   (std::source_location src = std::source_location::current()) { return {ERROR  , src}; }
+    [[maybe_unused]] static LogGuard fatal   (std::source_location src = std::source_location::current()) { return {FATAL  , src}; }
 
-    PrintMode getSystemPrintMode();
+
 
 }
 
@@ -190,11 +188,12 @@ namespace std
 
         auto format(ut::log::Var<T> const& p, std::format_context& ctx) const
         {
-            auto&& prt = ut::log::Printer::instance();
+            auto&& fnPre = ut::log::Logger::instance().strPreFn();
+            auto&& fnSuf = ut::log::Logger::instance().strSufFn();
 
-            std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
+            std::format_to(ctx.out(), "{}", fnPre(p.chars));
             auto it = underlying_formatter.format(p.value, ctx);
-            return std::format_to(it, "{}", prt.getSuffix(p.chars)); // reset color
+            return std::format_to(it, "{}", fnSuf(p.chars)); // reset color
         }
     };
 
@@ -211,14 +210,16 @@ namespace std
 
         auto format(ut::log::VarList<T> const& p, std::format_context& ctx) const
         {
-            auto&& prt = ut::log::Printer::instance();
+            auto&& fnPre = ut::log::Logger::instance().strPreFn();
+            auto&& fnSuf = ut::log::Logger::instance().strSufFn();
 
             auto indent  = string(1, ' ');
             auto indent2 = string(5, ' ');
 
-            if (p.chars.use_newline)std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
+            if (p.chars.use_newline)
+                std::format_to(ctx.out(), "{}", fnPre(p.chars));
             else
-                std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
+                std::format_to(ctx.out(), "{}", fnPre(p.chars));
 
             auto it = p.value.begin();
             auto end = p.value.end();
@@ -253,8 +254,8 @@ namespace std
             }
 
             if (p.chars.use_newline)
-                return std::format_to(ctx.out(), "{}{}", indent, prt.getSuffix(p.chars));
-            return std::format_to(ctx.out(), "{}", prt.getSuffix(p.chars));
+                return std::format_to(ctx.out(), "{}{}", indent, fnSuf(p.chars));
+            return std::format_to(ctx.out(), "{}", fnSuf(p.chars));
         }
     };
 }
