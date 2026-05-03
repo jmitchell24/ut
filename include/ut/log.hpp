@@ -123,6 +123,8 @@ namespace ut::log
         std::string const& escLvl(Level lvl) const;
     };
 
+
+
     class Builder
     {
     public:
@@ -211,7 +213,8 @@ namespace std
             auto indent  = string(1, ' ');
             auto indent2 = string(5, ' ');
 
-            if (p.chars.use_newline)std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
+            if (p.chars.use_newline)
+                std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
             else
                 std::format_to(ctx.out(), "{}", prt.getPrefix(p.chars));
 

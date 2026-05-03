@@ -591,6 +591,27 @@ namespace ut
             return equals(withExact(m_end - s.size(), m_end), s);
         }
 
+        /// Return true if this view begins and ends with character \a c.
+        /// \param c    Character to search for
+        /// \return     True if this view ends with the chracter \a c, false otherwise.
+        M_DECL_PURE bool enclosedWith(char_type c) const
+        {
+            return  ( m_begin != m_end    ) &&
+                    ( *m_begin == c       ) &&
+                    ( *(m_end-1) == c     );
+        }
+
+
+        /// Return true if this view begins and ends with the string \a s.
+        /// \param s    String to search for.
+        /// \return     True if this view ends with the string \a s, false otherwise.
+        M_DECL_PURE bool enclosedWith(strview_type const& s) const
+        {
+            return  ( s.size() <= size()                            ) &&
+                    ( equals(takeBegin(s.size()), s)                ) &&
+                    ( equals(withExact(m_end - s.size(), m_end), s) );
+        }
+
         ///
         M_DECL_PURE bool isPrint() const
         {
